@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -7,19 +8,55 @@ interface Book {
   ISBN: string;
   title: string;
   author: string;
+  imageUrl?: string;
 }
 
 interface IsbnSearchInput {
   ISBN: string;
 }
 
+interface GoogleSearchResponse {
+  totalItems: number;
+  items: [
+    {
+      volumeInfo: {
+        title: string;
+        authors: [string];
+        imageLinks: {
+          thumbnail: string;
+        };
+      };
+    }
+  ];
+}
+
+function buildSearchUrl(ISBN: string) {
+  return `https://www.googleapis.com/books/v1/volumes?q=isbn:${ISBN}`;
+}
+
 function useIsbnSearch() {
-  const search = ({ ISBN }: IsbnSearchInput): Book | null => {
-    return {
-      ISBN,
-      title: "My book",
-      author: "Someone Somewhere",
-    };
+  const search = async ({ ISBN }: IsbnSearchInput): Promise<Book | null> => {
+    const searchUrl = buildSearchUrl(ISBN);
+
+    const response = await fetch(searchUrl);
+    const data: GoogleSearchResponse = await response.json();
+
+    if (data.totalItems > 0) {
+      // assume there is only 1 book in the response, since we searched by ISBN
+      // which should be unique
+      const book = data.items[0];
+      const {
+        volumeInfo: { title, authors, imageLinks },
+      } = book;
+      return {
+        ISBN,
+        title,
+        author: authors.join(", "),
+        imageUrl: imageLinks.thumbnail,
+      };
+    } else {
+      return null;
+    }
   };
 
   return search;
@@ -37,8 +74,8 @@ function BookQuery() {
     formState: { errors },
     reset,
   } = useForm<BookQueryFormInput>();
-  const onSubmit: SubmitHandler<BookQueryFormInput> = (data) => {
-    const book = search(data);
+  const onSubmit: SubmitHandler<BookQueryFormInput> = async (data) => {
+    const book = await search(data);
     setBook(book);
     reset();
   };
@@ -67,6 +104,14 @@ function BookQuery() {
         <div>ISBN: {book?.ISBN}</div>
         <div>Title: {book?.title}</div>
         <div>Author: {book?.author}</div>
+        {book?.imageUrl && (
+          <Image
+            alt={book?.title}
+            src={book?.imageUrl}
+            width={128}
+            height={192}
+          />
+        )}
       </div>
     </div>
   );
