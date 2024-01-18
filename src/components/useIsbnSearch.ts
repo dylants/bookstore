@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { Book } from "@/types/Book";
 
 export interface IsbnSearchInput {
@@ -29,11 +30,14 @@ export default function useIsbnSearch() {
 
     const response = await fetch(searchUrl);
     const data: GoogleSearchResponse = await response.json();
+    logger.info("data returned from Google search %j", data);
 
     if (data.totalItems > 0) {
       // assume there is only 1 book in the response, since we searched by ISBN
       // which should be unique
       const book = data.items[0];
+      logger.info("data returned book %j", book);
+
       const {
         volumeInfo: { title, authors, imageLinks },
       } = book;
@@ -46,6 +50,7 @@ export default function useIsbnSearch() {
         title,
       };
     } else {
+      logger.info("no data found, returning null");
       return null;
     }
   };
