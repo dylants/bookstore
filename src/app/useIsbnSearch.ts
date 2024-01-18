@@ -15,7 +15,7 @@ interface GoogleSearchResponse {
     {
       volumeInfo: {
         title: string;
-        authors: [string];
+        authors?: [string];
         imageLinks: {
           thumbnail: string;
         };
@@ -45,8 +45,8 @@ export default function useIsbnSearch() {
       return {
         ISBN,
         title,
-        author: authors.join(", "),
-        imageUrl: imageLinks.thumbnail,
+        author: authors?.join(", ") || '',
+        imageUrl: imageLinks.thumbnail ? imageLinks.thumbnail.replaceAll('http://', 'https://') : undefined,
       };
     } else {
       return null;
