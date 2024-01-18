@@ -3,13 +3,15 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import useIsbnSearch, { Book, IsbnSearchInput } from "@/app/useIsbnSearch";
+import useIsbnSearch, { IsbnSearchInput } from "@/app/useIsbnSearch";
+import { Book as BookType } from "@/types/Book";
+import Book from "@/components/Book";
 
 interface BookQueryFormInput extends IsbnSearchInput {}
 
 export default function BookQuery() {
   const search = useIsbnSearch();
-  const [book, setBook] = useState<Book | null>();
+  const [book, setBook] = useState<BookType | null>();
 
   const {
     register,
@@ -43,19 +45,7 @@ export default function BookQuery() {
           value="Search"
         />
       </form>
-      <div>
-        <div>ISBN: {book?.ISBN}</div>
-        <div>Title: {book?.title}</div>
-        <div>Author: {book?.author}</div>
-        {book?.imageUrl && (
-          <Image
-            alt={book?.title}
-            src={book?.imageUrl}
-            width={128}
-            height={192}
-          />
-        )}
-      </div>
+      {book && <Book book={book} />}
     </div>
   );
 }

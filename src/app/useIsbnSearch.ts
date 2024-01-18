@@ -1,9 +1,4 @@
-export interface Book {
-  ISBN: string;
-  title: string;
-  author: string;
-  imageUrl?: string;
-}
+import { Book } from "@/types/Book";
 
 export interface IsbnSearchInput {
   ISBN: string;
