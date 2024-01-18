@@ -1,14 +1,7 @@
 "use client";
 
-import BookQuery from "@/components/BookQuery";
-
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-screen p-2">
-      <h1 className="text-lg m-2">bookstore</h1>
-      <div className="flex min-h-screen justify-center items-center">
-        <BookQuery />
-      </div>
-    </main>
+    <div className="flex min-h-screen justify-center items-center">Welcome</div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
   description: "bookstore app",
@@ -13,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <main className="flex flex-col min-h-screen max-w-screen-md m-auto">
+          <Nav />
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
