@@ -1,0 +1,16 @@
+parserOptions:
+  ecmaVersion: latest
+  sourceType: module
+extends:
+  - next/core-web-vitals
+  - prettier
+plugins:
+  - prettier
+root: true
+rules:
+  prettier/prettier: 2
+  sort-keys:
+    - error
+    - asc
+    - caseSensitive: true
+      natural: false

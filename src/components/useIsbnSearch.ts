@@ -15,7 +15,7 @@ interface GoogleSearchResponse {
           thumbnail: string;
         };
       };
-    }
+    },
   ];
 }
 
@@ -39,9 +39,11 @@ export default function useIsbnSearch() {
       } = book;
       return {
         ISBN,
+        author: authors?.join(", ") || "",
+        imageUrl: imageLinks.thumbnail
+          ? imageLinks.thumbnail.replaceAll("http://", "https://")
+          : undefined,
         title,
-        author: authors?.join(", ") || '',
-        imageUrl: imageLinks.thumbnail ? imageLinks.thumbnail.replaceAll('http://', 'https://') : undefined,
       };
     } else {
       return null;
