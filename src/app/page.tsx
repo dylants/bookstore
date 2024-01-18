@@ -1,6 +1,6 @@
 "use client";
 
-import BookQuery from "@/app/BookQuery";
+import BookQuery from "@/components/BookQuery";
 
 export default function Home() {
   return (

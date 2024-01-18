@@ -1,11 +1,8 @@
-"use client";
-
-import Image from "next/image";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import useIsbnSearch, { IsbnSearchInput } from "@/app/useIsbnSearch";
 import { Book as BookType } from "@/types/Book";
 import Book from "@/components/Book";
+import useIsbnSearch, { IsbnSearchInput } from "@/components/useIsbnSearch";
 
 interface BookQueryFormInput extends IsbnSearchInput {}
 
