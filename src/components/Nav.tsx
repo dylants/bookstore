@@ -8,7 +8,7 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mt-4 mb-8">
+    <nav className="py-4 px-8 bg-slate-400 text-slate-900">
       <div className="text-xl">
         <Link href="/">bookstore</Link>
       </div>
@@ -24,7 +24,6 @@ export default function Nav() {
           Add
         </Link>
       </div>
-      <hr className="mt-4" />
     </nav>
   );
 }
