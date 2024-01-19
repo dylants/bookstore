@@ -29,8 +29,12 @@ function AddBookFormInput({
   fieldName: keyof AddBookFormInput;
   register: UseFormRegister<AddBookFormInput>;
 }) {
-  const fieldNameToDisplay =
-    fieldName === "publishedDate" ? "Published Date" : fieldName;
+  let fieldNameToDisplay: string = fieldName;
+  if (fieldName === "publishedDate") {
+    fieldNameToDisplay = "Published Date";
+  } else if (fieldName === "isbn") {
+    fieldNameToDisplay = "ISBN";
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -56,10 +60,10 @@ export default function AddBookPage() {
     reset,
   } = useForm<AddBookFormInput>({
     values: {
-      ISBN: lookupBook?.ISBN || "",
       author: lookupBook?.author || "",
       genre: lookupBook?.genre || "",
       imageUrl: lookupBook?.imageUrl,
+      isbn: lookupBook?.isbn || "",
       publishedDate: lookupBook?.publishedDate || "",
       publisher: lookupBook?.publisher || "",
       title: lookupBook?.title || "",
@@ -77,9 +81,9 @@ export default function AddBookPage() {
   };
 
   const onLookup = async () => {
-    const isbn = getValues("ISBN");
+    const isbn = getValues("isbn");
     if (isbn) {
-      const book = await search({ ISBN: isbn });
+      const book = await search({ isbn });
       // TODO loading spinner while we search
       setLookupBook(book);
     }
@@ -96,7 +100,7 @@ export default function AddBookPage() {
         <div className="flex gap-4 items-end">
           <AddBookFormInput
             errors={errors}
-            fieldName="ISBN"
+            fieldName="isbn"
             register={register}
           />
           <Button variant="secondary" type="button" onClick={() => onLookup()}>
