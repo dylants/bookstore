@@ -10,6 +10,14 @@ const config: Config = {
   theme: {
     colors: ({ colors }) => ({
       ...colors,
+      // https://coolors.co/palette/134074-13315c-0b2545-8da9c4-eef4ed
+      customPalette: {
+        100: "#EEF4ED",
+        200: "#8DA9C4",
+        300: "#134074",
+        400: "#13315C",
+        500: "#0B2545",
+      },
     }),
     container: {
       center: true,
