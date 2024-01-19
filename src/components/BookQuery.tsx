@@ -32,9 +32,9 @@ export default function BookQuery() {
           className="border rounded-sm w-[200px]"
           placeholder="Enter ISBN number..."
           type="text"
-          {...register("ISBN", { required: true })}
+          {...register("isbn", { required: true })}
         />
-        {errors.ISBN && <span>This field is required</span>}
+        {errors.isbn && <span>This field is required</span>}
 
         <input
           className="border rounded-md bg-slate-100 w-[100px]"

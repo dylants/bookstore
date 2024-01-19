@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "check-types": "tsc --noemit",
+    "dev": "next dev",
+    "eslint": "next lint",
+    "lint": "yarn eslint && yarn check-types",
+    "start": "next start"
   },
   "dependencies": {
     "@prisma/client": "5.8.1",
