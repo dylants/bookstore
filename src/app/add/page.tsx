@@ -7,10 +7,12 @@ import {
   UseFormRegister,
   useForm,
 } from "react-hook-form";
-import useIsbnSearch from "@/components/useIsbnSearch";
-import { Book as BookType } from "@/types/Book";
 import clsx from "clsx";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import useIsbnSearch from "@/components/useIsbnSearch";
+import { Book as BookType } from "@/types/Book";
 
 interface AddBookFormInput extends Omit<BookType, "publishedDate"> {
   publishedDate: Date | string;
@@ -33,12 +35,8 @@ function AddBookFormInput({
       <label className="text-sm text-slate-600 capitalize">
         {fieldNameToDisplay}
       </label>
-      <input
-        className={clsx(
-          "border-2 rounded-md py-1 px-2",
-          errors[fieldName] &&
-            "border-red-500 focus-visible:outline-red-500 outline-0",
-        )}
+      <Input
+        className={clsx(errors[fieldName] && "border-red-500")}
         type="text"
         {...register(fieldName, { required: true })}
       />
@@ -97,13 +95,9 @@ export default function AddBookPage() {
             fieldName="ISBN"
             register={register}
           />
-          <button
-            className="border rounded-md px-4 h-9 bg-slate-300 text-slate-900"
-            type="button"
-            onClick={() => onLookup()}
-          >
+          <Button variant="secondary" type="button" onClick={() => onLookup()}>
             Lookup via ISBN
-          </button>
+          </Button>
         </div>
 
         <hr className="mt-4 mb-3 border-slate-400" />
@@ -156,12 +150,7 @@ export default function AddBookPage() {
         </div>
 
         <div className="flex justify-end mt-4">
-          <button
-            className="border rounded-md px-4 h-9 bg-slate-400 text-slate-900"
-            type="submit"
-          >
-            Add Book
-          </button>
+          <Button type="submit">Add Book</Button>
         </div>
       </form>
     </div>
