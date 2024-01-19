@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "check-types": "tsc --noemit",
+    "dev": "next dev",
+    "eslint": "next lint",
+    "lint": "yarn eslint && yarn check-types",
+    "start": "next start"
   },
   "dependencies": {
+    "@prisma/client": "5.8.1",
     "@radix-ui/react-icons": "1.3.0",
     "@radix-ui/react-slot": "1.0.2",
     "class-variance-authority": "0.7.0",
@@ -32,6 +35,7 @@
     "eslint-plugin-prettier": "5.1.3",
     "postcss": "^8",
     "prettier": "3.2.4",
+    "prisma": "5.8.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Book({ book }: { book: BookType }) {
   return (
     <div>
-      <div>ISBN: {book.ISBN}</div>
+      <div>ISBN: {book.isbn}</div>
       <div>Title: {book.title}</div>
       <div>Author: {book.author}</div>
       {book.imageUrl && (

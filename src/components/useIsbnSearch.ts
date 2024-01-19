@@ -2,7 +2,7 @@ import logger from "@/lib/logger";
 import { Book as BookType } from "@/types/Book";
 
 export interface IsbnSearchInput {
-  ISBN: string;
+  isbn: string;
 }
 
 interface GoogleSearchResponse {
@@ -36,9 +36,9 @@ function buildSearchUrl(ISBN: string) {
 // TODO refactor search to use multiple search query methods other than ISBN
 export default function useIsbnSearch() {
   const search = async ({
-    ISBN,
+    isbn,
   }: IsbnSearchInput): Promise<BookType | null> => {
-    const searchUrl = buildSearchUrl(ISBN);
+    const searchUrl = buildSearchUrl(isbn);
 
     const response = await fetch(searchUrl);
     // TODO split out Google to allow for other search protocols
@@ -72,12 +72,12 @@ export default function useIsbnSearch() {
       }
 
       const book: BookType = {
-        ISBN,
         author: authors?.join(", ") || "",
         genre: categories?.join(", ") || "",
         imageUrl: imageLinks.thumbnail
           ? imageLinks.thumbnail.replaceAll("http://", "https://")
           : undefined,
+        isbn,
         publishedDate: publishedDate ?? new Date(),
         publisher,
         title,

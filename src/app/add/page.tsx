@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useIsbnSearch from "@/components/useIsbnSearch";
 import { Book as BookType } from "@/types/Book";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { createBook } from "@/lib/actions";
 
 interface AddBookFormInput extends Omit<BookType, "publishedDate"> {
   publishedDate: Date | string;
@@ -27,8 +29,12 @@ function AddBookFormInput({
   fieldName: keyof AddBookFormInput;
   register: UseFormRegister<AddBookFormInput>;
 }) {
-  const fieldNameToDisplay =
-    fieldName === "publishedDate" ? "Published Date" : fieldName;
+  let fieldNameToDisplay: string = fieldName;
+  if (fieldName === "publishedDate") {
+    fieldNameToDisplay = "Published Date";
+  } else if (fieldName === "isbn") {
+    fieldNameToDisplay = "ISBN";
+  }
 
   return (
     <div className="flex flex-col flex-1">
@@ -47,17 +53,17 @@ function AddBookFormInput({
 export default function AddBookPage() {
   const [lookupBook, setLookupBook] = useState<BookType | null>();
   const {
-    formState: { errors },
+    formState: { errors, isSubmitting },
     getValues,
     handleSubmit,
     register,
     reset,
   } = useForm<AddBookFormInput>({
     values: {
-      ISBN: lookupBook?.ISBN || "",
       author: lookupBook?.author || "",
       genre: lookupBook?.genre || "",
       imageUrl: lookupBook?.imageUrl,
+      isbn: lookupBook?.isbn || "",
       publishedDate: lookupBook?.publishedDate || "",
       publisher: lookupBook?.publisher || "",
       title: lookupBook?.title || "",
@@ -65,17 +71,19 @@ export default function AddBookPage() {
   });
   const search = useIsbnSearch();
 
-  const onSubmit: SubmitHandler<AddBookFormInput> = async (data) => {
-    // TODO add the book
-    console.log(data);
-    reset();
-    setLookupBook(null);
+  const onSubmit: SubmitHandler<AddBookFormInput> = async (book) => {
+    await createBook({
+      ...book,
+      publishedDate: new Date(book.publishedDate),
+    });
+    // reset();
+    // setLookupBook(null);
   };
 
   const onLookup = async () => {
-    const isbn = getValues("ISBN");
+    const isbn = getValues("isbn");
     if (isbn) {
-      const book = await search({ ISBN: isbn });
+      const book = await search({ isbn });
       // TODO loading spinner while we search
       setLookupBook(book);
     }
@@ -92,7 +100,7 @@ export default function AddBookPage() {
         <div className="flex gap-4 items-end">
           <AddBookFormInput
             errors={errors}
-            fieldName="ISBN"
+            fieldName="isbn"
             register={register}
           />
           <Button variant="secondary" type="button" onClick={() => onLookup()}>
@@ -100,7 +108,7 @@ export default function AddBookPage() {
           </Button>
         </div>
 
-        <hr className="mt-4 mb-3 border-customPalette-300" />
+        <hr className="mt-4 border-customPalette-300" />
 
         <div className="flex gap-4 mt-4">
           <div className="flex">
@@ -150,7 +158,13 @@ export default function AddBookPage() {
         </div>
 
         <div className="flex justify-end mt-4">
-          <Button type="submit">Add Book</Button>
+          <Button type="submit" disabled={isSubmitting} className="w-[100px]">
+            {isSubmitting ? (
+              <ReloadIcon className="h-4 w-4 animate-spin" />
+            ) : (
+              "Add Book"
+            )}
+          </Button>
         </div>
       </form>
     </div>
