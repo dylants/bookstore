@@ -20,7 +20,7 @@ const buttonVariants = cva(
       },
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          "bg-customPalette-400 text-customPalette-100 shadow hover:bg-customPalette-400/90",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         ghost: "hover:bg-accent hover:text-accent-foreground",
@@ -28,7 +28,7 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+          "bg-customPalette-100 text-customPalette-400 shadow-sm hover:bg-customPalette-100/80",
       },
     },
   },

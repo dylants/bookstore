@@ -32,7 +32,7 @@ function AddBookFormInput({
 
   return (
     <div className="flex flex-col flex-1">
-      <label className="text-sm text-slate-600 capitalize">
+      <label className="text-sm text-customPalette-500 capitalize">
         {fieldNameToDisplay}
       </label>
       <Input
@@ -83,10 +83,10 @@ export default function AddBookPage() {
 
   return (
     <div>
-      <h1 className="text-2xl text-slate-900 my-4">Add Book</h1>
+      <h1 className="text-2xl text-customPalette-500 my-4">Add a Book</h1>
 
       <form
-        className="flex flex-col p-4 bg-slate-200"
+        className="flex flex-col p-4 bg-customPalette-200"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex gap-4 items-end">
@@ -100,7 +100,7 @@ export default function AddBookPage() {
           </Button>
         </div>
 
-        <hr className="mt-4 mb-3 border-slate-400" />
+        <hr className="mt-4 mb-3 border-customPalette-300" />
 
         <div className="flex gap-4 mt-4">
           <div className="flex">
@@ -112,7 +112,7 @@ export default function AddBookPage() {
                 height={192}
               />
             ) : (
-              <div className="border rounded-sm border-slate-400 w-[128px] h-[192px] flex justify-center items-center text-slate-900">
+              <div className="border rounded-sm border-customPalette-300 w-[128px] h-[192px] flex justify-center items-center text-slate-900">
                 No Image
               </div>
             )}
