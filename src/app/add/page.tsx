@@ -76,8 +76,10 @@ export default function AddBookPage() {
       ...book,
       publishedDate: new Date(book.publishedDate),
     });
-    // reset();
-    // setLookupBook(null);
+    reset();
+    setLookupBook(null);
+
+    // TODO add success
   };
 
   const onLookup = async () => {

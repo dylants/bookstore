@@ -78,7 +78,8 @@ export default function useIsbnSearch() {
           ? imageLinks.thumbnail.replaceAll("http://", "https://")
           : undefined,
         isbn,
-        publishedDate: publishedDate ?? new Date(),
+        // TODO what to do when there's no published date?
+        publishedDate: publishedDate ? new Date(publishedDate) : new Date(),
         publisher,
         title,
       };

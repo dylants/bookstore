@@ -25,6 +25,7 @@ export default function SideNav() {
     <nav className="flex flex-col w-[140px] bg-customPalette-200 text-customPalette-500">
       <NavElement path="/search" text="Search" />
       <NavElement path="/add" text="Add" />
+      <NavElement path="/list" text="List" />
     </nav>
   );
 }
