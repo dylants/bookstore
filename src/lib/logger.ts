@@ -6,7 +6,7 @@ const options: LoggerOptions = {
     asObject: true,
   },
   // "silent" to disable logging
-  level: "info",
+  level: "trace",
 };
 
 const logger = pino(options);
