@@ -1,12 +1,169 @@
 "use client";
 
-import BookQuery from "@/components/BookQuery";
+import { useState } from "react";
+import {
+  FieldErrors,
+  SubmitHandler,
+  UseFormRegister,
+  useForm,
+} from "react-hook-form";
+import useIsbnSearch from "@/components/useIsbnSearch";
+import { Book as BookType } from "@/types/Book";
+import clsx from "clsx";
+import Image from "next/image";
+
+interface AddBookFormInput extends Omit<BookType, "publishedDate"> {
+  publishedDate: Date | string;
+}
+
+function AddBookFormInput({
+  errors,
+  fieldName,
+  register,
+}: {
+  errors: FieldErrors<AddBookFormInput>;
+  fieldName: keyof AddBookFormInput;
+  register: UseFormRegister<AddBookFormInput>;
+}) {
+  const fieldNameToDisplay =
+    fieldName === "publishedDate" ? "Published Date" : fieldName;
+
+  return (
+    <div className="flex flex-col flex-1">
+      <label className="text-sm text-slate-600 capitalize">
+        {fieldNameToDisplay}
+      </label>
+      <input
+        className={clsx(
+          "border-2 rounded-md py-1 px-2",
+          errors[fieldName] &&
+            "border-red-500 focus-visible:outline-red-500 outline-0",
+        )}
+        type="text"
+        {...register(fieldName, { required: true })}
+      />
+    </div>
+  );
+}
 
 export default function AddBookPage() {
+  const [lookupBook, setLookupBook] = useState<BookType | null>();
+  const {
+    formState: { errors },
+    getValues,
+    handleSubmit,
+    register,
+    reset,
+  } = useForm<AddBookFormInput>({
+    values: {
+      ISBN: lookupBook?.ISBN || "",
+      author: lookupBook?.author || "",
+      genre: lookupBook?.genre || "",
+      imageUrl: lookupBook?.imageUrl,
+      publishedDate: lookupBook?.publishedDate || "",
+      publisher: lookupBook?.publisher || "",
+      title: lookupBook?.title || "",
+    },
+  });
+  const search = useIsbnSearch();
+
+  const onSubmit: SubmitHandler<AddBookFormInput> = async (data) => {
+    // TODO add the book
+    console.log(data);
+    reset();
+    setLookupBook(null);
+  };
+
+  const onLookup = async () => {
+    const isbn = getValues("ISBN");
+    if (isbn) {
+      const book = await search({ ISBN: isbn });
+      // TODO loading spinner while we search
+      setLookupBook(book);
+    }
+  };
+
   return (
-    <div className="flex">
-      <h1 className="text-2xl">Add a new book</h1>
-      <BookQuery />
+    <div>
+      <h1 className="text-2xl text-slate-900 my-4">Add Book</h1>
+
+      <form
+        className="flex flex-col p-4 bg-slate-200"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <div className="flex gap-4 items-end">
+          <AddBookFormInput
+            errors={errors}
+            fieldName="ISBN"
+            register={register}
+          />
+          <button
+            className="border rounded-md px-4 h-9 bg-slate-300 text-slate-900"
+            type="button"
+            onClick={() => onLookup()}
+          >
+            Lookup via ISBN
+          </button>
+        </div>
+
+        <hr className="mt-4 mb-3 border-slate-400" />
+
+        <div className="flex gap-4 mt-4">
+          <div className="flex">
+            {lookupBook?.imageUrl ? (
+              <Image
+                alt={lookupBook?.title}
+                src={lookupBook?.imageUrl}
+                width={128}
+                height={192}
+              />
+            ) : (
+              <div className="border rounded-sm border-slate-400 w-[128px] h-[192px] flex justify-center items-center text-slate-900">
+                No Image
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col flex-1 gap-3">
+            <AddBookFormInput
+              errors={errors}
+              fieldName="title"
+              register={register}
+            />
+            <AddBookFormInput
+              errors={errors}
+              fieldName="author"
+              register={register}
+            />
+            <AddBookFormInput
+              errors={errors}
+              fieldName="genre"
+              register={register}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-4 mt-4">
+          <AddBookFormInput
+            errors={errors}
+            fieldName="publishedDate"
+            register={register}
+          />
+          <AddBookFormInput
+            errors={errors}
+            fieldName="publisher"
+            register={register}
+          />
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <button
+            className="border rounded-md px-4 h-9 bg-slate-400 text-slate-900"
+            type="submit"
+          >
+            Add Book
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
