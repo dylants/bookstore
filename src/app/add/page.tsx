@@ -42,7 +42,10 @@ function AddBookFormInput({
         {fieldNameToDisplay}
       </label>
       <Input
-        className={clsx(errors[fieldName] && "border-red-500")}
+        className={clsx(
+          errors[fieldName] && "border-red-500",
+          "border rounded-sm border-customPalette-200",
+        )}
         type="text"
         {...register(fieldName, { required: true })}
       />
@@ -64,7 +67,7 @@ export default function AddBookPage() {
       genre: lookupBook?.genre || "",
       imageUrl: lookupBook?.imageUrl,
       isbn: lookupBook?.isbn || "",
-      publishedDate: lookupBook?.publishedDate || "",
+      publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || "",
       publisher: lookupBook?.publisher || "",
       title: lookupBook?.title || "",
     },
@@ -94,9 +97,10 @@ export default function AddBookPage() {
   return (
     <div>
       <h1 className="text-2xl text-customPalette-500 my-4">Add a Book</h1>
+      <hr className="mt-4 mb-8 border-customPalette-300" />
 
       <form
-        className="flex flex-col p-4 bg-customPalette-200"
+        className="flex flex-col p-4 border border-customPalette-300"
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex gap-4 items-end">
@@ -122,7 +126,7 @@ export default function AddBookPage() {
                 height={192}
               />
             ) : (
-              <div className="border rounded-sm border-customPalette-300 w-[128px] h-[192px] flex justify-center items-center text-slate-900">
+              <div className="border rounded-sm border-customPalette-200 w-[128px] h-[192px] flex justify-center items-center text-customPalette-500">
                 No Image
               </div>
             )}

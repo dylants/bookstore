@@ -28,7 +28,7 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-customPalette-100 text-customPalette-400 shadow-sm hover:bg-customPalette-100/80",
+          "bg-customPalette-100 text-customPalette-400 border border-customPalette-300 shadow-sm hover:bg-customPalette-200/20",
       },
     },
   },
