@@ -1,6 +1,6 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Book as BookType } from "@/types/Book";
-import Image from "next/image";
+import { Skeleton } from '@/components/ui/skeleton';
+import { Book as BookType } from '@/types/Book';
+import Image from 'next/image';
 
 function BookKey({
   book,
@@ -11,11 +11,11 @@ function BookKey({
 }) {
   let fieldNameToDisplay: string = fieldName;
   let fieldToDisplay = book[fieldName]?.toString();
-  if (fieldName === "publishedDate") {
-    fieldNameToDisplay = "Published Date";
+  if (fieldName === 'publishedDate') {
+    fieldNameToDisplay = 'Published Date';
     fieldToDisplay = book[fieldName]?.toLocaleDateString?.();
-  } else if (fieldName === "isbn") {
-    fieldNameToDisplay = "ISBN";
+  } else if (fieldName === 'isbn') {
+    fieldNameToDisplay = 'ISBN';
   }
 
   return (

@@ -1,6 +1,6 @@
-import ListPageLoading from "@/app/list/loading";
-import ListPage from "@/app/list/page";
-import { Suspense } from "react";
+import ListPageLoading from '@/app/list/loading';
+import ListPage from '@/app/list/page';
+import { Suspense } from 'react';
 
 export default async function ListPageLayout() {
   return (

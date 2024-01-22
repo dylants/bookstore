@@ -1,17 +1,17 @@
-"use server";
+'use server';
 
-import logger from "@/lib/logger";
-import prisma from "@/lib/prisma";
-import { Book } from "@/types/Book";
+import logger from '@/lib/logger';
+import prisma from '@/lib/prisma';
+import { Book } from '@/types/Book';
 
 export async function createBook(book: Book) {
-  logger.trace("createBook, book: %j", book);
+  logger.trace('createBook, book: %j', book);
 
   const created = await prisma.book.create({
     data: book,
   });
 
-  logger.trace("created book in DB: %j", created);
+  logger.trace('created book in DB: %j', created);
   return;
 }
 
