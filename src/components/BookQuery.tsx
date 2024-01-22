@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Book as BookType } from "@/types/Book";
-import Book from "@/components/Book";
-import useIsbnSearch, { IsbnSearchInput } from "@/components/useIsbnSearch";
+import { useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { Book as BookType } from '@/types/Book';
+import Book from '@/components/Book';
+import useIsbnSearch, { IsbnSearchInput } from '@/components/useIsbnSearch';
 
 interface BookQueryFormInput extends IsbnSearchInput {}
 
@@ -32,7 +32,7 @@ export default function BookQuery() {
           className="border rounded-sm w-[200px]"
           placeholder="Enter ISBN number..."
           type="text"
-          {...register("isbn", { required: true })}
+          {...register('isbn', { required: true })}
         />
         {errors.isbn && <span>This field is required</span>}
 

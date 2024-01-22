@@ -1,5 +1,5 @@
-import logger from "@/lib/logger";
-import { Book as BookType } from "@/types/Book";
+import logger from '@/lib/logger';
+import { Book as BookType } from '@/types/Book';
 
 export interface IsbnSearchInput {
   isbn: string;
@@ -43,13 +43,13 @@ export default function useIsbnSearch() {
     const response = await fetch(searchUrl);
     // TODO split out Google to allow for other search protocols
     const data: GoogleSearchResponse = await response.json();
-    logger.trace("data returned from Google search %j", data);
+    logger.trace('data returned from Google search %j', data);
 
     if (data.totalItems > 0) {
       // assume there is only 1 item in the response, since we searched by ISBN
       // which should be unique
       const item = data.items[0];
-      logger.trace("data returned item %j", item);
+      logger.trace('data returned item %j', item);
 
       const {
         volumeInfo: {
@@ -64,18 +64,18 @@ export default function useIsbnSearch() {
       } = item;
 
       const foundIdentifier = industryIdentifiers.find(
-        (i) => i.type === "ISBN_13",
+        (i) => i.type === 'ISBN_13',
       );
       // TODO standardize this to pull the ISBN from the response
       if (foundIdentifier) {
-        logger.trace("found ISBN: %s", foundIdentifier.identifier);
+        logger.trace('found ISBN: %s', foundIdentifier.identifier);
       }
 
       const book: BookType = {
-        author: authors?.join(", ") || "",
-        genre: categories?.join(", ") || "",
+        author: authors?.join(', ') || '',
+        genre: categories?.join(', ') || '',
         imageUrl: imageLinks.thumbnail
-          ? imageLinks.thumbnail.replaceAll("http://", "https://")
+          ? imageLinks.thumbnail.replaceAll('http://', 'https://')
           : undefined,
         isbn,
         // TODO what to do when there's no published date?
@@ -83,11 +83,11 @@ export default function useIsbnSearch() {
         publisher,
         title,
       };
-      logger.trace("returning book %j", book);
+      logger.trace('returning book %j', book);
 
       return book;
     } else {
-      logger.trace("no data found, returning null");
+      logger.trace('no data found, returning null');
       return null;
     }
   };

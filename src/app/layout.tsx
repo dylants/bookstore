@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Nav from "@/components/Nav";
-import SideNav from "@/components/SideNav";
+import type { Metadata } from 'next';
+import './globals.css';
+import Nav from '@/components/Nav';
+import SideNav from '@/components/SideNav';
 
 export const metadata: Metadata = {
-  description: "bookstore app",
-  title: "bookstore",
+  description: 'bookstore app',
+  title: 'bookstore',
 };
 
 export default function RootLayout({

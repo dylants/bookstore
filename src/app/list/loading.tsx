@@ -1,4 +1,4 @@
-import { BookSkeleton } from "@/components/Book";
+import { BookSkeleton } from '@/components/Book';
 
 export default function ListPageLoading() {
   return (

@@ -1,4 +1,4 @@
-import pino, { LoggerOptions } from "pino";
+import pino, { LoggerOptions } from 'pino';
 
 // https://github.com/pinojs/pino/blob/master/docs/api.md#pinooptions-destination--logger
 const options: LoggerOptions = {
@@ -6,7 +6,7 @@ const options: LoggerOptions = {
     asObject: true,
   },
   // "silent" to disable logging
-  level: "trace",
+  level: 'trace',
 };
 
 const logger = pino(options);

@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   FieldErrors,
   SubmitHandler,
   UseFormRegister,
   useForm,
-} from "react-hook-form";
-import clsx from "clsx";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import useIsbnSearch from "@/components/useIsbnSearch";
-import { Book as BookType } from "@/types/Book";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { createBook } from "@/lib/actions";
+} from 'react-hook-form';
+import clsx from 'clsx';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useIsbnSearch from '@/components/useIsbnSearch';
+import { Book as BookType } from '@/types/Book';
+import { ReloadIcon } from '@radix-ui/react-icons';
+import { createBook } from '@/lib/actions';
 
-interface AddBookFormInput extends Omit<BookType, "publishedDate"> {
+interface AddBookFormInput extends Omit<BookType, 'publishedDate'> {
   publishedDate: Date | string;
 }
 
@@ -30,10 +30,10 @@ function AddBookFormInput({
   register: UseFormRegister<AddBookFormInput>;
 }) {
   let fieldNameToDisplay: string = fieldName;
-  if (fieldName === "publishedDate") {
-    fieldNameToDisplay = "Published Date";
-  } else if (fieldName === "isbn") {
-    fieldNameToDisplay = "ISBN";
+  if (fieldName === 'publishedDate') {
+    fieldNameToDisplay = 'Published Date';
+  } else if (fieldName === 'isbn') {
+    fieldNameToDisplay = 'ISBN';
   }
 
   return (
@@ -43,8 +43,8 @@ function AddBookFormInput({
       </label>
       <Input
         className={clsx(
-          errors[fieldName] && "border-red-500",
-          "border rounded-sm border-customPalette-200",
+          errors[fieldName] && 'border-red-500',
+          'border rounded-sm border-customPalette-200',
         )}
         type="text"
         {...register(fieldName, { required: true })}
@@ -63,13 +63,13 @@ export default function AddBookPage() {
     reset,
   } = useForm<AddBookFormInput>({
     values: {
-      author: lookupBook?.author || "",
-      genre: lookupBook?.genre || "",
+      author: lookupBook?.author || '',
+      genre: lookupBook?.genre || '',
       imageUrl: lookupBook?.imageUrl,
-      isbn: lookupBook?.isbn || "",
-      publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || "",
-      publisher: lookupBook?.publisher || "",
-      title: lookupBook?.title || "",
+      isbn: lookupBook?.isbn || '',
+      publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || '',
+      publisher: lookupBook?.publisher || '',
+      title: lookupBook?.title || '',
     },
   });
   const search = useIsbnSearch();
@@ -86,7 +86,7 @@ export default function AddBookPage() {
   };
 
   const onLookup = async () => {
-    const isbn = getValues("isbn");
+    const isbn = getValues('isbn');
     if (isbn) {
       const book = await search({ isbn });
       // TODO loading spinner while we search
@@ -168,7 +168,7 @@ export default function AddBookPage() {
             {isSubmitting ? (
               <ReloadIcon className="h-4 w-4 animate-spin" />
             ) : (
-              "Add Book"
+              'Add Book'
             )}
           </Button>
         </div>
