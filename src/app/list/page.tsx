@@ -1,31 +1,18 @@
-"use client";
-
-import { useCallback, useEffect, useState } from "react";
-import { Book as BookType } from "@/types/Book";
 import { getBooks } from "@/lib/actions";
-import Book from "@/components/Book";
+import Books from "@/components/Books";
 
-export default function ListPage() {
-  const [books, setBooks] = useState<Array<BookType>>([]);
+// NextJS will by default make this a static route, which will load
+// the data during build time. Instead we want this to be loaded
+// at request time (but on the server), so force a dynamic route.
+// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config
+export const dynamic = "force-dynamic";
 
-  const loadBooks = useCallback(async () => {
-    const loadedBooks = await getBooks();
-    setBooks(loadedBooks);
-  }, [setBooks]);
-
-  useEffect(() => {
-    loadBooks();
-  }, [loadBooks]);
+export default async function ListPage() {
+  const books = await getBooks();
 
   return (
     <>
-      <h1 className="text-2xl text-customPalette-500 my-4">Books</h1>
-      <hr className="mt-4 mb-8 border-customPalette-300" />
-      <div className="flex flex-col gap-8">
-        {books.map((book) => (
-          <Book key={book.isbn} book={book} />
-        ))}
-      </div>
+      <Books books={books} />
     </>
   );
 }
