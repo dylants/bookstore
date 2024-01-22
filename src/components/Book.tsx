@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Book as BookType } from "@/types/Book";
 import Image from "next/image";
 
@@ -27,7 +28,7 @@ function BookKey({
 
 export default function Book({ book }: { book: BookType }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 h-[192px]">
       {book.imageUrl ? (
         <Image alt={book.title} src={book.imageUrl} width={128} height={192} />
       ) : (
@@ -45,6 +46,30 @@ export default function Book({ book }: { book: BookType }) {
           <BookKey book={book} fieldName="genre" />
           <BookKey book={book} fieldName="publisher" />
           <BookKey book={book} fieldName="publishedDate" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Loading state of the Book component
+ */
+export function BookSkeleton() {
+  return (
+    <div className="flex gap-4 h-[192px]">
+      <div className="">
+        <Skeleton className="h-[192px] w-[128px]" />
+      </div>
+      <div className="flex flex-col w-full justify-between text-customPalette-500">
+        <div>
+          <Skeleton className="h-7 w-full mb-2" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
         </div>
       </div>
     </div>

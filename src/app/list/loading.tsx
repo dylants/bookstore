@@ -1,9 +1,11 @@
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { BookSkeleton } from "@/components/Book";
 
 export default function ListPageLoading() {
   return (
-    <div className="flex justify-center">
-      <LoadingSpinner />
+    <div className="flex flex-col gap-8">
+      <BookSkeleton />
+      <BookSkeleton />
+      <BookSkeleton />
     </div>
   );
 }
