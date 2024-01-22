@@ -1,17 +1,17 @@
+// https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices
+
 import { PrismaClient } from "@prisma/client";
 
-let prisma: PrismaClient;
+const prismaClientSingleton = () => {
+  return new PrismaClient();
+};
 
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient();
-} else {
-  // @ts-ignore
-  if (!global.prisma) {
-    // @ts-ignore
-    global.prisma = new PrismaClient();
-  }
-  // @ts-ignore
-  prisma = global.prisma;
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
+const prisma = globalThis.prisma ?? prismaClientSingleton();
+
 export default prisma;
+
+if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
