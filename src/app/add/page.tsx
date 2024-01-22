@@ -11,10 +11,10 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import useIsbnSearch from '@/components/useIsbnSearch';
 import { Book as BookType } from '@/types/Book';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { createBook } from '@/lib/actions';
+import useExternalBookSearch from '@/lib/search/external/useExternalBookSearch';
 
 interface AddBookFormInput extends Omit<BookType, 'publishedDate'> {
   publishedDate: Date | string;
@@ -72,7 +72,7 @@ export default function AddBookPage() {
       title: lookupBook?.title || '',
     },
   });
-  const search = useIsbnSearch();
+  const search = useExternalBookSearch();
 
   const onSubmit: SubmitHandler<AddBookFormInput> = async (book) => {
     await createBook({
