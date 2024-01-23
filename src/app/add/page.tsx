@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Book as BookType } from '@/types/Book';
 import { ReloadIcon } from '@radix-ui/react-icons';
-import { createBook } from '@/lib/actions';
+import { createBook } from '@/lib/actions/book';
 import useExternalBookSearch from '@/lib/search/external/useExternalBookSearch';
 
 interface AddBookFormInput extends Omit<BookType, 'publishedDate'> {

@@ -1,4 +1,4 @@
-import { getBooks } from '@/lib/actions';
+import { getBooks } from '@/lib/actions/book';
 import Books from '@/components/Books';
 
 // NextJS will by default make this a static route, which will load
