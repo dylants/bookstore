@@ -5,28 +5,24 @@ export interface ExternalBookSearchInput {
   isbn: string;
 }
 
-interface GoogleSearchResponse {
+export interface GoogleSearchResponse {
   totalItems: number;
-  items: [
-    {
-      volumeInfo: {
-        authors?: [string];
-        categories?: [string];
-        imageLinks: {
-          thumbnail: string;
-        };
-        industryIdentifiers: [
-          {
-            identifier: string;
-            type: string;
-          },
-        ];
-        publishedDate?: Date;
-        publisher: string;
-        title: string;
+  items: Array<{
+    volumeInfo: {
+      authors?: [string];
+      categories?: [string];
+      imageLinks?: {
+        thumbnail?: string;
       };
-    },
-  ];
+      industryIdentifiers: Array<{
+        identifier: string;
+        type: string;
+      }>;
+      publishedDate?: Date;
+      publisher: string;
+      title: string;
+    };
+  }>;
 }
 
 function buildGoogleSearchUrl(ISBN: string) {
@@ -55,24 +51,29 @@ async function googleBookSearch(
         categories,
         imageLinks,
         industryIdentifiers,
-        publishedDate,
+        publishedDate: publishedDateString,
         publisher,
         title,
       },
     } = item;
 
+    const author = authors?.join(', ') || '';
+    const genre = categories?.join(', ') || '';
+    const imageUrl = imageLinks?.thumbnail
+      ? imageLinks.thumbnail.replaceAll('http://', 'https://')
+      : null;
     const isbn =
       industryIdentifiers.find((i) => i.type === 'ISBN_13')?.identifier ?? '';
+    const publishedDate = publishedDateString
+      ? new Date(publishedDateString)
+      : null;
 
     const book: BookType = {
-      author: authors?.join(', ') || '',
-      genre: categories?.join(', ') || '',
-      imageUrl: imageLinks.thumbnail
-        ? imageLinks.thumbnail.replaceAll('http://', 'https://')
-        : undefined,
+      author,
+      genre,
+      imageUrl,
       isbn,
-      // TODO what to do when there's no published date?
-      publishedDate: publishedDate ? new Date(publishedDate) : new Date(),
+      publishedDate,
       publisher,
       title,
     };
@@ -85,7 +86,11 @@ async function googleBookSearch(
   }
 }
 
-export default function useExternalBookSearch() {
+export type UseExternalBookSearchResult = (
+  input: ExternalBookSearchInput,
+) => Promise<BookType | null>;
+
+export default function useExternalBookSearch(): UseExternalBookSearchResult {
   const search = async (
     input: ExternalBookSearchInput,
   ): Promise<BookType | null> => {

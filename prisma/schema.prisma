@@ -11,12 +11,12 @@ datasource db {
 }
 
 model Book {
-  id            Int      @id @default(autoincrement())
-  isbn          String   @unique
+  id            Int       @id @default(autoincrement())
+  isbn          String    @unique
   author        String
   genre         String
   imageUrl      String?
-  publishedDate DateTime
+  publishedDate DateTime?
   publisher     String
   title         String
 }
