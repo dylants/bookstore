@@ -65,7 +65,7 @@ export default function AddBookPage() {
     values: {
       author: lookupBook?.author || '',
       genre: lookupBook?.genre || '',
-      imageUrl: lookupBook?.imageUrl,
+      imageUrl: lookupBook?.imageUrl || '',
       isbn: lookupBook?.isbn || '',
       publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || '',
       publisher: lookupBook?.publisher || '',
