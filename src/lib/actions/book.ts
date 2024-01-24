@@ -2,17 +2,18 @@
 
 import logger from '@/lib/logger';
 import prisma from '@/lib/prisma';
-import { Book } from '@/types/Book';
+import { Book } from '@prisma/client';
+import { Book as BookType } from '@/types/Book';
 
-export async function createBook(book: Book) {
+export async function createBook(book: BookType): Promise<Book> {
   logger.trace('createBook, book: %j', book);
 
-  const created = await prisma.book.create({
+  const createdBook: Book = await prisma.book.create({
     data: book,
   });
 
-  logger.trace('created book in DB: %j', created);
-  return;
+  logger.trace('created book in DB: %j', createdBook);
+  return createdBook;
 }
 
 export async function getBooks(): Promise<Array<Book>> {
