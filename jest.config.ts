@@ -10,7 +10,10 @@ const createJestConfig = nextJest({
 const config: Config = {
   collectCoverageFrom: ['src/**/*.ts*'],
   coveragePathIgnorePatterns: ['src/components/*'],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/test-setup/fetch-polyfill.setup.ts',
+    '<rootDir>/test-setup/prisma-mock.setup.ts',
+  ],
   testEnvironment: 'jsdom',
 };
 
