@@ -42,10 +42,7 @@ function AddBookFormInput({
         {fieldNameToDisplay}
       </label>
       <Input
-        className={clsx(
-          errors[fieldName] && 'border-red-500',
-          'border rounded-sm border-customPalette-200',
-        )}
+        className={clsx(errors[fieldName] && 'border-red-500')}
         type="text"
         {...register(fieldName, { required: true })}
       />
