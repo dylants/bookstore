@@ -5,7 +5,8 @@ import {
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { Book } from '@prisma/client';
-import { Book as BookType } from '@/types/Book';
+import BookType from '@/types/Book';
+import { DEFAULT_LIMIT, buildPaginationQuery } from '@/lib/pagination';
 
 describe('book actions', () => {
   const book1: BookType = {
@@ -59,10 +60,69 @@ describe('book actions', () => {
   });
 
   describe('getBooks', () => {
-    it('should get all books', async () => {
+    it('should get books when provided with default input', async () => {
       prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
 
-      await expect(getBooks()).resolves.toEqual([book1db, book2db, book3db]);
+      const paginationQuery = buildPaginationQuery({});
+      const result = await getBooks({ paginationQuery });
+
+      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
+        cursor: undefined,
+        orderBy: {
+          id: 'asc',
+        },
+        skip: undefined,
+        take: DEFAULT_LIMIT,
+      });
+      expect(result).toEqual({
+        books: [book1db, book2db, book3db],
+        pageInfo: {
+          endCursor: '3',
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: '1',
+        },
+      });
+    });
+
+    it('should get books when provided with pagination query input', async () => {
+      prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
+
+      const paginationQuery = buildPaginationQuery({
+        after: '123',
+        first: 333,
+      });
+      const result = await getBooks({ paginationQuery });
+
+      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
+        cursor: { id: 123 },
+        orderBy: {
+          id: 'asc',
+        },
+        skip: 1,
+        take: 333,
+      });
+      expect(result).toEqual({
+        books: [book1db, book2db, book3db],
+        pageInfo: {
+          endCursor: '3',
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: '1',
+        },
+      });
+    });
+
+    it('should throw error when provided with bad input', async () => {
+      const paginationQuery = buildPaginationQuery({
+        first: 1,
+        last: 1,
+      });
+      await expect(
+        getBooks({ paginationQuery }),
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"invalid pagination query"`,
+      );
     });
   });
 

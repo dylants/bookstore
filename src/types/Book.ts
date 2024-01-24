@@ -1,4 +1,4 @@
-export interface Book {
+export default interface Book {
   author: string;
   genre: string;
   imageUrl: string | null;

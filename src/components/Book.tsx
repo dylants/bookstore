@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { Book as BookType } from '@/types/Book';
+import BookType from '@/types/Book';
 import Image from 'next/image';
 
 function BookKey({

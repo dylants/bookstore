@@ -1,18 +1,68 @@
+'use client';
+
 import { getBooks } from '@/lib/actions/book';
 import Books from '@/components/Books';
+import { DEFAULT_LIMIT, buildPaginationQuery } from '@/lib/pagination';
+import { BookSkeleton } from '@/components/Book';
+import { useCallback, useEffect, useState } from 'react';
+import Book from '@/types/Book';
+import PageInfo from '@/types/PageInfo';
 
-// NextJS will by default make this a static route, which will load
-// the data during build time. Instead we want this to be loaded
-// at request time (but on the server), so force a dynamic route.
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config
-export const dynamic = 'force-dynamic';
+export default function ListPage() {
+  const [books, setBooks] = useState<Array<Book> | null>();
+  const [pageInfo, setPageInfo] = useState<PageInfo>();
 
-export default async function ListPage() {
-  const books = await getBooks();
+  const initialLoad = useCallback(async () => {
+    const paginationQuery = buildPaginationQuery({});
+    const { books, pageInfo } = await getBooks({ paginationQuery });
+    setBooks(books);
+    setPageInfo(pageInfo);
+  }, []);
+
+  useEffect(() => {
+    initialLoad();
+  }, [initialLoad]);
+
+  const onNext = useCallback(async () => {
+    setBooks(null);
+    const paginationQuery = buildPaginationQuery({
+      after: pageInfo?.endCursor,
+      first: DEFAULT_LIMIT,
+    });
+    const { books: newBooks, pageInfo: newPageInfo } = await getBooks({
+      paginationQuery,
+    });
+    setBooks(newBooks);
+    setPageInfo(newPageInfo);
+  }, [pageInfo]);
+
+  const onPrevious = useCallback(async () => {
+    setBooks(null);
+    const paginationQuery = buildPaginationQuery({
+      before: pageInfo?.startCursor,
+      last: DEFAULT_LIMIT,
+    });
+    const { books: newBooks, pageInfo: newPageInfo } = await getBooks({
+      paginationQuery,
+    });
+    setBooks(newBooks);
+    setPageInfo(newPageInfo);
+  }, [pageInfo]);
 
   return (
     <>
-      <Books books={books} />
+      <h1 className="text-2xl text-customPalette-500 my-4">Books</h1>
+      <hr className="mt-4 mb-8 border-customPalette-300" />
+
+      {!books ? (
+        <div className="flex flex-col gap-8">
+          <BookSkeleton />
+          <BookSkeleton />
+          <BookSkeleton />
+        </div>
+      ) : (
+        <Books books={books} onNext={onNext} onPrevious={onPrevious} />
+      )}
     </>
   );
 }

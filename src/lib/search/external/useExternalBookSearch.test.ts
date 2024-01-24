@@ -2,7 +2,7 @@ import useExternalBookSearch, {
   GoogleSearchResponse,
   UseExternalBookSearchResult,
 } from '@/lib/search/external/useExternalBookSearch';
-import { Book } from '@/types/Book';
+import Book from '@/types/Book';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 

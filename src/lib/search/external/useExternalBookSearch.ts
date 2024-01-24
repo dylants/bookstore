@@ -1,5 +1,5 @@
 import logger from '@/lib/logger';
-import { Book as BookType } from '@/types/Book';
+import BookType from '@/types/Book';
 
 export interface ExternalBookSearchInput {
   isbn: string;
