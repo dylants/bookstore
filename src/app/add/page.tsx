@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Book as BookType } from '@/types/Book';
+import BookType from '@/types/Book';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { createBook } from '@/lib/actions/book';
 import useExternalBookSearch from '@/lib/search/external/useExternalBookSearch';

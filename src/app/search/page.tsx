@@ -3,7 +3,7 @@
 import Books from '@/components/Books';
 import SearchForm, { SearchFormParams } from '@/components/SearchForm';
 import { findBookBySearchString } from '@/lib/actions/book';
-import { Book as BookType } from '@/types/Book';
+import BookType from '@/types/Book';
 import { useEffect, useRef, useState } from 'react';
 
 export default function SearchPage() {
@@ -35,7 +35,8 @@ export default function SearchPage() {
             {books.length === 0 ? (
               <p>No books found</p>
             ) : (
-              <Books books={books} />
+              // TODO implement pagination
+              <Books books={books} onNext={() => {}} onPrevious={() => {}} />
             )}
           </>
         )}
