@@ -16,8 +16,8 @@ export default function Books({
   onPrevious,
 }: {
   books: Array<BookType>;
-  onNext: () => void;
-  onPrevious: () => void;
+  onNext?: () => Promise<void>;
+  onPrevious?: () => Promise<void>;
 }) {
   return (
     <>
@@ -29,10 +29,18 @@ export default function Books({
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" onClick={onPrevious} />
+            <PaginationPrevious
+              href="#"
+              onClick={onPrevious ? onPrevious : undefined}
+              isDisabled={!onPrevious}
+            />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext href="#" onClick={onNext} />
+            <PaginationNext
+              href="#"
+              onClick={onNext ? onNext : undefined}
+              isDisabled={!onNext}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

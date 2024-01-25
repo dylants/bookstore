@@ -2,17 +2,13 @@
 
 import logger from '@/lib/logger';
 import {
-  buildEndCursor,
-  buildStartCursor,
-  findLimit,
-  isValidPaginationQuery,
-  parseCursorAsId,
+  buildPaginationRequest,
+  buildPaginationResponse,
 } from '@/lib/pagination';
 import prisma from '@/lib/prisma';
 import { Book } from '@prisma/client';
 import BookType from '@/types/Book';
 import PageInfo from '@/types/PageInfo';
-import _ from 'lodash';
 import PaginationQuery from '@/types/PaginationQuery';
 
 export async function createBook(book: BookType): Promise<Book> {
@@ -27,7 +23,7 @@ export async function createBook(book: BookType): Promise<Book> {
 }
 
 export interface GetBooksParams {
-  paginationQuery: PaginationQuery;
+  paginationQuery?: PaginationQuery;
 }
 
 export interface GetBooksResult {
@@ -38,42 +34,20 @@ export interface GetBooksResult {
 export async function getBooks({
   paginationQuery,
 }: GetBooksParams): Promise<GetBooksResult> {
-  if (!isValidPaginationQuery(paginationQuery)) {
-    throw new Error('invalid pagination query');
-  }
+  const paginationRequest = buildPaginationRequest({ paginationQuery });
 
-  // https://www.prisma.io/docs/orm/prisma-client/queries/pagination
-  const take = findLimit(paginationQuery);
-  const id = parseCursorAsId(paginationQuery);
-  const cursor = id ? { id } : undefined;
-  const skip = cursor ? 1 : undefined;
-
-  logger.trace('cursor: %o skip: %d take: %d', cursor, skip, take);
-
-  const books = await prisma.book.findMany({
-    cursor,
-    orderBy: {
-      id: 'asc',
-    },
-    skip,
-    take,
+  const items = await prisma.book.findMany({
+    ...paginationRequest,
   });
 
-  logger.trace(
-    'returning books of length %d with ids %j',
-    books.length,
-    books.map((b) => b.id),
-  );
+  const { items: books, pageInfo } = buildPaginationResponse<Book>({
+    items,
+    paginationQuery,
+  });
 
   return {
     books,
-    pageInfo: {
-      endCursor: buildEndCursor(books),
-      // TODO
-      hasNextPage: false,
-      hasPreviousPage: false,
-      startCursor: buildStartCursor(books),
-    },
+    pageInfo,
   };
 }
 
