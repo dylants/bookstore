@@ -1,6 +1,7 @@
 import logger from '@/lib/logger';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
+import { Prisma } from '@prisma/client';
 import _ from 'lodash';
 
 export const DEFAULT_LIMIT = 3;
@@ -74,8 +75,8 @@ export function findTake(paginationQuery: PaginationQuery): number {
 }
 
 export interface PaginationRequest {
-  cursor: any;
-  orderBy: any;
+  cursor: { id: number } | undefined;
+  orderBy: { id: Prisma.SortOrder } | undefined;
   skip: number | undefined;
   take: number | undefined;
 }
