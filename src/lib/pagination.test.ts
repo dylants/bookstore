@@ -5,6 +5,9 @@ import {
   parseCursorAsId,
   findLimit,
   isValidPaginationQuery,
+  buildFullPaginationQuery,
+  buildPaginationRequest,
+  buildPaginationResponse,
 } from '@/lib/pagination';
 import PaginationQuery from '@/types/PaginationQuery';
 
@@ -15,6 +18,35 @@ describe('pagination', () => {
     first: null,
     last: null,
   };
+
+  /* ***********************************************
+   * PAGINATION REQUEST
+   * ***********************************************/
+
+  describe('buildFullPaginationQuery', () => {
+    it('should honor values', () => {
+      expect(
+        buildFullPaginationQuery({
+          after: 'hi',
+          first: 2,
+        }),
+      ).toEqual({
+        after: 'hi',
+        before: null,
+        first: 2,
+        last: null,
+      });
+    });
+
+    it('should populate full query', () => {
+      expect(buildFullPaginationQuery()).toEqual({
+        after: null,
+        before: null,
+        first: null,
+        last: null,
+      });
+    });
+  });
 
   describe('isValidPaginationQuery', () => {
     it.each([
@@ -193,6 +225,58 @@ describe('pagination', () => {
     });
   });
 
+  describe('buildPaginationRequest', () => {
+    it('should throw error when provided with bad input', () => {
+      expect(() =>
+        buildPaginationRequest({
+          paginationQuery: {
+            first: 1,
+            last: 1,
+          },
+        }),
+      ).toThrowErrorMatchingInlineSnapshot(`"invalid pagination query"`);
+    });
+
+    it('should return a cursor and skip when ID is supplied', () => {
+      expect(
+        buildPaginationRequest({
+          paginationQuery: {
+            after: '123',
+            first: 1,
+          },
+        }),
+      ).toEqual({
+        cursor: {
+          id: 123,
+        },
+        orderBy: {
+          id: 'asc',
+        },
+        skip: 1,
+        take: 2,
+      });
+    });
+
+    it('should only include take when no ID is supplied', () => {
+      expect(
+        buildPaginationRequest({
+          paginationQuery: {
+            first: 1,
+          },
+        }),
+      ).toEqual({
+        orderBy: {
+          id: 'asc',
+        },
+        take: 2,
+      });
+    });
+  });
+
+  /* ***********************************************
+   * PAGINATION RESPONSE
+   * ***********************************************/
+
   describe('buildStartCursor', () => {
     it('should return last ID when it exists', () => {
       expect(buildStartCursor([{ id: 1 }, { id: 2 }, { id: 3 }])).toEqual('1');
@@ -210,6 +294,168 @@ describe('pagination', () => {
 
     it('should return null when last ID does NOT exist', () => {
       expect(buildEndCursor([])).toEqual(null);
+    });
+  });
+
+  describe('buildPaginationResponse', () => {
+    describe('when moving forward', () => {
+      describe('yes next no previous', () => {
+        const items = [{ id: 1 }, { id: 2 }, { id: 3 }];
+        const paginationQuery: PaginationQuery = {
+          first: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 1 }, { id: 2 }],
+            pageInfo: {
+              endCursor: '2',
+              hasNextPage: true,
+              hasPreviousPage: false,
+              startCursor: '1',
+            },
+          });
+        });
+      });
+
+      describe('no next no previous', () => {
+        const items = [{ id: 1 }, { id: 2 }];
+        const paginationQuery: PaginationQuery = {
+          first: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 1 }, { id: 2 }],
+            pageInfo: {
+              endCursor: '2',
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: '1',
+            },
+          });
+        });
+      });
+
+      describe('yes next yes previous', () => {
+        const items = [{ id: 3 }, { id: 4 }, { id: 5 }];
+        const paginationQuery: PaginationQuery = {
+          after: '2',
+          first: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 3 }, { id: 4 }],
+            pageInfo: {
+              endCursor: '4',
+              hasNextPage: true,
+              hasPreviousPage: true,
+              startCursor: '3',
+            },
+          });
+        });
+      });
+
+      describe('no next yes previous', () => {
+        const items = [{ id: 5 }, { id: 6 }];
+        const paginationQuery: PaginationQuery = {
+          after: '4',
+          first: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 5 }, { id: 6 }],
+            pageInfo: {
+              endCursor: '6',
+              hasNextPage: false,
+              hasPreviousPage: true,
+              startCursor: '5',
+            },
+          });
+        });
+      });
+    });
+
+    describe('when moving backward', () => {
+      describe('yes next no previous', () => {
+        const items = [{ id: 3 }, { id: 4 }];
+        const paginationQuery: PaginationQuery = {
+          before: '5',
+          last: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 3 }, { id: 4 }],
+            pageInfo: {
+              endCursor: '4',
+              hasNextPage: true,
+              hasPreviousPage: false,
+              startCursor: '3',
+            },
+          });
+        });
+      });
+
+      describe('no next no previous', () => {
+        const items = [{ id: 1 }, { id: 2 }];
+        const paginationQuery: PaginationQuery = {
+          last: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 1 }, { id: 2 }],
+            pageInfo: {
+              endCursor: '2',
+              hasNextPage: false,
+              hasPreviousPage: false,
+              startCursor: '1',
+            },
+          });
+        });
+      });
+
+      describe('yes next yes previous', () => {
+        const items = [{ id: 4 }, { id: 5 }, { id: 6 }];
+        const paginationQuery: PaginationQuery = {
+          before: '7',
+          last: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 5 }, { id: 6 }],
+            pageInfo: {
+              endCursor: '6',
+              hasNextPage: true,
+              hasPreviousPage: true,
+              startCursor: '5',
+            },
+          });
+        });
+      });
+
+      describe('no next yes previous', () => {
+        const items = [{ id: 3 }, { id: 4 }, { id: 5 }];
+        const paginationQuery: PaginationQuery = {
+          last: 2,
+        };
+
+        it('should return correct items and pageInfo', () => {
+          expect(buildPaginationResponse({ items, paginationQuery })).toEqual({
+            items: [{ id: 4 }, { id: 5 }],
+            pageInfo: {
+              endCursor: '5',
+              hasNextPage: false,
+              hasPreviousPage: true,
+              startCursor: '4',
+            },
+          });
+        });
+      });
     });
   });
 });

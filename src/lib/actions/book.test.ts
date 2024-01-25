@@ -6,7 +6,6 @@ import {
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { Book } from '@prisma/client';
 import BookType from '@/types/Book';
-import { DEFAULT_LIMIT, buildPaginationQuery } from '@/lib/pagination';
 
 describe('book actions', () => {
   const book1: BookType = {
@@ -63,17 +62,8 @@ describe('book actions', () => {
     it('should get books when provided with default input', async () => {
       prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
 
-      const paginationQuery = buildPaginationQuery({});
-      const result = await getBooks({ paginationQuery });
+      const result = await getBooks({});
 
-      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
-        cursor: undefined,
-        orderBy: {
-          id: 'asc',
-        },
-        skip: undefined,
-        take: DEFAULT_LIMIT,
-      });
       expect(result).toEqual({
         books: [book1db, book2db, book3db],
         pageInfo: {
@@ -86,43 +76,24 @@ describe('book actions', () => {
     });
 
     it('should get books when provided with pagination query input', async () => {
-      prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
+      prismaMock.book.findMany.mockResolvedValue([book2db, book3db]);
 
-      const paginationQuery = buildPaginationQuery({
-        after: '123',
-        first: 333,
-      });
-      const result = await getBooks({ paginationQuery });
-
-      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
-        cursor: { id: 123 },
-        orderBy: {
-          id: 'asc',
+      const result = await getBooks({
+        paginationQuery: {
+          after: '1',
+          first: 2,
         },
-        skip: 1,
-        take: 333,
       });
+
       expect(result).toEqual({
-        books: [book1db, book2db, book3db],
+        books: [book2db, book3db],
         pageInfo: {
           endCursor: '3',
           hasNextPage: false,
-          hasPreviousPage: false,
-          startCursor: '1',
+          hasPreviousPage: true,
+          startCursor: '2',
         },
       });
-    });
-
-    it('should throw error when provided with bad input', async () => {
-      const paginationQuery = buildPaginationQuery({
-        first: 1,
-        last: 1,
-      });
-      await expect(
-        getBooks({ paginationQuery }),
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"invalid pagination query"`,
-      );
     });
   });
 

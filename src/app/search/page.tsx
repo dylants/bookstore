@@ -36,7 +36,7 @@ export default function SearchPage() {
               <p>No books found</p>
             ) : (
               // TODO implement pagination
-              <Books books={books} onNext={() => {}} onPrevious={() => {}} />
+              <Books books={books} />
             )}
           </>
         )}
