@@ -1,6 +1,7 @@
 'use client';
 
 import Book from '@/components/Book';
+import BookSkeleton from '@/components/BookSkeleton';
 import {
   Pagination,
   PaginationContent,
@@ -12,19 +13,31 @@ import BookType from '@/types/Book';
 
 export default function Books({
   books,
+  isLoading,
   onNext,
   onPrevious,
 }: {
   books: Array<BookType>;
+  isLoading?: boolean;
   onNext?: () => Promise<void>;
   onPrevious?: () => Promise<void>;
 }) {
   return (
     <>
       <div className="flex flex-col gap-8">
-        {books.map((book) => (
-          <Book key={book.isbn} book={book} />
-        ))}
+        {isLoading ? (
+          <>
+            <BookSkeleton />
+            <BookSkeleton />
+            <BookSkeleton />
+          </>
+        ) : (
+          <>
+            {books.map((book) => (
+              <Book key={book.isbn} book={book} />
+            ))}
+          </>
+        )}
       </div>
       <div className="mt-8">
         <Pagination>
@@ -33,14 +46,14 @@ export default function Books({
               <PaginationPrevious
                 href="#"
                 onClick={onPrevious ? onPrevious : undefined}
-                isDisabled={!onPrevious}
+                isDisabled={!onPrevious || isLoading}
               />
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
                 href="#"
                 onClick={onNext ? onNext : undefined}
-                isDisabled={!onNext}
+                isDisabled={!onNext || isLoading}
               />
             </PaginationItem>
           </PaginationContent>

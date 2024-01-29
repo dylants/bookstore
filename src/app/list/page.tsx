@@ -6,11 +6,11 @@ import { DEFAULT_LIMIT } from '@/lib/pagination';
 import { useCallback, useEffect, useState } from 'react';
 import Book from '@/types/Book';
 import PageInfo from '@/types/PageInfo';
-import BookSkeleton from '@/components/BookSkeleton';
 
 export default function ListPage() {
   const [books, setBooks] = useState<Array<Book> | null>();
   const [pageInfo, setPageInfo] = useState<PageInfo>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const initialLoad = useCallback(async () => {
     const { books, pageInfo } = await getBooks({
@@ -26,8 +26,17 @@ export default function ListPage() {
     initialLoad();
   }, [initialLoad]);
 
+  // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
+  const setDelayedLoading = useCallback(() => {
+    const timeout = setTimeout(() => setIsLoading(true), 50);
+    return () => {
+      setIsLoading(false);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   const onNext = useCallback(async () => {
-    setBooks(null);
+    const doneLoading = setDelayedLoading();
     const { books: newBooks, pageInfo: newPageInfo } = await getBooks({
       paginationQuery: {
         after: pageInfo?.endCursor,
@@ -36,10 +45,11 @@ export default function ListPage() {
     });
     setBooks(newBooks);
     setPageInfo(newPageInfo);
-  }, [pageInfo]);
+    doneLoading();
+  }, [pageInfo, setDelayedLoading]);
 
   const onPrevious = useCallback(async () => {
-    setBooks(null);
+    const doneLoading = setDelayedLoading();
     const { books: newBooks, pageInfo: newPageInfo } = await getBooks({
       paginationQuery: {
         before: pageInfo?.startCursor,
@@ -48,26 +58,20 @@ export default function ListPage() {
     });
     setBooks(newBooks);
     setPageInfo(newPageInfo);
-  }, [pageInfo]);
+    doneLoading();
+  }, [pageInfo, setDelayedLoading]);
 
   return (
     <>
       <h1 className="text-2xl text-customPalette-500 my-4">Books</h1>
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
-      {!books || !pageInfo ? (
-        <div className="flex flex-col gap-8">
-          <BookSkeleton />
-          <BookSkeleton />
-          <BookSkeleton />
-        </div>
-      ) : (
-        <Books
-          books={books}
-          onNext={pageInfo.hasNextPage ? onNext : undefined}
-          onPrevious={pageInfo.hasPreviousPage ? onPrevious : undefined}
-        />
-      )}
+      <Books
+        books={books ?? []}
+        isLoading={isLoading || !books}
+        onNext={pageInfo?.hasNextPage ? onNext : undefined}
+        onPrevious={pageInfo?.hasPreviousPage ? onPrevious : undefined}
+      />
     </>
   );
 }
