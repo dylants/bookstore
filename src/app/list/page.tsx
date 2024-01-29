@@ -3,10 +3,10 @@
 import { getBooks } from '@/lib/actions/book';
 import Books from '@/components/Books';
 import { DEFAULT_LIMIT } from '@/lib/pagination';
-import { BookSkeleton } from '@/components/Book';
 import { useCallback, useEffect, useState } from 'react';
 import Book from '@/types/Book';
 import PageInfo from '@/types/PageInfo';
+import BookSkeleton from '@/components/BookSkeleton';
 
 export default function ListPage() {
   const [books, setBooks] = useState<Array<Book> | null>();

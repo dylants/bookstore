@@ -26,24 +26,26 @@ export default function Books({
           <Book key={book.isbn} book={book} />
         ))}
       </div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={onPrevious ? onPrevious : undefined}
-              isDisabled={!onPrevious}
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={onNext ? onNext : undefined}
-              isDisabled={!onNext}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <div className="mt-8">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={onPrevious ? onPrevious : undefined}
+                isDisabled={!onPrevious}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={onNext ? onNext : undefined}
+                isDisabled={!onNext}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </>
   );
 }
