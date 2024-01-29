@@ -13,7 +13,9 @@
     "lint": "yarn eslint && yarn check-types",
     "start": "next start",
     "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@prisma/client": "5.8.1",
@@ -32,6 +34,13 @@
     "tailwindcss-animate": "1.0.7"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "7.6.10",
+    "@storybook/addon-interactions": "7.6.10",
+    "@storybook/addon-links": "7.6.10",
+    "@storybook/blocks": "7.6.10",
+    "@storybook/nextjs": "7.6.10",
+    "@storybook/react": "7.6.10",
+    "@storybook/test": "7.6.10",
     "@testing-library/jest-dom": "6.2.1",
     "@testing-library/react": "14.1.2",
     "@types/jest": "29.5.11",
@@ -54,6 +63,7 @@
     "postcss": "8.4.32",
     "prettier": "3.2.4",
     "prisma": "5.8.1",
+    "storybook": "7.6.10",
     "tailwindcss": "3.3.6",
     "ts-node": "10.9.2",
     "typescript": "5.3.3"

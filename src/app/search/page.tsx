@@ -29,7 +29,7 @@ export default function SearchPage() {
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
       <SearchForm onSearch={onSearch} ref={inputElement} />
-      <div className="flex my-8">
+      <div className="my-8">
         {books && (
           <>
             {books.length === 0 ? (
