@@ -31,11 +31,11 @@ export default function Book({ book }: { book: BookType }) {
       {book.imageUrl ? (
         <Image alt={book.title} src={book.imageUrl} width={128} height={192} />
       ) : (
-        <div className="border rounded-sm border-customPalette-300 w-[128px] h-[192px] flex justify-center items-center text-slate-900">
+        <div className="border rounded-sm border-customPalette-300 w-[128px] h-[192px] flex justify-center items-center">
           No Image
         </div>
       )}
-      <div className="flex flex-col justify-between text-customPalette-500">
+      <div className="flex flex-col justify-between">
         <div>
           <div className="text-xl font-bold mb-2">{book.title}</div>
         </div>

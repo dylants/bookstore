@@ -60,8 +60,8 @@ const PaginationLink = ({
         size,
         variant: isActive ? 'outline' : 'ghost',
       }),
-      'text-customPalette-400',
-      isDisabled && 'pointer-events-none text-customPalette-400/50',
+      isDisabled &&
+        'text-customPalette-500/50 hover:text-customPalette-500/50 cursor-not-allowed',
       className,
     )}
     {...props}

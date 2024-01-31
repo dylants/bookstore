@@ -22,3 +22,17 @@ export const Default: Story = {
   },
 };
 Default.storyName = 'Book';
+
+export const NoImage: Story = {
+  args: {
+    book: {
+      author: 'Biff Spiffington',
+      genre: 'Fiction',
+      imageUrl: null,
+      isbn: '123',
+      publishedDate: new Date('2000-01-02'),
+      publisher: 'My Publisher',
+      title: 'My Book',
+    },
+  },
+};

@@ -7,7 +7,6 @@ import {
   UseFormRegister,
   useForm,
 } from 'react-hook-form';
-import clsx from 'clsx';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,12 +37,10 @@ function AddBookFormInput({
 
   return (
     <div className="flex flex-col flex-1">
-      <label className="text-sm text-customPalette-500 capitalize">
-        {fieldNameToDisplay}
-      </label>
+      <label className="text-sm capitalize">{fieldNameToDisplay}</label>
       <Input
-        className={clsx(errors[fieldName] && 'border-red-500')}
         type="text"
+        variant={errors[fieldName] ? 'error' : 'default'}
         {...register(fieldName, { required: true })}
       />
     </div>
@@ -93,7 +90,7 @@ export default function AddBookPage() {
 
   return (
     <div>
-      <h1 className="text-2xl text-customPalette-500 my-4">Add a Book</h1>
+      <h1 className="text-2xl my-4">Add a Book</h1>
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
       <form
@@ -123,7 +120,7 @@ export default function AddBookPage() {
                 height={192}
               />
             ) : (
-              <div className="border rounded-sm border-customPalette-200 w-[128px] h-[192px] flex justify-center items-center text-customPalette-500">
+              <div className="border rounded-sm border-customPalette-200 w-[128px] h-[192px] flex justify-center items-center">
                 No Image
               </div>
             )}
