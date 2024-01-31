@@ -4,7 +4,7 @@ import { cn } from 'lib/utils';
 import { Loader2 } from 'lucide-react';
 import { VariantProps, cva } from 'class-variance-authority';
 
-const loadingVariants = cva('text-customPalette-400 animate-spin', {
+const loadingVariants = cva('animate-spin', {
   defaultVariants: {
     size: 'default',
   },

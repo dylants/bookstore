@@ -9,7 +9,7 @@ export default function BookSkeleton() {
       <div className="">
         <Skeleton className="h-[192px] w-[128px]" />
       </div>
-      <div className="flex flex-col w-full justify-between text-customPalette-500">
+      <div className="flex flex-col w-full justify-between">
         <div>
           <Skeleton className="h-7 w-full mb-2" />
         </div>

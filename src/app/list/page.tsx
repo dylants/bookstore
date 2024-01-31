@@ -63,7 +63,7 @@ export default function ListPage() {
 
   return (
     <>
-      <h1 className="text-2xl text-customPalette-500 my-4">Books</h1>
+      <h1 className="text-2xl my-4">Books</h1>
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
       <Books
