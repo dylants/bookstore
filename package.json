@@ -31,7 +31,9 @@
     "react-dom": "18.2.0",
     "react-hook-form": "7.48.2",
     "tailwind-merge": "2.2.1",
-    "tailwindcss-animate": "1.0.7"
+    "tailwindcss-animate": "1.0.7",
+    "zod": "3.22.4",
+    "zod-validation-error": "3.0.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "7.6.10",

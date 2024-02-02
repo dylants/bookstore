@@ -28,7 +28,7 @@ export function isValidPaginationQuery(
 
   if (before && after) {
     return false;
-  } else if (_.isNumber(first) && _.isNumber(last)) {
+  } else if (_.isFinite(first) && _.isFinite(last)) {
     return false;
   }
 
@@ -57,9 +57,10 @@ export function parseCursorAsId(
 export function findLimit(paginationQuery: PaginationQuery): number {
   const { first, last } = paginationQuery;
 
-  if (_.isNumber(first)) {
+  // need to also include isNumber to make typescript happy
+  if (_.isNumber(first) && _.isFinite(first)) {
     return first;
-  } else if (_.isNumber(last)) {
+  } else if (_.isNumber(last) && _.isFinite(last)) {
     return -last;
   } else {
     return DEFAULT_LIMIT;
@@ -68,8 +69,9 @@ export function findLimit(paginationQuery: PaginationQuery): number {
 
 export function findTake(paginationQuery: PaginationQuery): number {
   const limit = findLimit(paginationQuery);
+  logger.trace('limit: %j', limit);
   // add or subtract 1 to verify if we have next page
-  const take = limit > 0 ? limit + 1 : limit - 1;
+  const take = limit === 0 ? 0 : limit > 0 ? limit + 1 : limit - 1;
 
   return take;
 }
