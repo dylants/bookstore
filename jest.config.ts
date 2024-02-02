@@ -9,7 +9,11 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const config: Config = {
   collectCoverageFrom: ['src/**/*.ts*'],
-  coveragePathIgnorePatterns: ['src/components/*'],
+  coveragePathIgnorePatterns: [
+    'src/components/*',
+    'src/lib/prisma.ts',
+    'src/lib/tailwind-utils.ts',
+  ],
   setupFilesAfterEnv: [
     '<rootDir>/test-setup/fetch-polyfill.setup.ts',
     '<rootDir>/test-setup/prisma-mock.setup.ts',
