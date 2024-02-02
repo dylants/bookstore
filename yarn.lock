@@ -6250,6 +6250,8 @@ __metadata:
     tailwindcss-animate: "npm:1.0.7"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.3.3"
+    zod: "npm:3.22.4"
+    zod-validation-error: "npm:3.0.0"
   languageName: unknown
   linkType: soft
 
@@ -16440,5 +16442,21 @@ __metadata:
   version: 1.0.0
   resolution: "yocto-queue@npm:1.0.0"
   checksum: 856117aa15cf5103d2a2fb173f0ab4acb12b4b4d0ed3ab249fdbbf612e55d1cadfd27a6110940e24746fb0a78cf640b522cc8bca76f30a3b00b66e90cf82abe0
+  languageName: node
+  linkType: hard
+
+"zod-validation-error@npm:3.0.0":
+  version: 3.0.0
+  resolution: "zod-validation-error@npm:3.0.0"
+  peerDependencies:
+    zod: ^3.18.0
+  checksum: b85590173bb9c7ca6a4996930cce560567033eacc2bf91635b79c4467938dd9363bd0e36ad79f120c880632fdbfaccf92284ae12dc5a2e6d592d352050bb246f
+  languageName: node
+  linkType: hard
+
+"zod@npm:3.22.4":
+  version: 3.22.4
+  resolution: "zod@npm:3.22.4"
+  checksum: 7578ab283dac0eee66a0ad0fc4a7f28c43e6745aadb3a529f59a4b851aa10872b3890398b3160f257f4b6817b4ce643debdda4fb21a2c040adda7862cab0a587
   languageName: node
   linkType: hard

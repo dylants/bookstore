@@ -8,6 +8,7 @@ import {
   buildFullPaginationQuery,
   buildPaginationRequest,
   buildPaginationResponse,
+  findTake,
 } from '@/lib/pagination';
 import PaginationQuery from '@/types/PaginationQuery';
 
@@ -65,6 +66,14 @@ describe('pagination', () => {
         first: 1,
         last: 2,
         title: 'should fail when both first and last are supplied',
+      },
+      {
+        after: null,
+        before: null,
+        expected: true,
+        first: NaN,
+        last: Infinity,
+        title: 'should pass when both first and last are NaN (ignoring them)',
       },
       {
         after: null,
@@ -191,6 +200,24 @@ describe('pagination', () => {
       expect(findLimit(nullPaginationQuery)).toEqual(DEFAULT_LIMIT);
     });
 
+    it('should use default when first is NaN/Infinity', () => {
+      expect(
+        findLimit({
+          ...nullPaginationQuery,
+          first: NaN,
+        }),
+      ).toEqual(DEFAULT_LIMIT);
+    });
+
+    it('should use default when last is NaN/Infinity', () => {
+      expect(
+        findLimit({
+          ...nullPaginationQuery,
+          last: Infinity,
+        }),
+      ).toEqual(DEFAULT_LIMIT);
+    });
+
     it('should use first when supplied', () => {
       expect(
         findLimit({
@@ -222,6 +249,35 @@ describe('pagination', () => {
           first: undefined as unknown as number,
         }),
       ).toEqual(DEFAULT_LIMIT);
+    });
+  });
+
+  describe('findTake', () => {
+    it('should return 1 more when limit is positive', () => {
+      expect(
+        findTake({
+          ...nullPaginationQuery,
+          first: 1,
+        }),
+      ).toEqual(2);
+    });
+
+    it('should return 1 less when limit is negative', () => {
+      expect(
+        findTake({
+          ...nullPaginationQuery,
+          last: 3,
+        }),
+      ).toEqual(-4);
+    });
+
+    it('should return 0 when limit is 0', () => {
+      expect(
+        findTake({
+          ...nullPaginationQuery,
+          first: 0,
+        }),
+      ).toEqual(0);
     });
   });
 
