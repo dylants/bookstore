@@ -8,7 +8,11 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const config: Config = {
-  collectCoverageFrom: ['src/**/*.ts*'],
+  collectCoverageFrom: [
+    'src/**/*.ts*',
+    '!src/app/**/layout.tsx',
+    '!src/app/**/page.tsx',
+  ],
   coveragePathIgnorePatterns: [
     'src/components/*',
     'src/lib/prisma.ts',
@@ -18,6 +22,7 @@ const config: Config = {
     '<rootDir>/test-setup/fetch-polyfill.setup.ts',
     '<rootDir>/test-setup/prisma-mock.setup.ts',
   ],
+  testPathIgnorePatterns: ['<rootDir>/tests/'],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
