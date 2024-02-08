@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// https://pris.ly/d/prisma-schema
 
 generator client {
   provider        = "prisma-client-js"
@@ -14,11 +13,58 @@ datasource db {
 
 model Book {
   id            Int       @id @default(autoincrement())
-  isbn          String    @unique
-  author        String
-  genre         String
-  imageUrl      String?
-  publishedDate DateTime?
-  publisher     String
+  isbn13        BigInt    @unique
   title         String
+  publishedDate DateTime?
+  imageUrl      String?
+
+  authors Author[]
+
+  publisher   BookSource @relation(fields: [publisherId], references: [id], name: "publisher")
+  publisherId Int
+
+  vendor   BookSource @relation(fields: [vendorId], references: [id], name: "vendor")
+  vendorId Int
+
+  format Format
+  genre  Genre
+}
+
+model Author {
+  id       Int     @id @default(autoincrement())
+  name     String
+  imageUrl String?
+  books    Book[]
+}
+
+model BookSource {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  books       Book[] @relation("publisher")
+  vendorBooks Book[] @relation("vendor")
+}
+
+enum Format {
+  HARDCOVER
+  MASS_MARKET
+  TRADE_PAPERBACK
+}
+
+enum Genre {
+  // Fiction
+  FANTASY
+  LITERARY_FICTION
+  ROMANCE
+  SCIENCE_FICTION
+
+  // Young Adult
+  YOUNG_ADULT_FANTASY
+
+  // Kids
+  MIDDLE_GRADE
+
+  // Non-Fiction
+  BUSINESS_AND_FINANCE
+  COOKBOOKS
 }

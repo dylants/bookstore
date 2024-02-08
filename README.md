@@ -22,6 +22,8 @@ $ yarn dev
 
 This project utilizes [Prisma](https://www.prisma.io/) for its ORM, and expects a PostgreSQL database instance.
 
+The database schema is stored in the [schema.prisma](prisma/schema.prisma) file.
+
 ### Setup Postgres
 
 Install PostgreSQL and populate the `.env` file with the correct `DATABASE_URL` string to connect to PostgreSQL. Some articles to help setup:
@@ -31,10 +33,16 @@ Install PostgreSQL and populate the `.env` file with the correct `DATABASE_URL` 
 
 ### Run Migrations
 
-To run migrations:
+To run migrations (note: this will automatically run the [seed script](prisma/seed.ts) after migrations):
 
 ```
 $ npx prisma migrate dev
+```
+
+or if you have an `.env.local` file:
+
+```
+$ npx dotenv -e .env.local -- prisma migrate dev
 ```
 
 ### Create New Migration
@@ -45,14 +53,68 @@ To create a new migration (and run it):
 $ npx prisma migrate dev --name <update name>
 ```
 
+### Seeds
+
+Database seeds are found in the [seed script](prisma/seed.ts).
+
+The following commands require an `.env.local` file with the `DATABASE_URL`.
+
+Run the seeds:
+
+```
+$ yarn db:seed
+```
+
+Reset the database, re-run migrations, and re-seed the data:
+
+```
+$ yarn db:reset
+```
+
 ## Logging
 
 [Pino](https://github.com/pinojs/pino) logger is setup to use within the app. Configuration can be found in the [logger.ts](src/lib/logger.ts) file.
 
 ## Tests
 
-Lint and Jest tests are run during CI. To run them locally:
+### Unit Tests
+
+Lint and Jest tests are run during CI. These unit tests are stored along side the source code.
+
+To run the tests:
 
 ```
 $ yarn test
+```
+
+To run tests in watch mode:
+
+```
+$ yarn test:watch
+```
+
+### Playwright e2e Tests
+
+Playwright tests are stored in [tests](tests/).
+
+To run the tests:
+
+```
+$ yarn playwright test
+```
+
+To run the tests with the Playwright UI:
+
+```
+$ yarn playwright test --ui
+```
+
+## Storybook
+
+This app uses [Storybook](https://storybook.js.org/) to demo UI components.
+
+To run storybook:
+
+```
+$ yarn storybook
 ```
