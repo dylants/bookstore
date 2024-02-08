@@ -1,40 +1,122 @@
-import { Format, Genre, PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import {
+  Author,
+  BookSource,
+  Format,
+  Genre,
+  PrismaClient,
+} from '@prisma/client';
+import _ from 'lodash';
 const prisma = new PrismaClient();
 
-async function main() {
-  // TODO let's generate more data and use fake values
-  const source1 = await prisma.bookSource.create({
+// ***********************************************************
+// ********************* BEGIN VARIABLES *********************
+// ***********************************************************
+
+const NUM_SOURCES = 10;
+const NUM_AUTHORS = 20;
+const NUM_BOOKS = 50;
+
+// ***********************************************************
+// ********************** END VARIABLES **********************
+// ***********************************************************
+
+async function generateSource() {
+  return await prisma.bookSource.create({
     data: {
-      name: 'Macmillan',
+      name: faker.company.name(),
     },
   });
+}
 
-  const author1 = await prisma.author.create({
+async function generateSources(num: number) {
+  const sourcePromises = _.times(num, generateSource);
+  return await Promise.all(sourcePromises);
+}
+
+async function generateAuthor() {
+  return await prisma.author.create({
     data: {
-      name: 'Brandon Sanderson',
+      name: faker.person.fullName(),
     },
   });
+}
 
-  await prisma.book.create({
+async function generateAuthors(num: number) {
+  const authorPromises = _.times(num, generateAuthor);
+  return await Promise.all(authorPromises);
+}
+
+const formatKeys = Object.keys(Format) as Format[];
+const randomFormat = (): Format => _.sample(formatKeys) as Format;
+
+const genreKeys = Object.keys(Genre) as Genre[];
+const randomGenre = (): Genre => _.sample(genreKeys) as Genre;
+
+const randomImage = (): string =>
+  `https://picsum.photos/id/${_.random(1, 500)}/128/192`;
+
+const randomIsbn13 = (): bigint =>
+  BigInt(
+    // remove the decimal
+    Math.floor(
+      // generate a random number that starts with 1
+      (Math.random() + 1) *
+        // move the decimal 13 spaces (minus 1 because of the +1 above)
+        10 ** (13 - 1),
+    ),
+  );
+
+interface GenerateBookProps {
+  authors: Author[];
+  publisher: BookSource;
+  vendor: BookSource;
+}
+
+async function generateBook(props: GenerateBookProps) {
+  const authorsConnect = props.authors.map((a) => ({
+    id: a.id,
+  }));
+
+  return await prisma.book.create({
     data: {
       authors: {
-        connect: author1,
+        connect: authorsConnect,
       },
-      format: Format.HARDCOVER,
-      genre: Genre.FANTASY,
-      imageUrl:
-        'https://books.google.com/books/content?id=QVn-CgAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api',
-      isbn13: 9780765326355,
-      publishedDate: new Date('2014-03-03'),
+      format: randomFormat(),
+      genre: randomGenre(),
+      imageUrl: randomImage(),
+      isbn13: randomIsbn13(),
+      publishedDate: faker.date.past(),
       publisher: {
-        connect: source1,
+        connect: props.publisher,
       },
-      title: 'The Way of Kings',
+      title: faker.music.songName(),
       vendor: {
-        connect: source1,
+        connect: props.vendor,
       },
     },
   });
+}
+
+async function main() {
+  const sources = await generateSources(NUM_SOURCES);
+  const authors = await generateAuthors(NUM_AUTHORS);
+
+  const bookPromises = _.times(NUM_BOOKS, () =>
+    generateBook({
+      authors: _.sampleSize(
+        authors,
+        // choose 1 author more often
+        Math.random() > 0.25
+          ? 1
+          : _.random(1, authors.length > 3 ? 3 : authors.length),
+      ),
+      publisher: _.sample(sources) as BookSource,
+      vendor: _.sample(sources) as BookSource,
+    }),
+  );
+  await Promise.all(bookPromises);
 }
 main()
   .then(async () => {
