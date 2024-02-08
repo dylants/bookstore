@@ -6,6 +6,10 @@ const nextConfig = {
         hostname: 'books.google.com',
         protocol: 'https',
       },
+      {
+        hostname: 'picsum.photos',
+        protocol: 'https',
+      },
     ],
   },
 };

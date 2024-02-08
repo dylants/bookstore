@@ -4,7 +4,7 @@ import PaginationQuery from '@/types/PaginationQuery';
 import { Prisma } from '@prisma/client';
 import _ from 'lodash';
 
-export const DEFAULT_LIMIT = 3;
+export const DEFAULT_LIMIT = 10;
 
 /* ***********************************************
  * PAGINATION REQUEST
