@@ -7,15 +7,20 @@
   },
   "scripts": {
     "build": "next build",
+    "build-storybook": "storybook build",
     "check-types": "tsc --noemit",
+    "db:seed": "dotenv -e .env.local -- prisma db seed",
+    "db:reset": "dotenv -e .env.local -- prisma migrate reset",
     "dev": "next dev",
     "eslint": "next lint",
     "lint": "yarn eslint && yarn check-types",
     "start": "next start",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "5.8.1",
@@ -53,6 +58,7 @@
     "@typescript-eslint/parser": "6.19.1",
     "autoprefixer": "10.0.1",
     "cross-fetch": "4.0.0",
+    "dotenv-cli": "7.3.0",
     "eslint": "8.55.0",
     "eslint-config-next": "14.0.4",
     "eslint-config-prettier": "9.1.0",
