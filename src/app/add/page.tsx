@@ -10,16 +10,24 @@ import {
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import BookType from '@/types/Book';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { createBook } from '@/lib/actions/book';
-import useExternalBookSearch from '@/lib/search/external/useExternalBookSearch';
+import useExternalBookSearch, {
+  ExternalBookSearchResult,
+} from '@/lib/search/external/useExternalBookSearch';
+import { Format, Genre } from '@prisma/client';
 
-interface AddBookFormInput extends Omit<BookType, 'publishedDate'> {
-  publishedDate: Date | string;
-}
+type AddBookFormInput = {
+  authors: string;
+  genre: string;
+  imageUrl: string;
+  isbn13: string;
+  publishedDate: string;
+  publisher: string;
+  title: string;
+};
 
-function AddBookFormInput({
+function AddBookFormInputField({
   errors,
   fieldName,
   register,
@@ -31,7 +39,7 @@ function AddBookFormInput({
   let fieldNameToDisplay: string = fieldName;
   if (fieldName === 'publishedDate') {
     fieldNameToDisplay = 'Published Date';
-  } else if (fieldName === 'isbn') {
+  } else if (fieldName === 'isbn13') {
     fieldNameToDisplay = 'ISBN';
   }
 
@@ -48,7 +56,8 @@ function AddBookFormInput({
 }
 
 export default function AddBookPage() {
-  const [lookupBook, setLookupBook] = useState<BookType | null>();
+  const [lookupBook, setLookupBook] =
+    useState<ExternalBookSearchResult | null>();
   const {
     formState: { errors, isSubmitting },
     getValues,
@@ -57,12 +66,13 @@ export default function AddBookPage() {
     reset,
   } = useForm<AddBookFormInput>({
     values: {
-      author: lookupBook?.author || '',
-      genre: lookupBook?.genre || '',
+      // TODO we'll probably want a better UI for these hints...
+      authors: lookupBook?.authorsHint || '',
+      genre: lookupBook?.genresHint || '',
       imageUrl: lookupBook?.imageUrl || '',
-      isbn: lookupBook?.isbn || '',
+      isbn13: lookupBook?.isbn13 || '',
       publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || '',
-      publisher: lookupBook?.publisher || '',
+      publisher: lookupBook?.publisherHint || '',
       title: lookupBook?.title || '',
     },
   });
@@ -71,7 +81,13 @@ export default function AddBookPage() {
   const onSubmit: SubmitHandler<AddBookFormInput> = async (book) => {
     await createBook({
       ...book,
+      // TODO fixme
+      format: Format.HARDCOVER,
+      // TODO fixme
+      genre: Genre.FANTASY,
+      isbn13: BigInt(book.isbn13),
       publishedDate: new Date(book.publishedDate),
+      vendor: book.publisher,
     });
     reset();
     setLookupBook(null);
@@ -80,7 +96,7 @@ export default function AddBookPage() {
   };
 
   const onLookup = async () => {
-    const isbn = getValues('isbn');
+    const isbn: string = getValues('isbn13');
     if (isbn) {
       const book = await search({ isbn });
       // TODO loading spinner while we search
@@ -98,9 +114,9 @@ export default function AddBookPage() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className="flex gap-4 items-end">
-          <AddBookFormInput
+          <AddBookFormInputField
             errors={errors}
-            fieldName="isbn"
+            fieldName="isbn13"
             register={register}
           />
           <Button variant="secondary" type="button" onClick={() => onLookup()}>
@@ -114,7 +130,7 @@ export default function AddBookPage() {
           <div className="flex">
             {lookupBook?.imageUrl ? (
               <Image
-                alt={lookupBook?.title}
+                alt={lookupBook?.title || 'Unknown image'}
                 src={lookupBook?.imageUrl}
                 width={128}
                 height={192}
@@ -126,17 +142,17 @@ export default function AddBookPage() {
             )}
           </div>
           <div className="flex flex-col flex-1 gap-3">
-            <AddBookFormInput
+            <AddBookFormInputField
               errors={errors}
               fieldName="title"
               register={register}
             />
-            <AddBookFormInput
+            <AddBookFormInputField
               errors={errors}
-              fieldName="author"
+              fieldName="authors"
               register={register}
             />
-            <AddBookFormInput
+            <AddBookFormInputField
               errors={errors}
               fieldName="genre"
               register={register}
@@ -145,12 +161,12 @@ export default function AddBookPage() {
         </div>
 
         <div className="flex gap-4 mt-4">
-          <AddBookFormInput
+          <AddBookFormInputField
             errors={errors}
             fieldName="publishedDate"
             register={register}
           />
-          <AddBookFormInput
+          <AddBookFormInputField
             errors={errors}
             fieldName="publisher"
             register={register}

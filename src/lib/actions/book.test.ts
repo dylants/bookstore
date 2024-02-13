@@ -1,96 +1,104 @@
 import {
-  BookFull,
   createBook,
   findBookBySearchString,
   getBooks,
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
-import { Book, Format, Genre } from '@prisma/client';
-import BookType from '@/types/Book';
-import _ from 'lodash';
-
-function convertTypeToDb(book: BookType, id: number): BookFull {
-  return {
-    authors: [{ id, imageUrl: '', name: book.author }],
-    // TODO fixme
-    format: Format.HARDCOVER,
-    // TODO fixme
-    genre: Genre.LITERARY_FICTION,
-    id,
-    imageUrl: book.imageUrl,
-    isbn13: BigInt(_.toNumber(book.isbn)),
-    publishedDate: book.publishedDate,
-    publisher: { id, name: book.publisher },
-    publisherId: id,
-    title: book.title,
-    vendorId: id,
-  };
-}
+import { randomBookHydrated } from '@/lib/fakes/book';
 
 describe('book actions', () => {
-  // TODO use fakes
-  const book1: BookType = {
-    author: 'Biff Spiffington',
-    genre: Genre.LITERARY_FICTION,
-    imageUrl: 'https://img.com',
-    isbn: '123',
-    publishedDate: new Date('2000-01-02'),
-    publisher: 'My Publisher',
-    title: 'My Book',
-  };
-  const book1db: Book = convertTypeToDb(book1, 1);
-
-  const book2: BookType = {
-    author: 'Jane Doe',
-    genre: Genre.LITERARY_FICTION,
-    imageUrl: 'https://img2.com',
-    isbn: '345',
-    publishedDate: new Date('2001-02-03'),
-    publisher: 'My Other Publisher',
-    title: 'My Book 2',
-  };
-  const book2db: Book = convertTypeToDb(book2, 2);
-
-  const book3: BookType = {
-    author: 'John Doe',
-    genre: Genre.LITERARY_FICTION,
-    imageUrl: 'https://img3.com',
-    isbn: '567',
-    publishedDate: new Date('2002-03-04'),
-    publisher: 'That Publisher',
-    title: 'My Book 3',
-  };
-  const book3db: Book = convertTypeToDb(book3, 3);
+  const book1 = randomBookHydrated();
+  const book2 = randomBookHydrated();
+  const book3 = randomBookHydrated();
 
   describe('createBook', () => {
     it('should create a new book', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
-      prismaMock.book.create.mockResolvedValue(book1db);
+      prismaMock.book.create.mockResolvedValue(book1);
 
-      await expect(createBook(book1)).resolves.toEqual(book1);
+      const result = await createBook({
+        ...book1,
+        authors: 'author1',
+        publisher: 'publisher2',
+        vendor: 'vendor3',
+      });
+
+      expect(prismaMock.author.findFirst).toHaveBeenCalledWith({
+        where: { name: 'author1' },
+      });
+
+      expect(prismaMock.bookSource.findFirst).toHaveBeenCalledTimes(2);
+      expect(prismaMock.bookSource.findFirst).toHaveBeenNthCalledWith(1, {
+        where: { name: 'publisher2' },
+      });
+      expect(prismaMock.bookSource.findFirst).toHaveBeenNthCalledWith(2, {
+        where: { name: 'vendor3' },
+      });
+
+      expect(prismaMock.book.create).toHaveBeenCalledWith({
+        data: {
+          authors: {
+            connectOrCreate: {
+              create: {
+                name: 'author1',
+              },
+              where: { id: -1 },
+            },
+          },
+          format: book1.format,
+          genre: book1.genre,
+          imageUrl: book1.imageUrl,
+          isbn13: book1.isbn13,
+          publishedDate: book1.publishedDate,
+          publisher: {
+            connectOrCreate: {
+              create: {
+                name: 'publisher2',
+              },
+              where: { id: -1 },
+            },
+          },
+          title: book1.title,
+          vendor: {
+            connectOrCreate: {
+              create: {
+                name: 'vendor3',
+              },
+              where: { id: -1 },
+            },
+          },
+        },
+        include: {
+          authors: true,
+          publisher: true,
+          vendor: true,
+        },
+      });
+
+      expect(result).toEqual(book1);
     });
   });
 
   describe('getBooks', () => {
     it('should get books when provided with default input', async () => {
-      prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
+      prismaMock.book.findMany.mockResolvedValue([book1, book2, book3]);
 
       const result = await getBooks({});
 
       expect(result).toEqual({
         books: [book1, book2, book3],
         pageInfo: {
-          endCursor: '3',
+          endCursor: book3.id.toString(),
           hasNextPage: false,
           hasPreviousPage: false,
-          startCursor: '1',
+          startCursor: book1.id.toString(),
         },
       });
     });
 
     it('should get books when provided with pagination query input', async () => {
-      prismaMock.book.findMany.mockResolvedValue([book2db, book3db]);
+      prismaMock.book.findMany.mockResolvedValue([book2, book3]);
 
       const result = await getBooks({
         paginationQuery: {
@@ -102,10 +110,10 @@ describe('book actions', () => {
       expect(result).toEqual({
         books: [book2, book3],
         pageInfo: {
-          endCursor: '3',
+          endCursor: book3.id.toString(),
           hasNextPage: false,
           hasPreviousPage: true,
-          startCursor: '2',
+          startCursor: book2.id.toString(),
         },
       });
     });
@@ -113,7 +121,7 @@ describe('book actions', () => {
 
   describe('findBookBySearchString', () => {
     it('should find books that contain "Book"', async () => {
-      prismaMock.book.findMany.mockResolvedValue([book1db, book2db, book3db]);
+      prismaMock.book.findMany.mockResolvedValue([book1, book2, book3]);
 
       const result = await findBookBySearchString('Book');
 

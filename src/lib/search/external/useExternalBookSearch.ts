@@ -1,9 +1,18 @@
 import logger from '@/lib/logger';
-import BookType from '@/types/Book';
 
-export interface ExternalBookSearchInput {
+export type ExternalBookSearchInput = {
   isbn: string;
-}
+};
+
+export type ExternalBookSearchResult = {
+  authorsHint?: string;
+  genresHint?: string;
+  imageUrl?: string;
+  isbn13?: string;
+  publishedDate?: Date;
+  publisherHint?: string;
+  title?: string;
+};
 
 export interface GoogleSearchResponse {
   totalItems: number;
@@ -31,7 +40,7 @@ function buildGoogleSearchUrl(ISBN: string) {
 
 async function googleBookSearch(
   input: ExternalBookSearchInput,
-): Promise<BookType | null> {
+): Promise<ExternalBookSearchResult | null> {
   // TODO do we need to care about other search input?
   const searchUrl = buildGoogleSearchUrl(input.isbn);
 
@@ -57,24 +66,15 @@ async function googleBookSearch(
       },
     } = item;
 
-    const author = authors?.join(', ') || '';
-    const genre = categories?.join(', ') || '';
-    const imageUrl = imageLinks?.thumbnail
-      ? imageLinks.thumbnail.replaceAll('http://', 'https://')
-      : null;
-    const isbn =
-      industryIdentifiers.find((i) => i.type === 'ISBN_13')?.identifier ?? '';
-    const publishedDate = publishedDateString
-      ? new Date(publishedDateString)
-      : null;
-
-    const book: BookType = {
-      author,
-      genre,
-      imageUrl,
-      isbn,
-      publishedDate,
-      publisher,
+    const book: ExternalBookSearchResult = {
+      authorsHint: authors?.join(', '),
+      genresHint: categories?.join(', '),
+      imageUrl: imageLinks?.thumbnail?.replaceAll('http://', 'https://'),
+      isbn13: industryIdentifiers.find((i) => i.type === 'ISBN_13')?.identifier,
+      publishedDate: publishedDateString
+        ? new Date(publishedDateString)
+        : undefined,
+      publisherHint: publisher,
       title,
     };
     logger.trace('returning book %j', book);
@@ -88,12 +88,12 @@ async function googleBookSearch(
 
 export type UseExternalBookSearchResult = (
   input: ExternalBookSearchInput,
-) => Promise<BookType | null>;
+) => Promise<ExternalBookSearchResult | null>;
 
 export default function useExternalBookSearch(): UseExternalBookSearchResult {
   const search = async (
     input: ExternalBookSearchInput,
-  ): Promise<BookType | null> => {
+  ): Promise<ExternalBookSearchResult | null> => {
     // currently only support Google as a search mechanism
     return googleBookSearch(input);
   };

@@ -1,8 +1,8 @@
 import useExternalBookSearch, {
+  ExternalBookSearchResult,
   GoogleSearchResponse,
   UseExternalBookSearchResult,
 } from '@/lib/search/external/useExternalBookSearch';
-import Book from '@/types/Book';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
@@ -68,14 +68,14 @@ describe('useExternalBookSearch', () => {
           return res(ctx.json(GOOGLE_BOOK_FOUND));
         }),
       );
-      const book: Book = {
-        author: 'Cressida Cowell',
-        genre: 'Juvenile Fiction',
+      const book: ExternalBookSearchResult = {
+        authorsHint: 'Cressida Cowell',
+        genresHint: 'Juvenile Fiction',
         imageUrl:
           'https://books.google.com/books/content?id=28_qngEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
-        isbn: '9780316085274',
+        isbn13: '9780316085274',
         publishedDate: new Date('2010-02-01'),
-        publisher: 'Little Brown & Company',
+        publisherHint: 'Little Brown & Company',
         title: 'How to Train Your Dragon',
       };
 
@@ -96,13 +96,8 @@ describe('useExternalBookSearch', () => {
           return res(ctx.json(GOOGLE_BOOK_FOUND_WITHOUT_DETAIL));
         }),
       );
-      const book: Book = {
-        author: '',
-        genre: '',
-        imageUrl: null,
-        isbn: '',
-        publishedDate: null,
-        publisher: 'Little Brown & Company',
+      const book: ExternalBookSearchResult = {
+        publisherHint: 'Little Brown & Company',
         title: 'How to Train Your Dragon',
       };
 

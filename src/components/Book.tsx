@@ -1,20 +1,45 @@
-import BookType from '@/types/Book';
+import BookHydrated from '@/types/BookHydrated';
+import _ from 'lodash';
 import Image from 'next/image';
 
 function BookKey({
   book,
   fieldName,
 }: {
-  book: BookType;
-  fieldName: keyof BookType;
+  book: BookHydrated;
+  fieldName: keyof BookHydrated;
 }) {
-  let fieldNameToDisplay: string = fieldName;
-  let fieldToDisplay = book[fieldName]?.toString();
-  if (fieldName === 'publishedDate') {
-    fieldNameToDisplay = 'Published Date';
-    fieldToDisplay = book[fieldName]?.toLocaleDateString?.();
-  } else if (fieldName === 'isbn') {
-    fieldNameToDisplay = 'ISBN';
+  let fieldNameToDisplay: string;
+  let fieldToDisplay: string | undefined;
+  switch (fieldName) {
+    case 'authors':
+      fieldNameToDisplay = 'By';
+      fieldToDisplay = book[fieldName].map((a) => a.name).join(', ');
+      break;
+    case 'genre':
+      fieldNameToDisplay = fieldName;
+      // TODO should this be a function?
+      fieldToDisplay = _(book[fieldName])
+        .split('_')
+        .map((w) => _.capitalize(_.lowerCase(w)))
+        .join(' ');
+      break;
+    case 'isbn13':
+      fieldNameToDisplay = 'ISBN';
+      fieldToDisplay = book[fieldName].toString();
+      break;
+    case 'publishedDate':
+      fieldNameToDisplay = 'Published Date';
+      fieldToDisplay = book[fieldName]?.toLocaleDateString?.();
+      break;
+    case 'publisher':
+      fieldNameToDisplay = fieldName;
+      fieldToDisplay = book[fieldName].name;
+      break;
+    default:
+      fieldNameToDisplay = fieldName;
+      fieldToDisplay = book[fieldName]?.toString();
+      break;
   }
 
   return (
@@ -25,7 +50,7 @@ function BookKey({
   );
 }
 
-export default function Book({ book }: { book: BookType }) {
+export default function Book({ book }: { book: BookHydrated }) {
   return (
     <div className="flex gap-4 h-[192px]">
       {book.imageUrl ? (
@@ -40,8 +65,8 @@ export default function Book({ book }: { book: BookType }) {
           <div className="text-xl font-bold mb-2">{book.title}</div>
         </div>
         <div>
-          <BookKey book={book} fieldName="isbn" />
-          <BookKey book={book} fieldName="author" />
+          <BookKey book={book} fieldName="isbn13" />
+          <BookKey book={book} fieldName="authors" />
           <BookKey book={book} fieldName="genre" />
           <BookKey book={book} fieldName="publisher" />
           <BookKey book={book} fieldName="publishedDate" />

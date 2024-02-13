@@ -9,7 +9,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '@/components/ui/pagination';
-import BookType from '@/types/Book';
+import BookHydrated from '@/types/BookHydrated';
 
 export default function Books({
   books,
@@ -17,7 +17,7 @@ export default function Books({
   onNext,
   onPrevious,
 }: {
-  books: Array<BookType>;
+  books: Array<BookHydrated>;
   isLoading?: boolean;
   onNext?: () => Promise<void>;
   onPrevious?: () => Promise<void>;
@@ -34,7 +34,7 @@ export default function Books({
         ) : (
           <>
             {books.map((book) => (
-              <Book key={book.isbn} book={book} />
+              <Book key={book.isbn13} book={book} />
             ))}
           </>
         )}

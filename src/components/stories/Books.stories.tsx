@@ -1,5 +1,5 @@
 import Books from '@/components/Books';
-import { randomBookType } from '@/lib/fakes/book';
+import { randomBookHydrated } from '@/lib/fakes/book';
 import type { Meta, StoryObj } from '@storybook/react';
 import _ from 'lodash';
 
@@ -10,7 +10,10 @@ const meta: Meta<typeof Books> = {
 export default meta;
 type Story = StoryObj<typeof Books>;
 
-const books = _.times(3, randomBookType);
+const books = _.times(3, randomBookHydrated);
+// this is necessary until the storybook bug is fixed
+// https://github.com/storybookjs/storybook/issues/22452
+books.map((b) => (b.isbn13 = b.isbn13.toString() as unknown as bigint));
 
 export const Default: Story = {
   args: {

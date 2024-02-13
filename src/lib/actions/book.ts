@@ -6,44 +6,26 @@ import {
   buildPaginationResponse,
 } from '@/lib/pagination';
 import prisma from '@/lib/prisma';
-import { Author, Book, BookSource, Format, Genre } from '@prisma/client';
-import BookType from '@/types/Book';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
-import _ from 'lodash';
+import BookCreateInput from '@/types/BookCreateInput';
+import BookHydrated from '@/types/BookHydrated';
 
-export interface BookFull extends Book {
-  authors: Author[];
-  publisher: BookSource;
-}
-
-function convertDbToType(book: BookFull): BookType {
-  return {
-    author: book.authors.map((a) => a.name).join(', '),
-    genre: book.genre,
-    imageUrl: book.imageUrl,
-    isbn: book.isbn13.toString(),
-    publishedDate: book.publishedDate,
-    publisher: book.publisher.name,
-    title: book.title,
-  };
-}
-
-export async function createBook(book: BookType): Promise<BookType> {
+export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('createBook, book: %j', book);
 
   // TODO how do we find multiple authors?
+  const authorString = book.authors.split(',')[0].trim();
   const author = await prisma.author.findFirst({
-    where: { name: book.author },
+    where: { name: authorString },
   });
 
   const publisher = await prisma.bookSource.findFirst({
     where: { name: book.publisher },
   });
 
-  // TODO include vendor
   const vendor = await prisma.bookSource.findFirst({
-    where: { name: book.publisher },
+    where: { name: book.vendor },
   });
 
   const createdBook = await prisma.book.create({
@@ -51,19 +33,16 @@ export async function createBook(book: BookType): Promise<BookType> {
       authors: {
         connectOrCreate: {
           create: {
-            name: book.author,
+            name: authorString,
           },
           // TODO fixme
           where: { id: author?.id ?? -1 },
         },
       },
-      // TODO fixme
-      format: Format.HARDCOVER,
-      // TODO fixme
-      genre: Genre.LITERARY_FICTION,
+      format: book.format,
+      genre: book.genre,
       imageUrl: book.imageUrl,
-      // TODO fixme
-      isbn13: _.toNumber(book.isbn),
+      isbn13: book.isbn13,
       publishedDate: book.publishedDate,
       publisher: {
         connectOrCreate: {
@@ -78,7 +57,7 @@ export async function createBook(book: BookType): Promise<BookType> {
       vendor: {
         connectOrCreate: {
           create: {
-            name: book.publisher,
+            name: book.vendor,
           },
           // TODO fixme
           where: { id: vendor?.id ?? -1 },
@@ -94,7 +73,7 @@ export async function createBook(book: BookType): Promise<BookType> {
 
   logger.trace('created book in DB: %j', createdBook);
 
-  return convertDbToType(createdBook);
+  return createdBook;
 }
 
 export interface GetBooksParams {
@@ -102,7 +81,7 @@ export interface GetBooksParams {
 }
 
 export interface GetBooksResult {
-  books: Array<BookType>;
+  books: Array<BookHydrated>;
   pageInfo: PageInfo;
 }
 
@@ -120,20 +99,20 @@ export async function getBooks({
     },
   });
 
-  const { items: books, pageInfo } = buildPaginationResponse<BookFull>({
+  const { items: books, pageInfo } = buildPaginationResponse<BookHydrated>({
     items,
     paginationQuery,
   });
 
   return {
-    books: books.map(convertDbToType),
+    books,
     pageInfo,
   };
 }
 
 export async function findBookBySearchString(
   search: string,
-): Promise<Array<BookType>> {
+): Promise<Array<BookHydrated>> {
   const books = await prisma.book.findMany({
     include: {
       authors: true,
@@ -146,5 +125,5 @@ export async function findBookBySearchString(
   });
   logger.trace('books found: %j', books);
 
-  return books.map(convertDbToType);
+  return books;
 }
