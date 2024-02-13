@@ -6,7 +6,7 @@ const options: LoggerOptions = {
     asObject: true,
   },
   // "silent" to disable logging
-  level: 'trace',
+  level: process.env.NODE_ENV === 'test' ? 'silent' : 'trace',
 };
 
 const logger = pino(options);
