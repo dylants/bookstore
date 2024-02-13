@@ -28,6 +28,7 @@ function convertTypeToDb(book: BookType, id: number): BookFull {
 }
 
 describe('book actions', () => {
+  // TODO use fakes
   const book1: BookType = {
     author: 'Biff Spiffington',
     genre: Genre.LITERARY_FICTION,
@@ -67,15 +68,7 @@ describe('book actions', () => {
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
       prismaMock.book.create.mockResolvedValue(book1db);
 
-      await expect(createBook(book1)).resolves.toEqual({
-        author: 'Biff Spiffington',
-        genre: Genre.LITERARY_FICTION,
-        imageUrl: 'https://img.com',
-        isbn: '123',
-        publishedDate: new Date('2000-01-02'),
-        publisher: 'My Publisher',
-        title: 'My Book',
-      });
+      await expect(createBook(book1)).resolves.toEqual(book1);
     });
   });
 

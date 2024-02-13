@@ -1,4 +1,5 @@
 import Book from '@/components/Book';
+import { randomBookType } from '@/lib/fakes/book';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Book> = {
@@ -10,15 +11,7 @@ type Story = StoryObj<typeof Book>;
 
 export const Default: Story = {
   args: {
-    book: {
-      author: 'Biff Spiffington',
-      genre: 'Fiction',
-      imageUrl: 'https://picsum.photos/128/192',
-      isbn: '123',
-      publishedDate: new Date('2000-01-02'),
-      publisher: 'My Publisher',
-      title: 'My Book',
-    },
+    book: randomBookType(),
   },
 };
 Default.storyName = 'Book';
@@ -26,13 +19,8 @@ Default.storyName = 'Book';
 export const NoImage: Story = {
   args: {
     book: {
-      author: 'Biff Spiffington',
-      genre: 'Fiction',
+      ...randomBookType(),
       imageUrl: null,
-      isbn: '123',
-      publishedDate: new Date('2000-01-02'),
-      publisher: 'My Publisher',
-      title: 'My Book',
     },
   },
 };
