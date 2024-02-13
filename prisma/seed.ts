@@ -1,4 +1,4 @@
-import { randomBookType } from '../src/lib/fakes/book';
+import { randomBook } from '../src/lib/fakes/book';
 import { faker } from '@faker-js/faker';
 import { Author, BookSource, PrismaClient } from '@prisma/client';
 import _ from 'lodash';
@@ -53,8 +53,8 @@ async function generateBook(props: GenerateBookProps) {
     id: a.id,
   }));
 
-  const { format, genre, imageUrl, isbn, publishedDate, title } =
-    randomBookType();
+  const { format, genre, imageUrl, isbn13, publishedDate, title } =
+    randomBook();
 
   return await prisma.book.create({
     data: {
@@ -64,7 +64,7 @@ async function generateBook(props: GenerateBookProps) {
       format,
       genre,
       imageUrl,
-      isbn13: BigInt(isbn),
+      isbn13,
       publishedDate,
       publisher: {
         connect: props.publisher,

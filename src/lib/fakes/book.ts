@@ -1,3 +1,4 @@
+import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
 import { Book, Format, Genre } from '@prisma/client';
 import _ from 'lodash';
@@ -36,16 +37,24 @@ export function randomBook(): Book {
   };
 }
 
-// TODO add typing
-export function randomBookType() {
+export function randomBookHydrated(): BookHydrated {
+  const publisherId = faker.number.int();
+  const vendorId = faker.number.int();
+
   return {
-    author: faker.person.fullName(),
+    authors: [
+      { id: faker.number.int(), imageUrl: null, name: faker.person.fullName() },
+    ],
     format: randomFormat(),
     genre: randomGenre(),
+    id: faker.number.int(),
     imageUrl: randomImage(),
-    isbn: randomIsbn13().toString(),
+    isbn13: randomIsbn13(),
     publishedDate: faker.date.past(),
-    publisher: faker.company.name(),
+    publisher: { id: publisherId, name: faker.company.name() },
+    publisherId,
     title: faker.music.songName(),
+    vendor: { id: vendorId, name: faker.company.name() },
+    vendorId,
   };
 }

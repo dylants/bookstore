@@ -12,6 +12,8 @@ const config: Config = {
     'src/**/*.ts*',
     '!src/app/**/layout.tsx',
     '!src/app/**/page.tsx',
+    '!src/lib/fakes/**',
+    '!src/types/**',
   ],
   coveragePathIgnorePatterns: [
     'src/components/*',
@@ -23,6 +25,9 @@ const config: Config = {
     '<rootDir>/test-setup/prisma-mock.setup.ts',
   ],
   testPathIgnorePatterns: ['<rootDir>/tests/'],
+  // necessary to overcome BigInt serialization issues
+  // https://github.com/jestjs/jest/issues/11617
+  workerThreads: true,
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

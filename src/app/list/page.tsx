@@ -4,11 +4,11 @@ import { getBooks } from '@/lib/actions/book';
 import Books from '@/components/Books';
 import { DEFAULT_LIMIT } from '@/lib/pagination';
 import { useCallback, useEffect, useState } from 'react';
-import Book from '@/types/Book';
 import PageInfo from '@/types/PageInfo';
+import BookHydrated from '@/types/BookHydrated';
 
 export default function ListPage() {
-  const [books, setBooks] = useState<Array<Book> | null>();
+  const [books, setBooks] = useState<Array<BookHydrated> | null>();
   const [pageInfo, setPageInfo] = useState<PageInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
