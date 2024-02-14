@@ -1,4 +1,5 @@
-import { randomBook } from '../src/lib/fakes/book';
+import { randomBook } from '@/lib/fakes/book';
+import { randomBookSource } from '@/lib/fakes/book-source';
 import { faker } from '@faker-js/faker';
 import { Author, BookSource, PrismaClient } from '@prisma/client';
 import _ from 'lodash';
@@ -17,10 +18,10 @@ const NUM_BOOKS = 50;
 // ***********************************************************
 
 async function generateSource() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, ...data } = randomBookSource();
   return await prisma.bookSource.create({
-    data: {
-      name: faker.company.name(),
-    },
+    data,
   });
 }
 
