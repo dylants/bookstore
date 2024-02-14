@@ -20,7 +20,7 @@ const buttonVariants = cva(
       },
       variant: {
         default:
-          'bg-customPalette-400 text-customPalette-100 shadow hover:bg-customPalette-400/90',
+          'bg-customPalette-300 text-customPalette-100 shadow hover:bg-customPalette-400/90',
         destructive:
           'bg-red-500 text-customPalette-100 shadow-sm hover:bg-red-500/90',
         ghost: 'hover:bg-customPalette-100 hover:text-customPalette-300/80',

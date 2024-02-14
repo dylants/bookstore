@@ -5,3 +5,13 @@
 body {
   @apply bg-customPalette-100 text-customPalette-500;
 }
+
+@layer base {
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+}

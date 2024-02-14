@@ -106,7 +106,7 @@ export default function AddBookPage() {
 
   return (
     <div>
-      <h1 className="text-2xl my-4">Add a Book</h1>
+      <h1 className="my-4">Add a Book</h1>
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
       <form
