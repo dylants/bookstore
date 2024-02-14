@@ -3,6 +3,9 @@ import { faker } from '@faker-js/faker';
 import { Book, Format, Genre } from '@prisma/client';
 import _ from 'lodash';
 
+// must import relative path for seeds!
+import { randomBookSource } from './book-source';
+
 const formatKeys = Object.keys(Format) as Format[];
 export const randomFormat = (): Format => _.sample(formatKeys) as Format;
 
@@ -38,8 +41,8 @@ export function randomBook(): Book {
 }
 
 export function randomBookHydrated(): BookHydrated {
-  const publisherId = faker.number.int();
-  const vendorId = faker.number.int();
+  const publisher = randomBookSource();
+  const vendor = randomBookSource();
 
   return {
     authors: [
@@ -51,10 +54,10 @@ export function randomBookHydrated(): BookHydrated {
     imageUrl: randomImage(),
     isbn13: randomIsbn13(),
     publishedDate: faker.date.past(),
-    publisher: { id: publisherId, name: faker.company.name() },
-    publisherId,
+    publisher,
+    publisherId: publisher.id,
     title: faker.music.songName(),
-    vendor: { id: vendorId, name: faker.company.name() },
-    vendorId,
+    vendor,
+    vendorId: vendor.id,
   };
 }
