@@ -1,10 +1,8 @@
+import { randomBookSource } from '@/lib/fakes/book-source';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
 import { Book, Format, Genre } from '@prisma/client';
 import _ from 'lodash';
-
-// must import relative path for seeds!
-import { randomBookSource } from './book-source';
 
 const formatKeys = Object.keys(Format) as Format[];
 export const randomFormat = (): Format => _.sample(formatKeys) as Format;

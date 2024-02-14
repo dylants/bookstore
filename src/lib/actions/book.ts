@@ -24,6 +24,7 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
     where: { name: book.publisher },
   });
 
+  // TODO vendor should come as input
   const vendor = await prisma.bookSource.findFirst({
     where: { name: book.vendor },
   });
@@ -47,6 +48,9 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
       publisher: {
         connectOrCreate: {
           create: {
+            // TODO we need better logic to determine if publisher/vendor
+            isPublisher: true,
+            isVendor: false,
             name: book.publisher,
           },
           // TODO fixme
@@ -57,6 +61,9 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
       vendor: {
         connectOrCreate: {
           create: {
+            // TODO we need better logic to determine if publisher/vendor
+            isPublisher: false,
+            isVendor: true,
             name: book.vendor,
           },
           // TODO fixme
