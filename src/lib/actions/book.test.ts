@@ -54,6 +54,8 @@ describe('book actions', () => {
           publisher: {
             connectOrCreate: {
               create: {
+                isPublisher: true,
+                isVendor: false,
                 name: 'publisher2',
               },
               where: { id: -1 },
@@ -63,6 +65,8 @@ describe('book actions', () => {
           vendor: {
             connectOrCreate: {
               create: {
+                isPublisher: false,
+                isVendor: true,
                 name: 'vendor3',
               },
               where: { id: -1 },
