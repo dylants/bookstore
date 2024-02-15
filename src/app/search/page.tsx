@@ -1,17 +1,20 @@
 'use client';
 
 import Books from '@/components/Books';
-import SearchForm, { SearchFormParams } from '@/components/SearchForm';
+import Search, { SearchFormInput } from '@/components/search/Search';
 import { findBookBySearchString } from '@/lib/actions/book';
 import BookHydrated from '@/types/BookHydrated';
 import { useEffect, useRef, useState } from 'react';
 
 export default function SearchPage() {
   const [books, setBooks] = useState<Array<BookHydrated>>();
+  const [isSearching, setIsSearching] = useState(false);
 
-  const onSearch: SearchFormParams['onSearch'] = async (searchString) => {
-    const books = await findBookBySearchString(searchString);
+  const onSearch = async ({ input }: SearchFormInput) => {
+    setIsSearching(true);
+    const books = await findBookBySearchString(input);
     setBooks(books);
+    setIsSearching(false);
     return;
   };
 
@@ -28,7 +31,11 @@ export default function SearchPage() {
       <h1 className="my-4">Search</h1>
       <hr className="mt-4 mb-8 border-customPalette-300" />
 
-      <SearchForm onSearch={onSearch} ref={inputElement} />
+      <Search
+        onSubmit={onSearch}
+        isSearching={isSearching}
+        ref={inputElement}
+      />
       <div className="my-8">
         {books && (
           <>
