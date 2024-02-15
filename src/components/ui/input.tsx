@@ -12,6 +12,7 @@ const inputVariants = cva(
       variant: {
         default: '',
         error: 'border-red-500',
+        ghost: 'border-none shadow-none focus-visible:ring-transparent',
       },
     },
   },
