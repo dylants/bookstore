@@ -15,6 +15,10 @@ export const Default: Story = {
   args: {},
 };
 
-export const error: Story = {
+export const Error: Story = {
   args: { variant: 'error' },
+};
+
+export const Ghost: Story = {
+  args: { variant: 'ghost' },
 };
