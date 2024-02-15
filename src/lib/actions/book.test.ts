@@ -15,25 +15,24 @@ describe('book actions', () => {
     it('should create a new book', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
+      prismaMock.bookSource.findUniqueOrThrow.mockResolvedValue(book1.vendor);
       prismaMock.book.create.mockResolvedValue(book1);
 
       const result = await createBook({
         ...book1,
         authors: 'author1',
         publisher: 'publisher2',
-        vendor: 'vendor3',
       });
 
       expect(prismaMock.author.findFirst).toHaveBeenCalledWith({
         where: { name: 'author1' },
       });
 
-      expect(prismaMock.bookSource.findFirst).toHaveBeenCalledTimes(2);
-      expect(prismaMock.bookSource.findFirst).toHaveBeenNthCalledWith(1, {
+      expect(prismaMock.bookSource.findFirst).toHaveBeenCalledWith({
         where: { name: 'publisher2' },
       });
-      expect(prismaMock.bookSource.findFirst).toHaveBeenNthCalledWith(2, {
-        where: { name: 'vendor3' },
+      expect(prismaMock.bookSource.findUniqueOrThrow).toHaveBeenCalledWith({
+        where: { id: book1.vendorId },
       });
 
       expect(prismaMock.book.create).toHaveBeenCalledWith({
@@ -63,13 +62,8 @@ describe('book actions', () => {
           },
           title: book1.title,
           vendor: {
-            connectOrCreate: {
-              create: {
-                isPublisher: false,
-                isVendor: true,
-                name: 'vendor3',
-              },
-              where: { id: -1 },
+            connect: {
+              id: book1.vendorId,
             },
           },
         },

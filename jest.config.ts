@@ -12,11 +12,13 @@ const config: Config = {
     'src/**/*.ts*',
     '!src/app/**/layout.tsx',
     '!src/app/**/page.tsx',
+    '!src/app/**/*Container.tsx',
     '!src/lib/fakes/**',
     '!src/types/**',
   ],
   coveragePathIgnorePatterns: [
     'src/components/*',
+    'src/lib/logger.ts',
     'src/lib/prisma.ts',
     'src/lib/tailwind-utils.ts',
   ],
