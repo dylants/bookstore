@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   return Response.json(response);
 }
 
-const postSchema: toZod<BookCreateInput> = z.object({
+export const BOOK_CREATE_INPUT_SCHEMA: toZod<BookCreateInput> = z.object({
   authors: z.string(),
   // toZod does not handle enums, so avoid this typecheck
   format: z.nativeEnum(Format) as never,
@@ -70,7 +70,7 @@ const postSchema: toZod<BookCreateInput> = z.object({
 export async function POST(request: NextRequest) {
   const book = await request.json();
 
-  const validatedFields = postSchema.safeParse(book);
+  const validatedFields = BOOK_CREATE_INPUT_SCHEMA.safeParse(book);
 
   if (!validatedFields.success) {
     const message = fromZodError(validatedFields.error);

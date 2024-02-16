@@ -10,7 +10,7 @@ import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookHydrated from '@/types/BookHydrated';
-import { Prisma } from '@prisma/client';
+import { Book, Prisma } from '@prisma/client';
 
 export async function buildAuthorsInput(
   authors: string,
@@ -191,4 +191,19 @@ export async function findBookBySearchString(
   logger.trace('books found: %j', books);
 
   return books;
+}
+
+export async function getBook(
+  isbn13: Book['isbn13'],
+): Promise<BookHydrated | null> {
+  const book = await prisma.book.findUnique({
+    include: {
+      authors: true,
+      publisher: true,
+      vendor: true,
+    },
+    where: { isbn13 },
+  });
+
+  return book;
 }
