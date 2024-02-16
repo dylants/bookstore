@@ -1,5 +1,5 @@
-import { BOOK_CREATE_INPUT_SCHEMA } from '@/app/api/books/route';
 import { getBook, upsertBook } from '@/lib/actions/book';
+import { BOOK_CREATE_INPUT_SCHEMA } from '@/lib/schemas/book';
 import { NextRequest } from 'next/server';
 import { fromZodError } from 'zod-validation-error';
 
