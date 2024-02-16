@@ -69,9 +69,9 @@ export async function buildPublisherInput(
   }
 }
 
-export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
-  logger.trace('createBook, book: %j', book);
-
+async function buildCreateUpdateBookData(
+  book: BookCreateInput,
+): Promise<Prisma.BookCreateInput | Prisma.BookUpdateInput> {
   const authors = await buildAuthorsInput(book.authors);
 
   const publisher = await buildPublisherInput(book.publisher);
@@ -82,22 +82,32 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
     },
   });
 
-  const createdBook = await prisma.book.create({
-    data: {
-      authors,
-      format: book.format,
-      genre: book.genre,
-      imageUrl: book.imageUrl,
-      isbn13: book.isbn13,
-      publishedDate: book.publishedDate,
-      publisher,
-      title: book.title,
-      vendor: {
-        connect: {
-          id: vendor.id,
-        },
+  return {
+    authors,
+    format: book.format,
+    genre: book.genre,
+    imageUrl: book.imageUrl,
+    isbn13: book.isbn13,
+    publishedDate: book.publishedDate,
+    publisher,
+    title: book.title,
+    vendor: {
+      connect: {
+        id: vendor.id,
       },
     },
+  };
+}
+
+export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
+  logger.trace('createBook, book: %j', book);
+
+  const data = (await buildCreateUpdateBookData(
+    book,
+  )) as Prisma.BookCreateInput;
+
+  const createdBook = await prisma.book.create({
+    data,
     include: {
       authors: true,
       publisher: true,
@@ -108,6 +118,27 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('created book in DB: %j', createdBook);
 
   return createdBook;
+}
+
+export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
+  logger.trace('upsertBook, book: %j', book);
+
+  const data = await buildCreateUpdateBookData(book);
+
+  const upsertedBook = await prisma.book.upsert({
+    create: data as Prisma.BookCreateInput,
+    include: {
+      authors: true,
+      publisher: true,
+      vendor: true,
+    },
+    update: data as Prisma.BookUpdateInput,
+    where: { isbn13: book.isbn13 },
+  });
+
+  logger.trace('upsertedBook in DB: %j', upsertedBook);
+
+  return upsertedBook;
 }
 
 export interface GetBooksParams {

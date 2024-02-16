@@ -4,6 +4,7 @@ import {
   createBook,
   findBookBySearchString,
   getBooks,
+  upsertBook,
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { randomBookHydrated } from '@/lib/fakes/book';
@@ -140,6 +141,90 @@ describe('book actions', () => {
           authors: true,
           publisher: true,
           vendor: true,
+        },
+      });
+
+      expect(result).toEqual(book1);
+    });
+  });
+
+  describe('upsertBook', () => {
+    it('should provide the correct data', async () => {
+      prismaMock.author.findFirst.mockResolvedValue(null);
+      prismaMock.bookSource.findFirst.mockResolvedValue(null);
+      prismaMock.bookSource.findUniqueOrThrow.mockResolvedValue(book1.vendor);
+      prismaMock.book.upsert.mockResolvedValue(book1);
+
+      const result = await upsertBook({
+        ...book1,
+        authors: 'author1',
+        publisher: 'publisher2',
+      });
+
+      expect(prismaMock.book.upsert).toHaveBeenCalledWith({
+        create: {
+          authors: {
+            connect: [],
+            create: [
+              {
+                name: 'author1',
+              },
+            ],
+          },
+          format: book1.format,
+          genre: book1.genre,
+          imageUrl: book1.imageUrl,
+          isbn13: book1.isbn13,
+          publishedDate: book1.publishedDate,
+          publisher: {
+            create: {
+              isPublisher: true,
+              isVendor: false,
+              name: 'publisher2',
+            },
+          },
+          title: book1.title,
+          vendor: {
+            connect: {
+              id: book1.vendorId,
+            },
+          },
+        },
+        include: {
+          authors: true,
+          publisher: true,
+          vendor: true,
+        },
+        update: {
+          authors: {
+            connect: [],
+            create: [
+              {
+                name: 'author1',
+              },
+            ],
+          },
+          format: book1.format,
+          genre: book1.genre,
+          imageUrl: book1.imageUrl,
+          isbn13: book1.isbn13,
+          publishedDate: book1.publishedDate,
+          publisher: {
+            create: {
+              isPublisher: true,
+              isVendor: false,
+              name: 'publisher2',
+            },
+          },
+          title: book1.title,
+          vendor: {
+            connect: {
+              id: book1.vendorId,
+            },
+          },
+        },
+        where: {
+          isbn13: book1.isbn13,
         },
       });
 
