@@ -6475,6 +6475,7 @@ __metadata:
     tailwind-merge: "npm:2.2.1"
     tailwindcss: "npm:3.3.6"
     tailwindcss-animate: "npm:1.0.7"
+    tozod: "npm:3.0.0"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.3.3"
     zod: "npm:3.22.4"
@@ -15624,6 +15625,15 @@ __metadata:
     universalify: "npm:^0.2.0"
     url-parse: "npm:^1.5.3"
   checksum: 4fc0433a0cba370d57c4b240f30440c848906dee3180bb6e85033143c2726d322e7e4614abb51d42d111ebec119c4876ed8d7247d4113563033eebbc1739c831
+  languageName: node
+  linkType: hard
+
+"tozod@npm:3.0.0":
+  version: 3.0.0
+  resolution: "tozod@npm:3.0.0"
+  peerDependencies:
+    zod: ^3.0.0-alpha.2
+  checksum: 914eea2b4238060aba339556d161a2c04a0302025afacf37b47f23bb3ba091f6dc80c84794fc98f4bb909a17a20a03b1adc588f4ef93e710cfd2a3fcc10a2f4f
   languageName: node
   linkType: hard
 
