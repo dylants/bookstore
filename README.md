@@ -31,6 +31,12 @@ Install PostgreSQL and populate the `.env` file with the correct `DATABASE_URL` 
 - Prisma and PostgreSQL: https://www.prisma.io/docs/orm/overview/databases/postgresql
 - .env files: https://www.prisma.io/docs/orm/more/development-environment/environment-variables/env-files
 
+The `DATABASE_URL` should be populated as such:
+
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/bookstore"
+```
+
 ### Run Migrations
 
 To run migrations (note: this will automatically run the [seed script](prisma/seed.ts) after migrations):
