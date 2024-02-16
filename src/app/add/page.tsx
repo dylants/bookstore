@@ -13,7 +13,7 @@ import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReloadIcon } from '@radix-ui/react-icons';
-import { createBook } from '@/lib/actions/book';
+import { upsertBook } from '@/lib/actions/book';
 import useExternalBookSearch, {
   ExternalBookSearchResult,
 } from '@/lib/search/external/useExternalBookSearch';
@@ -91,7 +91,7 @@ export default function AddBookPage() {
         return;
       }
 
-      await createBook({
+      await upsertBook({
         ...book,
         // TODO fixme
         format: Format.HARDCOVER,
