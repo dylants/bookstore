@@ -1,3 +1,4 @@
+import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import { BookSource } from '@prisma/client';
 
@@ -15,6 +16,7 @@ export function randomBookSource(): BookSource {
   }
 
   return {
+    ...randomCreatedAtUpdatedAt(),
     id: faker.number.int(),
     isPublisher,
     isVendor,

@@ -13,9 +13,11 @@ datasource db {
 
 model Book {
   id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime? @updatedAt @db.Timestamptz(3)
   isbn13        BigInt    @unique
   title         String
-  publishedDate DateTime?
+  publishedDate DateTime? @db.Timestamptz(1)
   imageUrl      String?
 
   authors Author[]
@@ -31,14 +33,18 @@ model Book {
 }
 
 model Author {
-  id       Int     @id @default(autoincrement())
-  name     String
-  imageUrl String?
-  books    Book[]
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  name      String
+  imageUrl  String?
+  books     Book[]
 }
 
 model BookSource {
-  id          Int     @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime? @updatedAt @db.Timestamptz(3)
   name        String
   isPublisher Boolean
   isVendor    Boolean

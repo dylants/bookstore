@@ -62,7 +62,9 @@ describe('/api/books/[isbn]', () => {
 
       expect(mockUpsertBook).toHaveBeenCalledWith({
         ...validPostBody,
+        createdAt: book.createdAt?.toISOString(),
         publishedDate: book.publishedDate?.toISOString(),
+        updatedAt: book.updatedAt?.toISOString(),
       });
       expect(res.status).toEqual(200);
     });

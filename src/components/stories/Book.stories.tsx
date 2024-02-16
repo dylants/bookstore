@@ -1,5 +1,6 @@
 import Book from '@/components/Book';
 import { randomBookHydrated } from '@/lib/fakes/book';
+import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -38,6 +39,7 @@ export const MultipleAuthors: Story = {
       authors: [
         ...book.authors,
         {
+          ...randomCreatedAtUpdatedAt(),
           id: faker.number.int(),
           imageUrl: null,
           name: faker.person.fullName(),
