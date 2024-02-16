@@ -1,12 +1,13 @@
 import {
   buildAuthorsInput,
+  buildPublisherInput,
   createBook,
   findBookBySearchString,
   getBooks,
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { randomBookHydrated } from '@/lib/fakes/book';
-import { Author } from '@prisma/client';
+import { Author, BookSource } from '@prisma/client';
 
 describe('book actions', () => {
   const book1 = randomBookHydrated();
@@ -56,6 +57,32 @@ describe('book actions', () => {
     });
   });
 
+  describe('buildPublisherInput', () => {
+    it('should return valid input for a publisher that exists', async () => {
+      prismaMock.bookSource.findFirst.mockResolvedValue({
+        id: 1,
+      } as BookSource);
+
+      const input = await buildPublisherInput('publisher one');
+      expect(input).toEqual({
+        connect: { id: 1 },
+      });
+    });
+
+    it('should return valid input for a publisher that does NOT exist', async () => {
+      prismaMock.bookSource.findFirst.mockResolvedValue(null);
+
+      const input = await buildPublisherInput('publisher one');
+      expect(input).toEqual({
+        create: {
+          isPublisher: true,
+          isVendor: false,
+          name: 'publisher one',
+        },
+      });
+    });
+  });
+
   describe('createBook', () => {
     it('should create a new book', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
@@ -96,13 +123,10 @@ describe('book actions', () => {
           isbn13: book1.isbn13,
           publishedDate: book1.publishedDate,
           publisher: {
-            connectOrCreate: {
-              create: {
-                isPublisher: true,
-                isVendor: false,
-                name: 'publisher2',
-              },
-              where: { id: -1 },
+            create: {
+              isPublisher: true,
+              isVendor: false,
+              name: 'publisher2',
             },
           },
           title: book1.title,
