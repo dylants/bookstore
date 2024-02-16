@@ -1,8 +1,11 @@
-import { GET } from '@/app/api/books/route';
+import { GET, POST } from '@/app/api/books/route';
+import { randomBook } from '@/lib/fakes/book';
 import { NextRequest } from 'next/server';
 
+const mockCreateBook = jest.fn();
 const mockGetBooks = jest.fn();
 jest.mock('../../../lib/actions/book', () => ({
+  createBook: (...args: unknown[]) => mockCreateBook(...args),
   getBooks: (...args: unknown[]) => mockGetBooks(...args),
 }));
 
@@ -15,6 +18,7 @@ function buildBooksUrl(query?: string): string {
 
 describe('/api/books', () => {
   beforeEach(() => {
+    mockCreateBook.mockReset();
     mockGetBooks.mockReset();
   });
 
@@ -81,6 +85,106 @@ describe('/api/books', () => {
       expect(res.status).toEqual(400);
       expect(res.statusText).toEqual(
         'Validation error: Expected number, received nan at "first"',
+      );
+    });
+  });
+
+  describe('POST', () => {
+    const book = randomBook();
+    const serializableBook = {
+      ...book,
+      isbn13: book.isbn13.toString(),
+    };
+    const validPostBody = {
+      ...serializableBook,
+      authors: 'Some Author',
+      publisher: 'A Publisher',
+    };
+
+    beforeEach(() => {
+      mockCreateBook.mockReturnValue(serializableBook);
+    });
+
+    it('should return the created book with valid input', async () => {
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify(validPostBody),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(200);
+    });
+
+    it('should fail with missing params', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { title, ...rest } = validPostBody;
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify(rest),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(400);
+      expect(res.statusText).toEqual('Validation error: Required at "title"');
+    });
+
+    it('should fail with invalid format', async () => {
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify({
+          ...validPostBody,
+          format: 'hello',
+        }),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(400);
+      expect(res.statusText).toMatch(/Validation error: Invalid enum value/);
+    });
+
+    it('should fail with invalid genre', async () => {
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify({
+          ...validPostBody,
+          genre: 'hello',
+        }),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(400);
+      expect(res.statusText).toMatch(/Validation error: Invalid enum value/);
+    });
+
+    it('should fail with invalid isbn13', async () => {
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify({
+          ...validPostBody,
+          isbn13: 'hello',
+        }),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(400);
+      expect(res.statusText).toEqual(
+        'Validation error: Expected bigint, received string at "isbn13"',
+      );
+    });
+
+    it('should fail with invalid publishedDate', async () => {
+      const req = new NextRequest(new Request(buildBooksUrl()), {
+        body: JSON.stringify({
+          ...validPostBody,
+          publishedDate: 'hello',
+        }),
+        method: 'POST',
+      });
+      const res = await POST(req);
+
+      expect(res.status).toEqual(400);
+      expect(res.statusText).toEqual(
+        'Validation error: Invalid date at "publishedDate"',
       );
     });
   });
