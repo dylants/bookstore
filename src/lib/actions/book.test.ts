@@ -1,15 +1,60 @@
 import {
+  buildAuthorsInput,
   createBook,
   findBookBySearchString,
   getBooks,
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { randomBookHydrated } from '@/lib/fakes/book';
+import { Author } from '@prisma/client';
 
 describe('book actions', () => {
   const book1 = randomBookHydrated();
   const book2 = randomBookHydrated();
   const book3 = randomBookHydrated();
+
+  describe('buildAuthorsInput', () => {
+    it('should return valid input for a single author that exists', async () => {
+      prismaMock.author.findFirst.mockResolvedValue({
+        id: 1,
+      } as Author);
+
+      const input = await buildAuthorsInput('author one');
+      expect(input).toEqual({
+        connect: [{ id: 1 }],
+        create: [],
+      });
+    });
+
+    it('should return valid input for a single author that does NOT exist', async () => {
+      prismaMock.author.findFirst.mockResolvedValue(null);
+
+      const input = await buildAuthorsInput('author one');
+      expect(input).toEqual({
+        connect: [],
+        create: [{ name: 'author one' }],
+      });
+    });
+
+    it('should return valid input for multiple authors', async () => {
+      prismaMock.author.findFirst.mockResolvedValueOnce({
+        id: 1,
+      } as Author);
+      prismaMock.author.findFirst.mockResolvedValueOnce(null);
+      prismaMock.author.findFirst.mockResolvedValueOnce({
+        id: 3,
+      } as Author);
+      prismaMock.author.findFirst.mockResolvedValueOnce(null);
+
+      const input = await buildAuthorsInput(
+        'author one, author 2, author 3, author 4',
+      );
+      expect(input).toEqual({
+        connect: [{ id: 1 }, { id: 3 }],
+        create: [{ name: 'author 2' }, { name: 'author 4' }],
+      });
+    });
+  });
 
   describe('createBook', () => {
     it('should create a new book', async () => {
@@ -38,12 +83,12 @@ describe('book actions', () => {
       expect(prismaMock.book.create).toHaveBeenCalledWith({
         data: {
           authors: {
-            connectOrCreate: {
-              create: {
+            connect: [],
+            create: [
+              {
                 name: 'author1',
               },
-              where: { id: -1 },
-            },
+            ],
           },
           format: book1.format,
           genre: book1.genre,

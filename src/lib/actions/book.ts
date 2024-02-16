@@ -10,15 +10,44 @@ import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookHydrated from '@/types/BookHydrated';
+import { Prisma } from '@prisma/client';
+
+export async function buildAuthorsInput(
+  authors: string,
+): Promise<Prisma.AuthorCreateNestedManyWithoutBooksInput> {
+  const authorStrings = authors.split(',').map((a) => a.trim());
+  const authorsConnectInput: Prisma.AuthorWhereUniqueInput[] = [];
+  const authorsCreateInput: Prisma.AuthorCreateWithoutBooksInput[] = [];
+
+  await Promise.all(
+    authorStrings.map(async (authorString) => {
+      const author = await prisma.author.findFirst({
+        where: { name: authorString },
+      });
+
+      if (author) {
+        authorsConnectInput.push({
+          id: author.id,
+        });
+      } else {
+        authorsCreateInput.push({
+          name: authorString,
+        });
+      }
+    }),
+  );
+  const authorsInput: Prisma.AuthorCreateNestedManyWithoutBooksInput = {
+    connect: authorsConnectInput,
+    create: authorsCreateInput,
+  };
+
+  return authorsInput;
+}
 
 export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('createBook, book: %j', book);
 
-  // TODO how do we find multiple authors?
-  const authorString = book.authors.split(',')[0].trim();
-  const author = await prisma.author.findFirst({
-    where: { name: authorString },
-  });
+  const authorsInput = await buildAuthorsInput(book.authors);
 
   const publisher = await prisma.bookSource.findFirst({
     where: { name: book.publisher },
@@ -32,15 +61,7 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
 
   const createdBook = await prisma.book.create({
     data: {
-      authors: {
-        connectOrCreate: {
-          create: {
-            name: authorString,
-          },
-          // TODO fixme
-          where: { id: author?.id ?? -1 },
-        },
-      },
+      authors: authorsInput,
       format: book.format,
       genre: book.genre,
       imageUrl: book.imageUrl,
