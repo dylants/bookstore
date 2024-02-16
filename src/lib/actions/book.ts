@@ -44,14 +44,37 @@ export async function buildAuthorsInput(
   return authorsInput;
 }
 
+export async function buildPublisherInput(
+  publisherString: string,
+): Promise<Prisma.BookSourceCreateNestedOneWithoutBooksInput> {
+  const publisher = await prisma.bookSource.findFirst({
+    where: { name: publisherString },
+  });
+
+  if (publisher) {
+    return {
+      connect: {
+        id: publisher.id,
+      },
+    };
+  } else {
+    return {
+      create: {
+        isPublisher: true,
+        // TODO we need better logic to determine if vendor
+        isVendor: false,
+        name: publisherString,
+      },
+    };
+  }
+}
+
 export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('createBook, book: %j', book);
 
-  const authorsInput = await buildAuthorsInput(book.authors);
+  const authors = await buildAuthorsInput(book.authors);
 
-  const publisher = await prisma.bookSource.findFirst({
-    where: { name: book.publisher },
-  });
+  const publisher = await buildPublisherInput(book.publisher);
 
   const vendor = await prisma.bookSource.findUniqueOrThrow({
     where: {
@@ -61,24 +84,13 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
 
   const createdBook = await prisma.book.create({
     data: {
-      authors: authorsInput,
+      authors,
       format: book.format,
       genre: book.genre,
       imageUrl: book.imageUrl,
       isbn13: book.isbn13,
       publishedDate: book.publishedDate,
-      publisher: {
-        connectOrCreate: {
-          create: {
-            // TODO we need better logic to determine if publisher/vendor
-            isPublisher: true,
-            isVendor: false,
-            name: book.publisher,
-          },
-          // TODO fixme
-          where: { id: publisher?.id ?? -1 },
-        },
-      },
+      publisher,
       title: book.title,
       vendor: {
         connect: {
