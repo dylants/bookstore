@@ -14,6 +14,7 @@ const config: Config = {
     '!src/app/**/page.tsx',
     '!src/app/**/*Container.tsx',
     '!src/lib/fakes/**',
+    '!src/lib/schemas/**',
     '!src/types/**',
   ],
   coveragePathIgnorePatterns: [

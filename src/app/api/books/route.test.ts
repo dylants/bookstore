@@ -112,6 +112,10 @@ describe('/api/books', () => {
       });
       const res = await POST(req);
 
+      expect(mockCreateBook).toHaveBeenCalledWith({
+        ...validPostBody,
+        publishedDate: book.publishedDate?.toISOString(),
+      });
       expect(res.status).toEqual(200);
     });
 

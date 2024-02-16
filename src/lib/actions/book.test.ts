@@ -3,6 +3,7 @@ import {
   buildPublisherInput,
   createBook,
   findBookBySearchString,
+  getBook,
   getBooks,
   upsertBook,
 } from '@/lib/actions/book';
@@ -291,6 +292,25 @@ describe('book actions', () => {
         },
       });
       expect(result).toEqual([book1, book2, book3]);
+    });
+  });
+
+  describe('getBook', () => {
+    it('should provide the correct input to prisma', async () => {
+      prismaMock.book.findUnique.mockResolvedValue(book1);
+
+      const isbn13 = BigInt(1);
+      const result = await getBook(isbn13);
+
+      expect(prismaMock.book.findUnique).toHaveBeenCalledWith({
+        include: {
+          authors: true,
+          publisher: true,
+          vendor: true,
+        },
+        where: { isbn13 },
+      });
+      expect(result).toEqual(book1);
     });
   });
 });
