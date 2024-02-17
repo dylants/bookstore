@@ -114,7 +114,9 @@ describe('/api/books', () => {
 
       expect(mockCreateBook).toHaveBeenCalledWith({
         ...validPostBody,
+        createdAt: book.createdAt?.toISOString(),
         publishedDate: book.publishedDate?.toISOString(),
+        updatedAt: book.updatedAt?.toISOString(),
       });
       expect(res.status).toEqual(200);
     });

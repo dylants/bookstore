@@ -1,4 +1,6 @@
+import { randomAuthor } from '@/lib/fakes/author';
 import { randomBookSource } from '@/lib/fakes/book-source';
+import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
 import { Book, Format, Genre } from '@prisma/client';
@@ -26,6 +28,7 @@ export const randomIsbn13 = (): bigint =>
 
 export function randomBook(): Book {
   return {
+    ...randomCreatedAtUpdatedAt(),
     format: randomFormat(),
     genre: randomGenre(),
     id: faker.number.int(),
@@ -43,9 +46,8 @@ export function randomBookHydrated(): BookHydrated {
   const vendor = randomBookSource();
 
   return {
-    authors: [
-      { id: faker.number.int(), imageUrl: null, name: faker.person.fullName() },
-    ],
+    ...randomCreatedAtUpdatedAt(),
+    authors: [randomAuthor()],
     format: randomFormat(),
     genre: randomGenre(),
     id: faker.number.int(),

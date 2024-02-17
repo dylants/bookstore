@@ -1,6 +1,6 @@
+import { randomAuthor } from '@/lib/fakes/author';
 import { randomBook } from '@/lib/fakes/book';
 import { randomBookSource } from '@/lib/fakes/book-source';
-import { faker } from '@faker-js/faker';
 import { Author, BookSource, PrismaClient } from '@prisma/client';
 import _ from 'lodash';
 const prisma = new PrismaClient();
@@ -31,10 +31,10 @@ async function generateSources(num: number) {
 }
 
 async function generateAuthor() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, ...data } = randomAuthor();
   return await prisma.author.create({
-    data: {
-      name: faker.person.fullName(),
-    },
+    data,
   });
 }
 
@@ -54,23 +54,18 @@ async function generateBook(props: GenerateBookProps) {
     id: a.id,
   }));
 
-  const { format, genre, imageUrl, isbn13, publishedDate, title } =
-    randomBook();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, publisherId, vendorId, ...data } = randomBook();
 
   return await prisma.book.create({
     data: {
+      ...data,
       authors: {
         connect: authorsConnect,
       },
-      format,
-      genre,
-      imageUrl,
-      isbn13,
-      publishedDate,
       publisher: {
         connect: props.publisher,
       },
-      title,
       vendor: {
         connect: props.vendor,
       },
