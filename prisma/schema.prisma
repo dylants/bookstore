@@ -22,14 +22,14 @@ model Book {
 
   authors Author[]
 
-  publisher   BookSource @relation(fields: [publisherId], references: [id], name: "publisher")
+  publisher   BookSource @relation(fields: [publisherId], references: [id])
   publisherId Int
-
-  vendor   BookSource @relation(fields: [vendorId], references: [id], name: "vendor")
-  vendorId Int
 
   format Format
   genre  Genre
+
+  quantity     Int           @default(0)
+  invoiceItems InvoiceItem[]
 }
 
 model Author {
@@ -42,15 +42,45 @@ model Author {
 }
 
 model BookSource {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+  name      String
+
+  isPublisher Boolean
+  books       Book[]
+
+  isVendor           Boolean
+  accountNumber      String?
+  discountPercentage Decimal?  @db.Decimal(5, 4)
+  invoices           Invoice[]
+}
+
+model Invoice {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime? @updatedAt @db.Timestamptz(3)
-  name        String
-  isPublisher Boolean
-  isVendor    Boolean
+  invoiceId   String
+  invoiceDate DateTime  @db.Timestamptz(1)
+  processed   Boolean   @default(false)
 
-  books       Book[] @relation("publisher")
-  vendorBooks Book[] @relation("vendor")
+  vendor   BookSource @relation(fields: [vendorId], references: [id])
+  vendorId Int
+
+  invoiceItems InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime? @updatedAt @db.Timestamptz(3)
+  costInCents Int
+
+  book   Book @relation(fields: [bookId], references: [id])
+  bookId Int
+
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+  invoiceId Int
 }
 
 enum Format {

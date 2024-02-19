@@ -55,7 +55,7 @@ async function generateBook(props: GenerateBookProps) {
   }));
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, publisherId, vendorId, ...data } = randomBook();
+  const { id, publisherId, ...data } = randomBook();
 
   return await prisma.book.create({
     data: {
@@ -65,9 +65,6 @@ async function generateBook(props: GenerateBookProps) {
       },
       publisher: {
         connect: props.publisher,
-      },
-      vendor: {
-        connect: props.vendor,
       },
     },
   });

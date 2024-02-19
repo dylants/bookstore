@@ -17,6 +17,9 @@ export function randomBookSource(): BookSource {
 
   return {
     ...randomCreatedAtUpdatedAt(),
+    // TODO separate out publisher from vendor
+    accountNumber: null,
+    discountPercentage: null,
     id: faker.number.int(),
     isPublisher,
     isVendor,

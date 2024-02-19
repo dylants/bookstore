@@ -89,7 +89,6 @@ describe('book actions', () => {
     it('should create a new book', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
-      prismaMock.bookSource.findUniqueOrThrow.mockResolvedValue(book1.vendor);
       prismaMock.book.create.mockResolvedValue(book1);
 
       const result = await createBook({
@@ -104,9 +103,6 @@ describe('book actions', () => {
 
       expect(prismaMock.bookSource.findFirst).toHaveBeenCalledWith({
         where: { name: 'publisher2' },
-      });
-      expect(prismaMock.bookSource.findUniqueOrThrow).toHaveBeenCalledWith({
-        where: { id: book1.vendorId },
       });
 
       expect(prismaMock.book.create).toHaveBeenCalledWith({
@@ -131,17 +127,12 @@ describe('book actions', () => {
               name: 'publisher2',
             },
           },
+          quantity: book1.quantity,
           title: book1.title,
-          vendor: {
-            connect: {
-              id: book1.vendorId,
-            },
-          },
         },
         include: {
           authors: true,
           publisher: true,
-          vendor: true,
         },
       });
 
@@ -153,7 +144,6 @@ describe('book actions', () => {
     it('should provide the correct data', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
-      prismaMock.bookSource.findUniqueOrThrow.mockResolvedValue(book1.vendor);
       prismaMock.book.upsert.mockResolvedValue(book1);
 
       const result = await upsertBook({
@@ -184,17 +174,12 @@ describe('book actions', () => {
               name: 'publisher2',
             },
           },
+          quantity: book1.quantity,
           title: book1.title,
-          vendor: {
-            connect: {
-              id: book1.vendorId,
-            },
-          },
         },
         include: {
           authors: true,
           publisher: true,
-          vendor: true,
         },
         update: {
           authors: {
@@ -217,12 +202,8 @@ describe('book actions', () => {
               name: 'publisher2',
             },
           },
+          quantity: book1.quantity,
           title: book1.title,
-          vendor: {
-            connect: {
-              id: book1.vendorId,
-            },
-          },
         },
         where: {
           isbn13: book1.isbn13,
@@ -282,7 +263,6 @@ describe('book actions', () => {
         include: {
           authors: true,
           publisher: true,
-          vendor: true,
         },
         where: {
           OR: [
@@ -306,7 +286,6 @@ describe('book actions', () => {
         include: {
           authors: true,
           publisher: true,
-          vendor: true,
         },
         where: { isbn13 },
       });

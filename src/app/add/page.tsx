@@ -86,6 +86,7 @@ export default function AddBookPage() {
 
   const onSubmit: SubmitHandler<AddBookFormInput> = useCallback(
     async (book) => {
+      // TODO fixme
       if (!vendorId) {
         setError(`root.${ERROR_KEY_VENDOR}`, { type: 'required' });
         return;
@@ -99,7 +100,8 @@ export default function AddBookPage() {
         genre: Genre.FANTASY,
         isbn13: BigInt(book.isbn13),
         publishedDate: new Date(book.publishedDate),
-        vendorId,
+        // TODO fixme
+        quantity: 0,
       });
       reset();
       setLookupBook(null);

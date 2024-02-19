@@ -76,12 +76,6 @@ async function buildCreateUpdateBookData(
 
   const publisher = await buildPublisherInput(book.publisher);
 
-  const vendor = await prisma.bookSource.findUniqueOrThrow({
-    where: {
-      id: book.vendorId,
-    },
-  });
-
   return {
     authors,
     format: book.format,
@@ -90,12 +84,8 @@ async function buildCreateUpdateBookData(
     isbn13: book.isbn13,
     publishedDate: book.publishedDate,
     publisher,
+    quantity: book.quantity,
     title: book.title,
-    vendor: {
-      connect: {
-        id: vendor.id,
-      },
-    },
   };
 }
 
@@ -111,7 +101,6 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
     include: {
       authors: true,
       publisher: true,
-      vendor: true,
     },
   });
 
@@ -130,7 +119,6 @@ export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
     include: {
       authors: true,
       publisher: true,
-      vendor: true,
     },
     update: data as Prisma.BookUpdateInput,
     where: { isbn13: book.isbn13 },
@@ -160,7 +148,6 @@ export async function getBooks({
     include: {
       authors: true,
       publisher: true,
-      vendor: true,
     },
   });
 
@@ -182,7 +169,6 @@ export async function findBookBySearchString(
     include: {
       authors: true,
       publisher: true,
-      vendor: true,
     },
     where: {
       OR: [{ authors: { some: { name: { search } } } }, { title: { search } }],
@@ -200,7 +186,6 @@ export async function getBook(
     include: {
       authors: true,
       publisher: true,
-      vendor: true,
     },
     where: { isbn13 },
   });
