@@ -24,6 +24,6 @@ export const BOOK_CREATE_INPUT_SCHEMA: toZod<BookCreateInput> = z.object({
     .pipe(z.bigint()) as unknown as z.ZodBigInt,
   publishedDate: z.coerce.date().nullable(),
   publisher: z.string(),
+  quantity: z.number(),
   title: z.string(),
-  vendorId: z.number(),
 });

@@ -36,14 +36,13 @@ export function randomBook(): Book {
     isbn13: randomIsbn13(),
     publishedDate: faker.date.past(),
     publisherId: faker.number.int(),
+    quantity: 0,
     title: faker.music.songName(),
-    vendorId: faker.number.int(),
   };
 }
 
 export function randomBookHydrated(): BookHydrated {
   const publisher = randomBookSource();
-  const vendor = randomBookSource();
 
   return {
     ...randomCreatedAtUpdatedAt(),
@@ -56,8 +55,7 @@ export function randomBookHydrated(): BookHydrated {
     publishedDate: faker.date.past(),
     publisher,
     publisherId: publisher.id,
+    quantity: 0,
     title: faker.music.songName(),
-    vendor,
-    vendorId: vendor.id,
   };
 }
