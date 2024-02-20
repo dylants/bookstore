@@ -77,6 +77,19 @@ Reset the database, re-run migrations, and re-seed the data:
 $ yarn db:reset
 ```
 
+#### Overrides
+
+The seed script provides values for the number of entities to create. These can be overridden via the environment variables:
+
+```
+SEED_NUM_VENDORS
+SEED_NUM_PUBLISHERS
+SEED_NUM_AUTHORS
+SEED_NUM_BOOKS
+```
+
+For instance, to set the number of Books to create to 5, set the environment variable `SEED_NUM_BOOKS=5` prior to running the seed script.
+
 ## Logging
 
 [Pino](https://github.com/pinojs/pino) logger is setup to use within the app. Configuration can be found in the [logger.ts](src/lib/logger.ts) file.
