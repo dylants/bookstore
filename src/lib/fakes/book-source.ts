@@ -1,28 +1,32 @@
 import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
-import { BookSource } from '@prisma/client';
+import { BookSource, Prisma } from '@prisma/client';
 
-export function randomBookSource(): BookSource {
-  let isPublisher = faker.datatype.boolean();
-  let isVendor = faker.datatype.boolean();
-
-  // at least one of these must be true
-  if (!isPublisher && !isVendor) {
-    if (Math.random() > 0.5) {
-      isPublisher = true;
-    } else {
-      isVendor = true;
-    }
-  }
-
+export function randomPublisher(): BookSource {
   return {
     ...randomCreatedAtUpdatedAt(),
-    // TODO separate out publisher from vendor
     accountNumber: null,
     discountPercentage: null,
     id: faker.number.int(),
+    isPublisher: true,
+    isVendor: false,
+    name: faker.company.name(),
+  };
+}
+
+export function randomVendor(): BookSource {
+  // some vendors can also be publishers, so randomly assign isPublisher
+  const isPublisher = faker.datatype.boolean();
+
+  return {
+    ...randomCreatedAtUpdatedAt(),
+    accountNumber: faker.finance.accountNumber(),
+    discountPercentage: new Prisma.Decimal(
+      faker.number.float({ fractionDigits: 2 }),
+    ),
+    id: faker.number.int(),
     isPublisher,
-    isVendor,
+    isVendor: true,
     name: faker.company.name(),
   };
 }

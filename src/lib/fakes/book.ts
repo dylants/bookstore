@@ -1,5 +1,5 @@
 import { randomAuthor } from '@/lib/fakes/author';
-import { randomBookSource } from '@/lib/fakes/book-source';
+import { randomPublisher } from '@/lib/fakes/book-source';
 import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
@@ -42,7 +42,7 @@ export function randomBook(): Book {
 }
 
 export function randomBookHydrated(): BookHydrated {
-  const publisher = randomBookSource();
+  const publisher = randomPublisher();
 
   return {
     ...randomCreatedAtUpdatedAt(),

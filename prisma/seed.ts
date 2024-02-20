@@ -1,6 +1,6 @@
 import { randomAuthor } from '@/lib/fakes/author';
 import { randomBook } from '@/lib/fakes/book';
-import { randomBookSource } from '@/lib/fakes/book-source';
+import { randomPublisher, randomVendor } from '@/lib/fakes/book-source';
 import { Author, BookSource, PrismaClient } from '@prisma/client';
 import _ from 'lodash';
 const prisma = new PrismaClient();
@@ -9,25 +9,50 @@ const prisma = new PrismaClient();
 // ********************* BEGIN VARIABLES *********************
 // ***********************************************************
 
-const NUM_SOURCES = 10;
-const NUM_AUTHORS = 20;
-const NUM_BOOKS = 50;
+const NUM_VENDORS = checkForEnvVariable(process.env.SEED_NUM_VENDORS, 5);
+const NUM_PUBLISHERS = checkForEnvVariable(process.env.SEED_NUM_PUBLISHERS, 10);
+const NUM_AUTHORS = checkForEnvVariable(process.env.SEED_NUM_AUTHORS, 20);
+const NUM_BOOKS = checkForEnvVariable(process.env.SEED_NUM_BOOKS, 50);
 
 // ***********************************************************
 // ********************** END VARIABLES **********************
 // ***********************************************************
 
-async function generateSource() {
+function checkForEnvVariable(
+  envValue: string | undefined,
+  defaultValue: number,
+): number {
+  if (envValue) {
+    return _.toNumber(envValue);
+  } else {
+    return defaultValue;
+  }
+}
+
+async function generatePublisher() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = randomBookSource();
+  const { id, ...data } = randomPublisher();
   return await prisma.bookSource.create({
     data,
   });
 }
 
-async function generateSources(num: number) {
-  const sourcePromises = _.times(num, generateSource);
-  return await Promise.all(sourcePromises);
+async function generatePublishers(num: number) {
+  const publisherPromises = _.times(num, generatePublisher);
+  return await Promise.all(publisherPromises);
+}
+
+async function generateVendor() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, ...data } = randomVendor();
+  return await prisma.bookSource.create({
+    data,
+  });
+}
+
+async function generateVendors(num: number) {
+  const vendorPromises = _.times(num, generateVendor);
+  return await Promise.all(vendorPromises);
 }
 
 async function generateAuthor() {
@@ -71,8 +96,9 @@ async function generateBook(props: GenerateBookProps) {
 }
 
 async function main() {
-  const sources = await generateSources(NUM_SOURCES);
+  const vendors = await generateVendors(NUM_VENDORS);
   const authors = await generateAuthors(NUM_AUTHORS);
+  const publishers = await generatePublishers(NUM_PUBLISHERS);
 
   const bookPromises = _.times(NUM_BOOKS, () =>
     generateBook({
@@ -83,8 +109,8 @@ async function main() {
           ? 1
           : _.random(1, authors.length > 3 ? 3 : authors.length),
       ),
-      publisher: _.sample(sources) as BookSource,
-      vendor: _.sample(sources) as BookSource,
+      publisher: _.sample(publishers) as BookSource,
+      vendor: _.sample(vendors) as BookSource,
     }),
   );
   await Promise.all(bookPromises);
