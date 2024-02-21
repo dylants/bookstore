@@ -11,8 +11,8 @@ ADD COLUMN     "quantity" INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE "BookSource"
 ADD COLUMN     "accountNumber" TEXT,
 ADD COLUMN     "discountPercentage" DECIMAL(5,4),
-ADD CONSTRAINT "DiscountPercentageAboveZero" CHECK ("discountPercentage" > 0),
-ADD CONSTRAINT "DiscountPercentageBelowOne" CHECK ("discountPercentage" < 1);
+ADD CONSTRAINT "DiscountPercentageGreaterThanEqualToZero" CHECK ("discountPercentage" >= 0),
+ADD CONSTRAINT "DiscountPercentageLessThanEqualToOne" CHECK ("discountPercentage" <= 1);
 
 -- CreateTable
 CREATE TABLE "Invoice" (
