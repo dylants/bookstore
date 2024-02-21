@@ -6,7 +6,7 @@ export type CreatedAtUpdatedAt = {
   updatedAt: Date;
 };
 
-export function randomCreatedAtUpdatedAt(): CreatedAtUpdatedAt {
+export function fakeCreatedAtUpdatedAt(): CreatedAtUpdatedAt {
   const date = faker.date.past();
   let createdAt = new Date(date);
   const updatedAt = new Date(date);

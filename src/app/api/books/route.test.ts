@@ -1,5 +1,5 @@
 import { GET, POST } from '@/app/api/books/route';
-import { randomBook } from '@/lib/fakes/book';
+import { fakeBook } from '@/lib/fakes/book';
 import { NextRequest } from 'next/server';
 
 const mockCreateBook = jest.fn();
@@ -90,7 +90,7 @@ describe('/api/books', () => {
   });
 
   describe('POST', () => {
-    const book = randomBook();
+    const book = fakeBook();
     const serializableBook = {
       ...book,
       isbn13: book.isbn13.toString(),

@@ -1,8 +1,8 @@
 import { completeInvoice, createInvoice } from '@/lib/actions/invoice';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
-import { randomAuthor } from '@/lib/fakes/author';
-import { randomBook } from '@/lib/fakes/book';
-import { randomPublisher, randomVendor } from '@/lib/fakes/book-source';
+import { fakeAuthor } from '@/lib/fakes/author';
+import { fakeBook } from '@/lib/fakes/book';
+import { fakePublisher, fakeVendor } from '@/lib/fakes/book-source';
 import { fakeInvoice } from '@/lib/fakes/invoice';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import BookCreateInput from '@/types/BookCreateInput';
@@ -36,7 +36,7 @@ function checkForEnvVariable(
 
 async function generateVendor() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = randomVendor();
+  const { id, ...data } = fakeVendor();
   return await prisma.bookSource.create({
     data,
   });
@@ -49,7 +49,7 @@ async function generateVendors(num: number) {
 
 async function generateAuthor() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = randomAuthor();
+  const { id, ...data } = fakeAuthor();
   return await prisma.author.create({
     data,
   });
@@ -62,7 +62,7 @@ async function generateAuthors(num: number) {
 
 async function generatePublisher() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = randomPublisher();
+  const { id, ...data } = fakePublisher();
   return await prisma.bookSource.create({
     data,
   });
@@ -98,7 +98,7 @@ function buildBookCreateInput(
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, publisherId, createdAt, updatedAt, quantity, ...data } =
-    randomBook();
+    fakeBook();
 
   return {
     ...data,

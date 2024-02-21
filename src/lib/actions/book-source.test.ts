@@ -1,11 +1,11 @@
 import { getBookSources } from '@/lib/actions/book-source';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
-import { randomPublisher, randomVendor } from '@/lib/fakes/book-source';
+import { fakePublisher, fakeVendor } from '@/lib/fakes/book-source';
 
 describe('book-source actions', () => {
-  const bookSource1 = randomVendor();
-  const bookSource2 = randomPublisher();
-  const bookSource3 = randomPublisher();
+  const bookSource1 = fakeVendor();
+  const bookSource2 = fakePublisher();
+  const bookSource3 = fakePublisher();
 
   describe('getBookSources', () => {
     it('should get book sources when provided with default input', async () => {

@@ -1,4 +1,4 @@
-import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import { Invoice } from '@prisma/client';
 import { add } from 'date-fns';
@@ -10,7 +10,7 @@ export function fakeInvoice(isCompleted: boolean = false): Invoice {
     : null;
 
   return {
-    ...randomCreatedAtUpdatedAt(),
+    ...fakeCreatedAtUpdatedAt(),
     dateReceived,
     id: faker.number.int(),
     invoiceDate: faker.date.past(),

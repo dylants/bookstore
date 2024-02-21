@@ -1,5 +1,5 @@
 import { GET, PUT } from '@/app/api/books/[isbn]/route';
-import { randomBook } from '@/lib/fakes/book';
+import { fakeBook } from '@/lib/fakes/book';
 import { NextRequest } from 'next/server';
 
 const mockGetBook = jest.fn();
@@ -17,7 +17,7 @@ function buildBooksUrl(isbn: string): string {
 }
 
 describe('/api/books/[isbn]', () => {
-  const book = randomBook();
+  const book = fakeBook();
   const isbn = book.isbn13.toString();
   beforeEach(() => {
     mockGetBook.mockReset();
