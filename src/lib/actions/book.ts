@@ -13,6 +13,7 @@ import BookHydrated from '@/types/BookHydrated';
 import { Book, Prisma } from '@prisma/client';
 
 export async function buildAuthorsInput(
+  tx: Prisma.TransactionClient,
   authors: string,
 ): Promise<Prisma.AuthorCreateNestedManyWithoutBooksInput> {
   const authorStrings = authors.split(',').map((a) => a.trim());
@@ -21,7 +22,7 @@ export async function buildAuthorsInput(
 
   await Promise.all(
     authorStrings.map(async (authorString) => {
-      const author = await prisma.author.findFirst({
+      const author = await tx.author.findFirst({
         where: { name: authorString },
       });
 
@@ -45,9 +46,10 @@ export async function buildAuthorsInput(
 }
 
 export async function buildPublisherInput(
+  tx: Prisma.TransactionClient,
   publisherString: string,
 ): Promise<Prisma.BookSourceCreateNestedOneWithoutBooksInput> {
-  const publisher = await prisma.bookSource.findFirst({
+  const publisher = await tx.bookSource.findFirst({
     where: { name: publisherString },
   });
 
@@ -70,11 +72,12 @@ export async function buildPublisherInput(
 }
 
 async function buildCreateUpdateBookData(
+  tx: Prisma.TransactionClient,
   book: BookCreateInput,
 ): Promise<Prisma.BookCreateInput | Prisma.BookUpdateInput> {
-  const authors = await buildAuthorsInput(book.authors);
+  const authors = await buildAuthorsInput(tx, book.authors);
 
-  const publisher = await buildPublisherInput(book.publisher);
+  const publisher = await buildPublisherInput(tx, book.publisher);
 
   return {
     authors,
@@ -92,41 +95,57 @@ async function buildCreateUpdateBookData(
 export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('createBook, book: %j', book);
 
-  const data = (await buildCreateUpdateBookData(
-    book,
-  )) as Prisma.BookCreateInput;
+  return prisma.$transaction(
+    async (tx) => {
+      const data = await buildCreateUpdateBookData(tx, book);
 
-  const createdBook = await prisma.book.create({
-    data,
-    include: {
-      authors: true,
-      publisher: true,
+      const createdBook = await tx.book.create({
+        data: data as Prisma.BookCreateInput,
+        include: {
+          authors: true,
+          publisher: true,
+        },
+      });
+
+      logger.trace('created book in DB: %j', createdBook);
+
+      return createdBook;
     },
-  });
-
-  logger.trace('created book in DB: %j', createdBook);
-
-  return createdBook;
+    {
+      // when we create a book, we create authors and publisher if they do not exist
+      // so this entire operation needs to be executed in serial
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
 }
 
 export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
   logger.trace('upsertBook, book: %j', book);
 
-  const data = await buildCreateUpdateBookData(book);
+  return prisma.$transaction(
+    async (tx) => {
+      const data = await buildCreateUpdateBookData(tx, book);
 
-  const upsertedBook = await prisma.book.upsert({
-    create: data as Prisma.BookCreateInput,
-    include: {
-      authors: true,
-      publisher: true,
+      const upsertedBook = await tx.book.upsert({
+        create: data as Prisma.BookCreateInput,
+        include: {
+          authors: true,
+          publisher: true,
+        },
+        update: data as Prisma.BookUpdateInput,
+        where: { isbn13: book.isbn13 },
+      });
+
+      logger.trace('upsertedBook in DB: %j', upsertedBook);
+
+      return upsertedBook;
     },
-    update: data as Prisma.BookUpdateInput,
-    where: { isbn13: book.isbn13 },
-  });
-
-  logger.trace('upsertedBook in DB: %j', upsertedBook);
-
-  return upsertedBook;
+    {
+      // when we create a book, we create authors and publisher if they do not exist
+      // so this entire operation needs to be executed in serial
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
 }
 
 export interface GetBooksParams {

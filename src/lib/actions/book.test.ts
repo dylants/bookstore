@@ -22,7 +22,7 @@ describe('book actions', () => {
         id: 1,
       } as Author);
 
-      const input = await buildAuthorsInput('author one');
+      const input = await buildAuthorsInput(prismaMock, 'author one');
       expect(input).toEqual({
         connect: [{ id: 1 }],
         create: [],
@@ -32,7 +32,7 @@ describe('book actions', () => {
     it('should return valid input for a single author that does NOT exist', async () => {
       prismaMock.author.findFirst.mockResolvedValue(null);
 
-      const input = await buildAuthorsInput('author one');
+      const input = await buildAuthorsInput(prismaMock, 'author one');
       expect(input).toEqual({
         connect: [],
         create: [{ name: 'author one' }],
@@ -50,6 +50,7 @@ describe('book actions', () => {
       prismaMock.author.findFirst.mockResolvedValueOnce(null);
 
       const input = await buildAuthorsInput(
+        prismaMock,
         'author one, author 2, author 3, author 4',
       );
       expect(input).toEqual({
@@ -65,7 +66,7 @@ describe('book actions', () => {
         id: 1,
       } as BookSource);
 
-      const input = await buildPublisherInput('publisher one');
+      const input = await buildPublisherInput(prismaMock, 'publisher one');
       expect(input).toEqual({
         connect: { id: 1 },
       });
@@ -74,7 +75,7 @@ describe('book actions', () => {
     it('should return valid input for a publisher that does NOT exist', async () => {
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
 
-      const input = await buildPublisherInput('publisher one');
+      const input = await buildPublisherInput(prismaMock, 'publisher one');
       expect(input).toEqual({
         create: {
           isPublisher: true,
@@ -87,6 +88,8 @@ describe('book actions', () => {
 
   describe('createBook', () => {
     it('should create a new book', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
       prismaMock.book.create.mockResolvedValue(book1);
@@ -142,6 +145,8 @@ describe('book actions', () => {
 
   describe('upsertBook', () => {
     it('should provide the correct data', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
       prismaMock.author.findFirst.mockResolvedValue(null);
       prismaMock.bookSource.findFirst.mockResolvedValue(null);
       prismaMock.book.upsert.mockResolvedValue(book1);
