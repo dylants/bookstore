@@ -1,7 +1,15 @@
+'use server';
+
 import logger from '@/lib/logger';
+import {
+  buildPaginationRequest,
+  buildPaginationResponse,
+} from '@/lib/pagination';
 import prisma from '@/lib/prisma';
 import InvoiceCreateInput from '@/types/InvoiceCreateInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
+import PageInfo from '@/types/PageInfo';
+import PaginationQuery from '@/types/PaginationQuery';
 import { Invoice, InvoiceItem, Prisma } from '@prisma/client';
 
 export async function createInvoice(
@@ -16,14 +24,17 @@ export async function createInvoice(
       vendorId,
     },
     include: {
-      invoiceItems: true,
       vendor: true,
     },
   });
 
   logger.trace('created invoice in DB: %j', createdInvoice);
 
-  return createdInvoice;
+  return {
+    ...createdInvoice,
+    // when we create a new invoice, we have no invoice items, so this can be hardcoded
+    numInvoiceItems: 0,
+  };
 }
 
 async function updateBookQuantity(
@@ -62,12 +73,81 @@ export async function completeInvoice(
         isCompleted: true,
       },
       include: {
-        invoiceItems: true,
+        _count: {
+          select: { invoiceItems: true },
+        },
         vendor: true,
       },
       where: { id: invoiceId },
     });
 
-    return invoice;
+    return {
+      ...invoice,
+      numInvoiceItems: invoice._count.invoiceItems,
+    };
   });
+}
+
+export interface GetInvoicesParams {
+  paginationQuery?: PaginationQuery;
+}
+
+export interface GetInvoicesResult {
+  invoices: Array<InvoiceHydrated>;
+  pageInfo: PageInfo;
+}
+
+export async function getInvoices({
+  paginationQuery,
+}: GetInvoicesParams): Promise<GetInvoicesResult> {
+  const paginationRequest = buildPaginationRequest({ paginationQuery });
+
+  const rawItems = await prisma.invoice.findMany({
+    ...paginationRequest,
+    include: {
+      _count: {
+        select: { invoiceItems: true },
+      },
+      vendor: true,
+    },
+  });
+
+  const items = rawItems.map((item) => ({
+    ...item,
+    numInvoiceItems: item._count.invoiceItems,
+  }));
+
+  const { items: invoices, pageInfo } =
+    buildPaginationResponse<InvoiceHydrated>({
+      items,
+      paginationQuery,
+    });
+
+  return {
+    invoices,
+    pageInfo,
+  };
+}
+
+export async function getInvoice(
+  id: Invoice['id'],
+): Promise<InvoiceHydrated | null> {
+  const invoice = await prisma.invoice.findUnique({
+    include: {
+      _count: {
+        select: { invoiceItems: true },
+      },
+      vendor: true,
+    },
+    where: { id },
+  });
+
+  if (invoice) {
+    return {
+      ...invoice,
+      numInvoiceItems: invoice._count.invoiceItems,
+    };
+  } else {
+    return null;
+  }
 }
