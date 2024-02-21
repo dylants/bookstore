@@ -6,7 +6,8 @@ import { fakePublisher, fakeVendor } from '@/lib/fakes/book-source';
 import { fakeInvoice } from '@/lib/fakes/invoice';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import BookCreateInput from '@/types/BookCreateInput';
-import { Author, BookSource, Invoice, PrismaClient } from '@prisma/client';
+import { BookSource, Invoice, PrismaClient } from '@prisma/client';
+import retry from 'async-retry';
 import _ from 'lodash';
 const prisma = new PrismaClient();
 
@@ -15,8 +16,6 @@ const prisma = new PrismaClient();
 // ***********************************************************
 
 const NUM_VENDORS = checkForEnvVariable(process.env.SEED_NUM_VENDORS, 5);
-const NUM_PUBLISHERS = checkForEnvVariable(process.env.SEED_NUM_PUBLISHERS, 10);
-const NUM_AUTHORS = checkForEnvVariable(process.env.SEED_NUM_AUTHORS, 20);
 const NUM_BOOKS = checkForEnvVariable(process.env.SEED_NUM_BOOKS, 50);
 
 // ***********************************************************
@@ -37,6 +36,7 @@ function checkForEnvVariable(
 async function generateVendor() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, ...data } = fakeVendor();
+  // TODO replace with create vendor once it exists
   return await prisma.bookSource.create({
     data,
   });
@@ -47,58 +47,39 @@ async function generateVendors(num: number) {
   return await Promise.all(vendorPromises);
 }
 
-async function generateAuthor() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = fakeAuthor();
-  return await prisma.author.create({
-    data,
-  });
+function fakeAuthorName() {
+  const { name } = fakeAuthor();
+  return name;
 }
 
-async function generateAuthors(num: number) {
-  const authorPromises = _.times(num, generateAuthor);
-  return await Promise.all(authorPromises);
-}
-
-async function generatePublisher() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...data } = fakePublisher();
-  return await prisma.bookSource.create({
-    data,
-  });
-}
-
-async function generatePublishers(num: number) {
-  const publisherPromises = _.times(num, generatePublisher);
-  return await Promise.all(publisherPromises);
+function fakePublisherName() {
+  const { name } = fakePublisher();
+  return name;
 }
 
 type BuildBookCreateInputProps = {
-  authors: Author[];
-  publishers: BookSource[];
+  authorNames: string[];
+  publisherNames: string[];
 };
 
 function buildBookCreateInput(
   props: BuildBookCreateInputProps,
 ): BookCreateInput {
-  const { authors, publishers } = props;
+  const { authorNames, publisherNames } = props;
 
   const authorsString = _.sampleSize(
-    authors,
+    authorNames,
     // choose 1 author more often
     Math.random() > 0.25
       ? 1
-      : // max the authors chosen at 3
-        _.random(1, authors.length > 3 ? 3 : authors.length),
-  )
-    .map((a) => a.name)
-    .join(', ');
+      : // max the names chosen at 3
+        _.random(1, authorNames.length > 3 ? 3 : authorNames.length),
+  ).join(', ');
 
-  const publisherString = (_.sample(publishers) as BookSource).name;
+  const publisherString = _.sample(publisherNames) as string;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, publisherId, createdAt, updatedAt, quantity, ...data } =
-    fakeBook();
+  const { id, createdAt, updatedAt, publisherId, ...data } = fakeBook();
 
   return {
     ...data,
@@ -109,15 +90,15 @@ function buildBookCreateInput(
 }
 
 type GenerateInvoiceItemProps = {
-  authors: Author[];
+  authorNames: string[];
   invoiceId: Invoice['id'];
-  publishers: BookSource[];
+  publisherNames: string[];
 };
 
 async function generateInvoiceItem(props: GenerateInvoiceItemProps) {
-  const { authors, invoiceId, publishers } = props;
+  const { authorNames, invoiceId, publisherNames } = props;
 
-  const book = buildBookCreateInput({ authors, publishers });
+  const book = buildBookCreateInput({ authorNames, publisherNames });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, bookId, createdAt, updatedAt, ...data } = fakeInvoiceItem();
@@ -130,14 +111,14 @@ async function generateInvoiceItem(props: GenerateInvoiceItemProps) {
 }
 
 type GenerateInvoiceProps = {
-  authors: Author[];
+  authorNames: string[];
   numBooks: number;
-  publishers: BookSource[];
+  publisherNames: string[];
   vendor: BookSource;
 };
 
 async function generateInvoice(props: GenerateInvoiceProps) {
-  const { authors, numBooks, publishers, vendor } = props;
+  const { authorNames, numBooks, publisherNames, vendor } = props;
 
   const { invoiceDate, invoiceNumber } = fakeInvoice();
   const { id: invoiceId } = await createInvoice({
@@ -147,7 +128,13 @@ async function generateInvoice(props: GenerateInvoiceProps) {
   });
 
   const invoiceItemPromises = _.times(numBooks, () =>
-    generateInvoiceItem({ authors, invoiceId, publishers }),
+    // retry on failure since during seed phase we're creating invoice items / books in quick
+    // succession which can lead to errors with the underlying transaction.
+    retry(
+      async () =>
+        generateInvoiceItem({ authorNames, invoiceId, publisherNames }),
+      { retries: 5 },
+    ),
   );
   await Promise.all(invoiceItemPromises);
 
@@ -158,14 +145,16 @@ async function generateInvoice(props: GenerateInvoiceProps) {
 
 async function main() {
   const vendors = await generateVendors(NUM_VENDORS);
-  const authors = await generateAuthors(NUM_AUTHORS);
-  const publishers = await generatePublishers(NUM_PUBLISHERS);
+
+  // this represents the "scope" of available authors and publishers
+  const authorNames = _.times(NUM_BOOKS, fakeAuthorName);
+  const publisherNames = _.times(NUM_BOOKS, fakePublisherName);
 
   // for now a single invoice for all books
   await generateInvoice({
-    authors,
+    authorNames,
     numBooks: NUM_BOOKS,
-    publishers,
+    publisherNames,
     vendor: _.sample(vendors) as BookSource,
   });
 }

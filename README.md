@@ -83,8 +83,6 @@ The seed script provides values for the number of entities to create. These can 
 
 ```
 SEED_NUM_VENDORS
-SEED_NUM_PUBLISHERS
-SEED_NUM_AUTHORS
 SEED_NUM_BOOKS
 ```
 
