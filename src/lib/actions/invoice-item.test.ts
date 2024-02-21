@@ -1,6 +1,6 @@
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
-import { randomBook } from '@/lib/fakes/book';
+import { fakeBook } from '@/lib/fakes/book';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 
 const mockUpsertBook = jest.fn();
@@ -9,7 +9,7 @@ jest.mock('./book', () => ({
 }));
 
 describe('invoice-item actions', () => {
-  const book = randomBook();
+  const book = fakeBook();
   const invoiceItem = fakeInvoiceItem();
   beforeEach(() => {
     mockUpsertBook.mockReset();

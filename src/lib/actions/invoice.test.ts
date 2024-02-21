@@ -2,7 +2,7 @@ import { fakeInvoice } from '@/lib/fakes/invoice';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { completeInvoice, createInvoice } from '@/lib/actions/invoice';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
-import { randomBook } from '@/lib/fakes/book';
+import { fakeBook } from '@/lib/fakes/book';
 
 describe('invoice actions', () => {
   const invoice = fakeInvoice(false);
@@ -43,17 +43,17 @@ describe('invoice actions', () => {
 
       const item1 = fakeInvoiceItem();
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...randomBook(),
+        ...fakeBook(),
         quantity: 7,
       });
       const item2 = fakeInvoiceItem();
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...randomBook(),
+        ...fakeBook(),
         quantity: 0,
       });
       const item3 = fakeInvoiceItem();
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...randomBook(),
+        ...fakeBook(),
         quantity: 2,
       });
       prismaMock.invoiceItem.findMany.mockResolvedValue([item1, item2, item3]);

@@ -1,10 +1,10 @@
-import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import { BookSource, Prisma } from '@prisma/client';
 
-export function randomPublisher(): BookSource {
+export function fakePublisher(): BookSource {
   return {
-    ...randomCreatedAtUpdatedAt(),
+    ...fakeCreatedAtUpdatedAt(),
     accountNumber: null,
     discountPercentage: null,
     id: faker.number.int(),
@@ -14,12 +14,12 @@ export function randomPublisher(): BookSource {
   };
 }
 
-export function randomVendor(): BookSource {
+export function fakeVendor(): BookSource {
   // some vendors can also be publishers, so randomly assign isPublisher
   const isPublisher = faker.datatype.boolean();
 
   return {
-    ...randomCreatedAtUpdatedAt(),
+    ...fakeCreatedAtUpdatedAt(),
     accountNumber: faker.finance.accountNumber(),
     discountPercentage: new Prisma.Decimal(
       faker.number.float({ fractionDigits: 2 }),

@@ -1,6 +1,6 @@
 import Book from '@/components/Book';
-import { randomBookHydrated } from '@/lib/fakes/book';
-import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeBookHydrated } from '@/lib/fakes/book';
+import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -11,7 +11,7 @@ const meta: Meta<typeof Book> = {
 export default meta;
 type Story = StoryObj<typeof Book>;
 
-const book = randomBookHydrated();
+const book = fakeBookHydrated();
 // this is necessary until the storybook bug is fixed
 // https://github.com/storybookjs/storybook/issues/22452
 book.isbn13 = book.isbn13.toString() as unknown as bigint;
@@ -39,7 +39,7 @@ export const MultipleAuthors: Story = {
       authors: [
         ...book.authors,
         {
-          ...randomCreatedAtUpdatedAt(),
+          ...fakeCreatedAtUpdatedAt(),
           id: faker.number.int(),
           imageUrl: null,
           name: faker.person.fullName(),

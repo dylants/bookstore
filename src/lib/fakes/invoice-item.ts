@@ -1,4 +1,4 @@
-import { randomCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
 import { InvoiceItem } from '@prisma/client';
 import _ from 'lodash';
@@ -10,7 +10,7 @@ export function fakeInvoiceItem(): InvoiceItem {
   const totalCostInCents = itemCostInCents * quantity;
 
   return {
-    ...randomCreatedAtUpdatedAt(),
+    ...fakeCreatedAtUpdatedAt(),
     bookId: faker.number.int(),
     id: faker.number.int(),
     invoiceId: faker.number.int(),

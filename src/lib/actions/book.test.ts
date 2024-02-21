@@ -8,13 +8,13 @@ import {
   upsertBook,
 } from '@/lib/actions/book';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
-import { randomBookHydrated } from '@/lib/fakes/book';
+import { fakeBookHydrated } from '@/lib/fakes/book';
 import { Author, BookSource } from '@prisma/client';
 
 describe('book actions', () => {
-  const book1 = randomBookHydrated();
-  const book2 = randomBookHydrated();
-  const book3 = randomBookHydrated();
+  const book1 = fakeBookHydrated();
+  const book2 = fakeBookHydrated();
+  const book3 = fakeBookHydrated();
 
   describe('buildAuthorsInput', () => {
     it('should return valid input for a single author that exists', async () => {
