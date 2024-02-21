@@ -2,6 +2,7 @@
 
 import Books from '@/components/Books';
 import Search, { SearchFormInput } from '@/components/search/Search';
+import { Separator } from '@/components/ui/separator';
 import { findBookBySearchString } from '@/lib/actions/book';
 import BookHydrated from '@/types/BookHydrated';
 import { useEffect, useRef, useState } from 'react';
@@ -29,7 +30,7 @@ export default function SearchPage() {
   return (
     <div>
       <h1 className="my-4">Search</h1>
-      <hr className="mt-4 mb-8 border-customPalette-300" />
+      <Separator className="mt-4 mb-8" />
 
       <Search
         onSubmit={onSearch}
