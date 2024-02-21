@@ -57,12 +57,13 @@ model BookSource {
 }
 
 model Invoice {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime? @updatedAt @db.Timestamptz(3)
-  invoiceId   String
-  invoiceDate DateTime  @db.Timestamptz(1)
-  processed   Boolean   @default(false)
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime? @updatedAt @db.Timestamptz(3)
+  invoiceNumber String
+  invoiceDate   DateTime  @db.Timestamptz(1)
+  dateReceived  DateTime? @db.Timestamptz(1)
+  isCompleted   Boolean   @default(false)
 
   vendor   BookSource @relation(fields: [vendorId], references: [id])
   vendorId Int
@@ -71,10 +72,12 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime? @updatedAt @db.Timestamptz(3)
-  costInCents Int
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime? @updatedAt @db.Timestamptz(3)
+  itemCostInCents  Int
+  quantity         Int
+  totalCostInCents Int
 
   book   Book @relation(fields: [bookId], references: [id])
   bookId Int
