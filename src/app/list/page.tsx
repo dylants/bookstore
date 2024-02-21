@@ -6,6 +6,7 @@ import { DEFAULT_LIMIT } from '@/lib/pagination';
 import { useCallback, useEffect, useState } from 'react';
 import PageInfo from '@/types/PageInfo';
 import BookHydrated from '@/types/BookHydrated';
+import { Separator } from '@/components/ui/separator';
 
 export default function ListPage() {
   const [books, setBooks] = useState<Array<BookHydrated> | null>();
@@ -64,7 +65,7 @@ export default function ListPage() {
   return (
     <>
       <h1 className="my-4">Books</h1>
-      <hr className="mt-4 mb-8 border-customPalette-300" />
+      <Separator className="mt-4 mb-8" />
 
       <Books
         books={books ?? []}

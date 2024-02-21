@@ -18,6 +18,7 @@ import useExternalBookSearch, {
   ExternalBookSearchResult,
 } from '@/lib/search/external/useExternalBookSearch';
 import { Format, Genre } from '@prisma/client';
+import { Separator } from '@/components/ui/separator';
 
 const ERROR_KEY_VENDOR = 'vendor';
 
@@ -136,7 +137,7 @@ export default function AddBookPage() {
   return (
     <div>
       <h1 className="my-4">Add a Book</h1>
-      <hr className="mt-4 mb-8 border-customPalette-300" />
+      <Separator className="mt-4 mb-8" />
 
       <VendorContainer
         hasError={!!errors.root?.[ERROR_KEY_VENDOR]}
