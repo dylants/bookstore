@@ -1,10 +1,10 @@
 import DataTable from '@/components/table/DataTable';
-import { Button } from '@/components/ui/button';
+import SortableHeader from '@/components/table/SortableHeader';
 import { faker } from '@faker-js/faker';
 import { Meta, StoryObj } from '@storybook/react';
 import { ColumnDef } from '@tanstack/react-table';
 import _ from 'lodash';
-import { ArrowUpDown, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 const meta: Meta<typeof DataTable> = {
   component: DataTable,
@@ -47,18 +47,7 @@ const columns: ColumnDef<DataTableEntity>[] = [
         <>{props.getValue()}</>
       </div>
     ),
-    header: ({ column }) => (
-      <div className="flex justify-end">
-        <Button
-          variant="ghost"
-          className="px-0"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Number
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
+    header: ({ column }) => <SortableHeader column={column} text="Number" />,
   },
   {
     accessorKey: 'bool',

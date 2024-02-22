@@ -1,44 +1,8 @@
 import DataTable from '@/components/table/DataTable';
-import { Button } from '@/components/ui/button';
+import SortableHeader from '@/components/table/SortableHeader';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
-import { Column, ColumnDef } from '@tanstack/react-table';
-import clsx from 'clsx';
-import { ArrowDown, ArrowUp, CheckCircle, RefreshCw } from 'lucide-react';
-
-function SortableHeader({
-  className,
-  column,
-  text,
-}: {
-  className?: string;
-  column: Column<InvoiceHydrated>;
-  text: string;
-}) {
-  const sorted = column.getIsSorted();
-  const sortIcon = sorted ? (
-    <>
-      {sorted === 'asc' ? (
-        <ArrowUp className="ml-1 h-4 w-4" />
-      ) : (
-        <ArrowDown className="ml-1 h-4 w-4" />
-      )}
-    </>
-  ) : (
-    // this acts as a placeholder for the sort icon
-    <div className="ml-1 h-4 w-4"></div>
-  );
-
-  return (
-    <Button
-      variant="ghost"
-      className={clsx('flex justify-end w-full px-0', className)}
-      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    >
-      {text}
-      {sortIcon}
-    </Button>
-  );
-}
+import { ColumnDef } from '@tanstack/react-table';
+import { CheckCircle, RefreshCw } from 'lucide-react';
 
 const columns: ColumnDef<InvoiceHydrated>[] = [
   {
