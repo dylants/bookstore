@@ -1,7 +1,8 @@
-import { BookSource, Invoice } from '@prisma/client';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
+import { Invoice } from '@prisma/client';
 
 type InvoiceHydrated = Invoice & {
   numInvoiceItems: number;
-  vendor: BookSource;
+  vendor: BookSourceSerialized;
 };
 export default InvoiceHydrated;

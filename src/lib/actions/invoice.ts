@@ -6,6 +6,7 @@ import {
   buildPaginationResponse,
 } from '@/lib/pagination';
 import prisma from '@/lib/prisma';
+import { serializeBookSource } from '@/lib/serializers/book-source';
 import InvoiceCreateInput from '@/types/InvoiceCreateInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import PageInfo from '@/types/PageInfo';
@@ -34,6 +35,7 @@ export async function createInvoice(
     ...createdInvoice,
     // when we create a new invoice, we have no invoice items, so this can be hardcoded
     numInvoiceItems: 0,
+    vendor: serializeBookSource(createdInvoice.vendor),
   };
 }
 
@@ -84,6 +86,7 @@ export async function completeInvoice(
     return {
       ...invoice,
       numInvoiceItems: invoice._count.invoiceItems,
+      vendor: serializeBookSource(invoice.vendor),
     };
   });
 }
@@ -115,6 +118,7 @@ export async function getInvoices({
   const items = rawItems.map((item) => ({
     ...item,
     numInvoiceItems: item._count.invoiceItems,
+    vendor: serializeBookSource(item.vendor),
   }));
 
   const { items: invoices, pageInfo } =
@@ -146,6 +150,7 @@ export async function getInvoice(
     return {
       ...invoice,
       numInvoiceItems: invoice._count.invoiceItems,
+      vendor: serializeBookSource(invoice.vendor),
     };
   } else {
     return null;
