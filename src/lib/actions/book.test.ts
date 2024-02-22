@@ -2,7 +2,7 @@ import {
   buildAuthorsInput,
   buildPublisherInput,
   createBook,
-  findBookBySearchString,
+  findBooksBySearchString,
   getBook,
   getBooks,
   upsertBook,
@@ -258,11 +258,11 @@ describe('book actions', () => {
     });
   });
 
-  describe('findBookBySearchString', () => {
+  describe('findBooksBySearchString', () => {
     it('should find books that contain "Book"', async () => {
       prismaMock.book.findMany.mockResolvedValue([book1, book2, book3]);
 
-      const result = await findBookBySearchString('Book');
+      const result = await findBooksBySearchString('Book');
 
       expect(prismaMock.book.findMany).toHaveBeenCalledWith({
         include: {
@@ -295,6 +295,12 @@ describe('book actions', () => {
         where: { isbn13 },
       });
       expect(result).toEqual(book1);
+    });
+
+    it('should return null when no book exists', async () => {
+      prismaMock.book.findUnique.mockResolvedValue(null);
+      const result = await getBook(BigInt(1));
+      expect(result).toEqual(null);
     });
   });
 });

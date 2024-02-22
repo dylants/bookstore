@@ -1,6 +1,7 @@
 import { fakeAuthor } from '@/lib/fakes/author';
 import { fakePublisher } from '@/lib/fakes/book-source';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { serializeBookSource } from '@/lib/serializers/book-source';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
 import { Book, Format, Genre } from '@prisma/client';
@@ -45,7 +46,7 @@ export function fakeBookHydrated(): BookHydrated {
     imageUrl: randomImage(),
     isbn13: fakeIsbn13(),
     publishedDate: faker.date.past(),
-    publisher,
+    publisher: serializeBookSource(publisher),
     publisherId: publisher.id,
     quantity: 0,
     title: faker.music.songName(),

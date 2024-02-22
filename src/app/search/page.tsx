@@ -3,7 +3,7 @@
 import Books from '@/components/Books';
 import Search, { SearchFormInput } from '@/components/search/Search';
 import { Separator } from '@/components/ui/separator';
-import { findBookBySearchString } from '@/lib/actions/book';
+import { findBooksBySearchString } from '@/lib/actions/book';
 import BookHydrated from '@/types/BookHydrated';
 import { useEffect, useRef, useState } from 'react';
 
@@ -13,7 +13,7 @@ export default function SearchPage() {
 
   const onSearch = async ({ input }: SearchFormInput) => {
     setIsSearching(true);
-    const books = await findBookBySearchString(input);
+    const books = await findBooksBySearchString(input);
     setBooks(books);
     setIsSearching(false);
     return;

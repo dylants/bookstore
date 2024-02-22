@@ -1,6 +1,7 @@
 import { upsertBook } from '@/lib/actions/book';
 import logger from '@/lib/logger';
 import prisma from '@/lib/prisma';
+import { serializeBookSource } from '@/lib/serializers/book-source';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 
@@ -17,7 +18,7 @@ export async function createInvoiceItem(
 
   const book = await upsertBook(bookInput);
 
-  const invoiceItemCreated = await prisma.invoiceItem.create({
+  const rawInvoiceItem = await prisma.invoiceItem.create({
     data: {
       book: {
         connect: { id: book.id },
@@ -39,6 +40,14 @@ export async function createInvoiceItem(
       invoice: true,
     },
   });
+
+  const invoiceItemCreated = {
+    ...rawInvoiceItem,
+    book: {
+      ...rawInvoiceItem.book,
+      publisher: serializeBookSource(rawInvoiceItem.book.publisher),
+    },
+  };
 
   logger.trace('created invoice item in DB: %j', invoiceItemCreated);
 
