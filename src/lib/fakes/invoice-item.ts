@@ -1,6 +1,5 @@
 import { fakeBookHydrated } from '@/lib/fakes/book';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
-import { fakeInvoice } from '@/lib/fakes/invoice';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import { faker } from '@faker-js/faker';
 import { InvoiceItem } from '@prisma/client';
@@ -26,11 +25,9 @@ export function fakeInvoiceItem(): InvoiceItem {
 export function fakeInvoiceItemHydrated(): InvoiceItemHydrated {
   const invoiceItem = fakeInvoiceItem();
   const book = fakeBookHydrated();
-  const invoice = fakeInvoice();
 
   return {
     ...invoiceItem,
     book,
-    invoice,
   };
 }
