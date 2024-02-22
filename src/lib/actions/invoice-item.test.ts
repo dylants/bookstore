@@ -1,7 +1,10 @@
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
-import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
+import {
+  fakeInvoiceItem,
+  fakeInvoiceItemHydrated,
+} from '@/lib/fakes/invoice-item';
 
 const mockUpsertBook = jest.fn();
 jest.mock('./book', () => ({
@@ -11,6 +14,7 @@ jest.mock('./book', () => ({
 describe('invoice-item actions', () => {
   const book = fakeBook();
   const invoiceItem = fakeInvoiceItem();
+  const invoiceItemHydrated = fakeInvoiceItemHydrated();
   beforeEach(() => {
     mockUpsertBook.mockReset();
   });
@@ -21,7 +25,7 @@ describe('invoice-item actions', () => {
     });
 
     it('should create a new invoice item', async () => {
-      prismaMock.invoiceItem.create.mockResolvedValue(invoiceItem);
+      prismaMock.invoiceItem.create.mockResolvedValue(invoiceItemHydrated);
 
       const result = await createInvoiceItem({
         book: {
@@ -55,7 +59,7 @@ describe('invoice-item actions', () => {
         },
       });
 
-      expect(result).toEqual(invoiceItem);
+      expect(result).toEqual(invoiceItemHydrated);
     });
   });
 });

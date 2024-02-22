@@ -1,7 +1,8 @@
-import { Author, Book, BookSource } from '@prisma/client';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
+import { Author, Book } from '@prisma/client';
 
 type BookHydrated = Book & {
   authors: Author[];
-  publisher: BookSource;
+  publisher: BookSourceSerialized;
 };
 export default BookHydrated;

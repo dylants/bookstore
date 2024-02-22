@@ -215,5 +215,11 @@ describe('invoice actions', () => {
         numInvoiceItems: 3,
       });
     });
+
+    it('should return null when no invoice exists', async () => {
+      prismaMock.invoice.findUnique.mockResolvedValue(null);
+      const result = await getInvoice(1);
+      expect(result).toEqual(null);
+    });
   });
 });

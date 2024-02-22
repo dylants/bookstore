@@ -11,6 +11,7 @@ import PaginationQuery from '@/types/PaginationQuery';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookHydrated from '@/types/BookHydrated';
 import { Book, Prisma } from '@prisma/client';
+import { serializeBookSource } from '@/lib/serializers/book-source';
 
 export async function buildAuthorsInput(
   tx: Prisma.TransactionClient,
@@ -109,7 +110,10 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
 
       logger.trace('created book in DB: %j', createdBook);
 
-      return createdBook;
+      return {
+        ...createdBook,
+        publisher: serializeBookSource(createdBook.publisher),
+      };
     },
     {
       // when we create a book, we create authors and publisher if they do not exist
@@ -138,7 +142,10 @@ export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
 
       logger.trace('upsertedBook in DB: %j', upsertedBook);
 
-      return upsertedBook;
+      return {
+        ...upsertedBook,
+        publisher: serializeBookSource(upsertedBook.publisher),
+      };
     },
     {
       // when we create a book, we create authors and publisher if they do not exist
@@ -162,13 +169,18 @@ export async function getBooks({
 }: GetBooksParams): Promise<GetBooksResult> {
   const paginationRequest = buildPaginationRequest({ paginationQuery });
 
-  const items = await prisma.book.findMany({
+  const rawItems = await prisma.book.findMany({
     ...paginationRequest,
     include: {
       authors: true,
       publisher: true,
     },
   });
+
+  const items = rawItems.map((item) => ({
+    ...item,
+    publisher: serializeBookSource(item.publisher),
+  }));
 
   const { items: books, pageInfo } = buildPaginationResponse<BookHydrated>({
     items,
@@ -181,10 +193,10 @@ export async function getBooks({
   };
 }
 
-export async function findBookBySearchString(
+export async function findBooksBySearchString(
   search: string,
 ): Promise<Array<BookHydrated>> {
-  const books = await prisma.book.findMany({
+  const rawBooks = await prisma.book.findMany({
     include: {
       authors: true,
       publisher: true,
@@ -193,6 +205,12 @@ export async function findBookBySearchString(
       OR: [{ authors: { some: { name: { search } } } }, { title: { search } }],
     },
   });
+
+  const books = rawBooks.map((book) => ({
+    ...book,
+    publisher: serializeBookSource(book.publisher),
+  }));
+
   logger.trace('books found: %j', books);
 
   return books;
@@ -209,5 +227,12 @@ export async function getBook(
     where: { isbn13 },
   });
 
-  return book;
+  if (book) {
+    return {
+      ...book,
+      publisher: serializeBookSource(book.publisher),
+    };
+  } else {
+    return null;
+  }
 }

@@ -1,4 +1,7 @@
+import { fakeBookHydrated } from '@/lib/fakes/book';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeInvoice } from '@/lib/fakes/invoice';
+import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import { faker } from '@faker-js/faker';
 import { InvoiceItem } from '@prisma/client';
 import _ from 'lodash';
@@ -17,5 +20,17 @@ export function fakeInvoiceItem(): InvoiceItem {
     itemCostInCents,
     quantity,
     totalCostInCents,
+  };
+}
+
+export function fakeInvoiceItemHydrated(): InvoiceItemHydrated {
+  const invoiceItem = fakeInvoiceItem();
+  const book = fakeBookHydrated();
+  const invoice = fakeInvoice();
+
+  return {
+    ...invoiceItem,
+    book,
+    invoice,
   };
 }
