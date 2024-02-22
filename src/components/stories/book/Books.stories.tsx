@@ -1,4 +1,4 @@
-import Books from '@/components/Books';
+import Books from '@/components/book/Books';
 import { fakeBookHydrated } from '@/lib/fakes/book';
 import type { Meta, StoryObj } from '@storybook/react';
 import _ from 'lodash';

@@ -1,4 +1,4 @@
-import Book from '@/components/Book';
+import Book from '@/components/book/Book';
 import { fakeBookHydrated } from '@/lib/fakes/book';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { faker } from '@faker-js/faker';
