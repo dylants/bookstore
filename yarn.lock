@@ -4521,6 +4521,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:8.12.0":
+  version: 8.12.0
+  resolution: "@tanstack/react-table@npm:8.12.0"
+  dependencies:
+    "@tanstack/table-core": "npm:8.12.0"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 9692fcb23779cc457f74c395b1f79dc700eae246315014879c3a312275a11c8e49fd14a16a122843b8eb14f6f1b71c8fb648ba7fec300806be6d589d7c902c21
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.12.0":
+  version: 8.12.0
+  resolution: "@tanstack/table-core@npm:8.12.0"
+  checksum: 3300b37dc73e8959718d73ad7a981c5c8e1561c7b1f4ee6c86f056be49d2d20571808cacfc281801b2eb8fb9ead93165a71f933bc209e939d2ca4bd6556bc0a5
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^9.3.1":
   version: 9.3.4
   resolution: "@testing-library/dom@npm:9.3.4"
@@ -6467,6 +6486,7 @@ __metadata:
     "@storybook/nextjs": "npm:7.6.10"
     "@storybook/react": "npm:7.6.10"
     "@storybook/test": "npm:7.6.10"
+    "@tanstack/react-table": "npm:8.12.0"
     "@types/async-retry": "npm:1"
     "@types/jest": "npm:29.5.11"
     "@types/lodash": "npm:4.14.202"
