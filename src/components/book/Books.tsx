@@ -1,7 +1,7 @@
 'use client';
 
-import Book from '@/components/Book';
-import BookSkeleton from '@/components/BookSkeleton';
+import Book from '@/components/book/Book';
+import BookSkeleton from '@/components/book/BookSkeleton';
 import {
   Pagination,
   PaginationContent,

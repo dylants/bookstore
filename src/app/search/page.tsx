@@ -1,6 +1,6 @@
 'use client';
 
-import Books from '@/components/Books';
+import Books from '@/components/book/Books';
 import Search, { SearchFormInput } from '@/components/search/Search';
 import { Separator } from '@/components/ui/separator';
 import { findBooksBySearchString } from '@/lib/actions/book';

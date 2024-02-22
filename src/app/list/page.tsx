@@ -1,7 +1,7 @@
 'use client';
 
 import { getBooks } from '@/lib/actions/book';
-import Books from '@/components/Books';
+import Books from '@/components/book/Books';
 import { DEFAULT_LIMIT } from '@/lib/pagination';
 import { useCallback, useEffect, useState } from 'react';
 import PageInfo from '@/types/PageInfo';

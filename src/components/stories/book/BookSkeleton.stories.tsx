@@ -1,4 +1,4 @@
-import BookSkeleton from '@/components/BookSkeleton';
+import BookSkeleton from '@/components/book/BookSkeleton';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof BookSkeleton> = {
