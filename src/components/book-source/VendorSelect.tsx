@@ -23,7 +23,7 @@ export default function VendorSelect({
 }: {
   hasError?: boolean;
   onSelect: (value: number) => void;
-  onVendorCreate: SubmitHandler<VendorCreateFormInput>;
+  onVendorCreate?: SubmitHandler<VendorCreateFormInput>;
   selectedVendorId?: number;
   vendors: Array<BookSource>;
 }) {
@@ -52,7 +52,7 @@ export default function VendorSelect({
           ))}
         </SelectContent>
       </Select>
-      <VendorCreate onCreate={onVendorCreate} />
+      {onVendorCreate && <VendorCreate onCreate={onVendorCreate} />}
     </div>
   );
 }
