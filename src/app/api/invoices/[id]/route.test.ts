@@ -14,7 +14,7 @@ function buildInvoiceUrl(id: string): string {
   return buildUrl(`/api/invoice/${id}`);
 }
 
-describe('/api/invoice/[id]', () => {
+describe('/api/invoices/[id]', () => {
   const invoice = fakeInvoice();
   const id = invoice.id;
   beforeEach(() => {
