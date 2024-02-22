@@ -51,5 +51,41 @@ describe('/api/book-sources', () => {
         'Validation error: Expected number, received nan at "first"',
       );
     });
+
+    it('success with isPublisher parameter', async () => {
+      mockGetBookSources.mockReturnValue([]);
+
+      const req = new NextRequest(
+        new Request(buildBookSourcesUrl('isPublisher=true')),
+        {
+          method: 'GET',
+        },
+      );
+      const res = await GET(req);
+
+      expect(res.status).toEqual(200);
+      expect(mockGetBookSources).toHaveBeenCalledWith({
+        isPublisher: true,
+        paginationQuery: {},
+      });
+    });
+
+    it('success with isVendor parameter', async () => {
+      mockGetBookSources.mockReturnValue([]);
+
+      const req = new NextRequest(
+        new Request(buildBookSourcesUrl('isVendor=true')),
+        {
+          method: 'GET',
+        },
+      );
+      const res = await GET(req);
+
+      expect(res.status).toEqual(200);
+      expect(mockGetBookSources).toHaveBeenCalledWith({
+        isVendor: true,
+        paginationQuery: {},
+      });
+    });
   });
 });

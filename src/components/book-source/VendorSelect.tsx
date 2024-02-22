@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { BookSource } from '@prisma/client';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
 import clsx from 'clsx';
 import _ from 'lodash';
 import { useCallback } from 'react';
@@ -25,7 +25,7 @@ export default function VendorSelect({
   onSelect: (value: number) => void;
   onVendorCreate?: SubmitHandler<VendorCreateFormInput>;
   selectedVendorId?: number;
-  vendors: Array<BookSource>;
+  vendors: Array<BookSourceSerialized>;
 }) {
   const onValueChange = useCallback(
     async (value: string) => {

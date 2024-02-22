@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import VendorSelect from '@/components/book-source/VendorSelect';
-import { BookSource } from '@prisma/client';
 import { getBookSources } from '@/lib/actions/book-source';
 import { VendorCreateFormInput } from '@/components/book-source/VendorCreate';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
 
 export default function VendorContainer({
   hasError,
@@ -13,10 +13,11 @@ export default function VendorContainer({
   hasError?: boolean;
   onSelect: (value: number) => void;
 }) {
-  const [vendors, setVendors] = useState<Array<BookSource>>([]);
+  const [vendors, setVendors] = useState<Array<BookSourceSerialized>>([]);
 
   const loadVendors = useCallback(async () => {
     const { bookSources: vendors } = await getBookSources({
+      isVendor: true,
       paginationQuery: {
         // TODO need to find a way to solve this
         first: 100,

@@ -7,20 +7,16 @@ const schema = z.object({
   after: z.string().optional().nullable(),
   before: z.string().optional().nullable(),
   first: z.coerce.number().optional().nullable(),
+  isPublisher: z.coerce.boolean().optional(),
+  isVendor: z.coerce.boolean().optional(),
   last: z.coerce.number().optional().nullable(),
 });
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const params = Object.fromEntries(searchParams.entries());
-  const { after, before, first, last } = params;
 
-  const validatedFields = schema.safeParse({
-    after,
-    before,
-    first,
-    last,
-  });
+  const validatedFields = schema.safeParse(params);
 
   if (!validatedFields.success) {
     const message = fromZodError(validatedFields.error);
@@ -30,10 +26,13 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const { after, before, first, last } = validatedFields.data;
+  const { isPublisher, isVendor } = validatedFields.data;
+
   const response = await getBookSources({
-    paginationQuery: {
-      ...validatedFields.data,
-    },
+    isPublisher,
+    isVendor,
+    paginationQuery: { after, before, first, last },
   });
 
   return Response.json(response);

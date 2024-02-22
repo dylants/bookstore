@@ -1,5 +1,5 @@
 import VendorSelect from '@/components/book-source/VendorSelect';
-import { fakeVendor } from '@/lib/fakes/book-source';
+import { fakeVendorSerialized } from '@/lib/fakes/book-source';
 import type { Meta, StoryObj } from '@storybook/react';
 import _ from 'lodash';
 
@@ -10,7 +10,7 @@ const meta: Meta<typeof VendorSelect> = {
 export default meta;
 type Story = StoryObj<typeof VendorSelect>;
 
-const vendors = _.times(5, fakeVendor);
+const vendors = _.times(5, fakeVendorSerialized);
 
 export const Default: Story = {
   args: {
