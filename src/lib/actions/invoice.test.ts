@@ -10,6 +10,10 @@ import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
 import { Invoice } from '@prisma/client';
 
+jest.mock('../serializers/book-source', () => ({
+  serializeBookSource: (vendor: unknown) => vendor,
+}));
+
 describe('invoice actions', () => {
   const invoice1 = fakeInvoice(false);
   const resolvedInvoice1 = {
