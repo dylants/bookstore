@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { BookSource } from '@prisma/client';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
 import { useCallback, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
@@ -26,7 +26,7 @@ export default function InvoiceCreate({
   vendors,
 }: {
   onCreate: SubmitHandler<InvoiceCreateFormInput>;
-  vendors: Array<BookSource>;
+  vendors: Array<BookSourceSerialized>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const {

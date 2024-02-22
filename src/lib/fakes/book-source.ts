@@ -1,4 +1,6 @@
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { serializeBookSource } from '@/lib/serializers/book-source';
+import BookSourceSerialized from '@/types/BookSourceSerialized';
 import { faker } from '@faker-js/faker';
 import { BookSource, Prisma } from '@prisma/client';
 
@@ -29,4 +31,8 @@ export function fakeVendor(): BookSource {
     isVendor: true,
     name: faker.company.name(),
   };
+}
+
+export function fakeVendorSerialized(): BookSourceSerialized {
+  return serializeBookSource(fakeVendor());
 }

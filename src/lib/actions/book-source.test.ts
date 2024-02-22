@@ -1,6 +1,11 @@
 import { getBookSources } from '@/lib/actions/book-source';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { fakePublisher, fakeVendor } from '@/lib/fakes/book-source';
+import { buildPaginationRequest } from '@/lib/pagination';
+
+jest.mock('../serializers/book-source', () => ({
+  serializeBookSource: (vendor: unknown) => vendor,
+}));
 
 describe('book-source actions', () => {
   const bookSource1 = fakeVendor();
@@ -49,6 +54,28 @@ describe('book-source actions', () => {
           hasPreviousPage: true,
           startCursor: bookSource2.id.toString(),
         },
+      });
+    });
+
+    it('should send correct input when provided with isPublisher', async () => {
+      prismaMock.bookSource.findMany.mockResolvedValue([]);
+
+      await getBookSources({ isPublisher: true });
+
+      expect(prismaMock.bookSource.findMany).toHaveBeenCalledWith({
+        ...buildPaginationRequest({}),
+        where: { isPublisher: true },
+      });
+    });
+
+    it('should send correct input when provided with isVendor', async () => {
+      prismaMock.bookSource.findMany.mockResolvedValue([]);
+
+      await getBookSources({ isVendor: true });
+
+      expect(prismaMock.bookSource.findMany).toHaveBeenCalledWith({
+        ...buildPaginationRequest({}),
+        where: { isVendor: true },
       });
     });
   });
