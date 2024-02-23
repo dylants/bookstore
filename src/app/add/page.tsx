@@ -14,32 +14,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { upsertBook } from '@/lib/actions/book';
-import useExternalBookSearch, {
-  ExternalBookSearchResult,
-} from '@/lib/search/external/useExternalBookSearch';
+import useExternalBookSearch from '@/lib/search/external/useExternalBookSearch';
 import { Format, Genre } from '@prisma/client';
 import { Separator } from '@/components/ui/separator';
+import BookFormInput from '@/types/BookFormInput';
 
 const ERROR_KEY_VENDOR = 'vendor';
-
-type AddBookFormInput = {
-  authors: string;
-  genre: string;
-  imageUrl: string;
-  isbn13: string;
-  publishedDate: string;
-  publisher: string;
-  title: string;
-};
 
 function AddBookFormInputField({
   errors,
   fieldName,
   register,
 }: {
-  errors: FieldErrors<AddBookFormInput>;
-  fieldName: keyof AddBookFormInput;
-  register: UseFormRegister<AddBookFormInput>;
+  errors: FieldErrors<BookFormInput>;
+  fieldName: keyof BookFormInput;
+  register: UseFormRegister<BookFormInput>;
 }) {
   let fieldNameToDisplay: string = fieldName;
   if (fieldName === 'publishedDate') {
@@ -62,8 +51,7 @@ function AddBookFormInputField({
 
 export default function AddBookPage() {
   const [vendorId, setVendorId] = useState<number>();
-  const [lookupBook, setLookupBook] =
-    useState<ExternalBookSearchResult | null>();
+  const [lookupBook, setLookupBook] = useState<Partial<BookFormInput>>();
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const {
@@ -73,19 +61,22 @@ export default function AddBookPage() {
     register,
     reset,
     setError,
-  } = useForm<AddBookFormInput>({
+  } = useForm<BookFormInput>({
     values: {
-      authors: lookupBook?.authorsHint || '',
-      genre: lookupBook?.genresHint || '',
+      authors: lookupBook?.authors || '',
+      format: '',
+      genre: lookupBook?.genre || '',
       imageUrl: lookupBook?.imageUrl || '',
       isbn13: lookupBook?.isbn13 || '',
-      publishedDate: lookupBook?.publishedDate?.toLocaleDateString?.() || '',
-      publisher: lookupBook?.publisherHint || '',
+      publishedDate: lookupBook?.publishedDate || '',
+      publisher: lookupBook?.publisher || '',
+      // TODO gotta be careful here...
+      quantity: lookupBook?.quantity || 0,
       title: lookupBook?.title || '',
     },
   });
 
-  const onSubmit: SubmitHandler<AddBookFormInput> = useCallback(
+  const onSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (book) => {
       // TODO fixme
       if (!vendorId) {
@@ -101,11 +92,9 @@ export default function AddBookPage() {
         genre: Genre.FANTASY,
         isbn13: BigInt(book.isbn13),
         publishedDate: new Date(book.publishedDate),
-        // TODO fixme
-        quantity: 0,
       });
       reset();
-      setLookupBook(null);
+      setLookupBook({});
 
       // TODO add success
     },
@@ -126,7 +115,7 @@ export default function AddBookPage() {
     async ({ input }: { input: string }) => {
       if (input) {
         setIsSearching(true);
-        const book = await search({ isbn: input });
+        const book = await search({ isbn13: input });
         setLookupBook(book);
         setIsSearching(false);
       }
