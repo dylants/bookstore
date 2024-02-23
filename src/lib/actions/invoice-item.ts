@@ -1,3 +1,5 @@
+'use server';
+
 import { upsertBook } from '@/lib/actions/book';
 import logger from '@/lib/logger';
 import {
