@@ -122,6 +122,7 @@ describe('book actions', () => {
           genre: book1.genre,
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
+          priceInCents: book1.priceInCents,
           publishedDate: book1.publishedDate,
           publisher: {
             create: {
@@ -171,6 +172,7 @@ describe('book actions', () => {
           genre: book1.genre,
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
+          priceInCents: book1.priceInCents,
           publishedDate: book1.publishedDate,
           publisher: {
             create: {
@@ -199,6 +201,7 @@ describe('book actions', () => {
           genre: book1.genre,
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
+          priceInCents: book1.priceInCents,
           publishedDate: book1.publishedDate,
           publisher: {
             create: {

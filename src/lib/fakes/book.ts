@@ -20,6 +20,8 @@ const fakeIsbn13 = (): bigint =>
   BigInt(faker.commerce.isbn({ separator: '', variant: 13 }));
 
 export function fakeBook(): Book {
+  const priceInCents = _.toNumber(faker.commerce.price({ max: 50 })) * 100 + 99;
+
   return {
     ...fakeCreatedAtUpdatedAt(),
     format: randomFormat(),
@@ -27,6 +29,7 @@ export function fakeBook(): Book {
     id: faker.number.int(),
     imageUrl: randomImage(),
     isbn13: fakeIsbn13(),
+    priceInCents,
     publishedDate: faker.date.past(),
     publisherId: faker.number.int(),
     quantity: 0,
@@ -35,20 +38,12 @@ export function fakeBook(): Book {
 }
 
 export function fakeBookHydrated(): BookHydrated {
+  const authors = [fakeAuthor()];
   const publisher = fakePublisher();
 
   return {
-    ...fakeCreatedAtUpdatedAt(),
-    authors: [fakeAuthor()],
-    format: randomFormat(),
-    genre: randomGenre(),
-    id: faker.number.int(),
-    imageUrl: randomImage(),
-    isbn13: fakeIsbn13(),
-    publishedDate: faker.date.past(),
+    ...fakeBook(),
+    authors,
     publisher: serializeBookSource(publisher),
-    publisherId: publisher.id,
-    quantity: 0,
-    title: faker.music.songName(),
   };
 }
