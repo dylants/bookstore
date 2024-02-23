@@ -1,6 +1,6 @@
 'use client';
 
-import Breadcrumbs from '@/app/invoices/Breadcrumbs';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import InvoiceItemsTable from '@/components/invoice-item/InvoiceItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
