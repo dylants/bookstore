@@ -18,7 +18,9 @@ export default function RootLayout({
         <Nav />
         <div className="flex flex-1">
           <main className="flex flex-col flex-1 md:items-center mb-12">
-            <div className="w-full px-4 md:w-[768px] md:px-0">{children}</div>
+            <div className="w-full h-full px-4 md:w-[768px] md:px-0">
+              {children}
+            </div>
           </main>
         </div>
       </body>

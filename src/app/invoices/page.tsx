@@ -1,14 +1,13 @@
 'use client';
 
+import Breadcrumbs from '@/app/invoices/Breadcrumbs';
 import InvoiceCreate from '@/components/invoice/InvoiceCreate';
 import InvoicesTable from '@/components/invoice/InvoicesTable';
-import { Separator } from '@/components/ui/separator';
 import { getBookSources } from '@/lib/actions/book-source';
 import { createInvoice, getInvoices } from '@/lib/actions/invoice';
 import { DEFAULT_LIMIT } from '@/lib/pagination';
 import BookSourceSerialized from '@/types/BookSourceSerialized';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -59,10 +58,10 @@ export default function InvoicesPage() {
 
   return (
     <>
-      <div className="flex justify-between items-center h-5 my-8 text-2xl">
-        <Link href="/invoices">
-          <div>Invoices</div>
-        </Link>
+      <Breadcrumbs />
+
+      <h1 className="mt-8">Invoices</h1>
+      <div className="flex w-full justify-end mb-4">
         <InvoiceCreate
           onCreate={async (data) => {
             setIsLoading(true);
@@ -72,7 +71,6 @@ export default function InvoicesPage() {
           vendors={vendors}
         />
       </div>
-      <Separator className="mt-4 mb-8" />
 
       <InvoicesTable
         invoices={invoices || []}
