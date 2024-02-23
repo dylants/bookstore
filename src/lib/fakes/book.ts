@@ -1,6 +1,7 @@
 import { fakeAuthor } from '@/lib/fakes/author';
 import { fakePublisher } from '@/lib/fakes/book-source';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { convertDollarsToCents } from '@/lib/money';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
@@ -20,7 +21,8 @@ const fakeIsbn13 = (): bigint =>
   BigInt(faker.commerce.isbn({ separator: '', variant: 13 }));
 
 export function fakeBook(): Book {
-  const priceInCents = _.toNumber(faker.commerce.price({ max: 50 })) * 100 + 99;
+  const priceInCents =
+    convertDollarsToCents(faker.commerce.price({ max: 50, min: 2 })) + 99;
 
   return {
     ...fakeCreatedAtUpdatedAt(),

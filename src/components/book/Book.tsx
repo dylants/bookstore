@@ -1,3 +1,4 @@
+import { convertCentsToDollars } from '@/lib/money';
 import BookHydrated from '@/types/BookHydrated';
 import _ from 'lodash';
 import Image from 'next/image';
@@ -27,6 +28,10 @@ function BookKey({
     case 'isbn13':
       fieldNameToDisplay = 'ISBN';
       fieldToDisplay = book[fieldName].toString();
+      break;
+    case 'priceInCents':
+      fieldNameToDisplay = 'Price';
+      fieldToDisplay = `$${convertCentsToDollars(book[fieldName])}`;
       break;
     case 'publishedDate':
       fieldNameToDisplay = 'Published Date';
@@ -68,8 +73,8 @@ export default function Book({ book }: { book: BookHydrated }) {
           <BookKey book={book} fieldName="isbn13" />
           <BookKey book={book} fieldName="authors" />
           <BookKey book={book} fieldName="genre" />
-          <BookKey book={book} fieldName="publisher" />
-          <BookKey book={book} fieldName="publishedDate" />
+          <BookKey book={book} fieldName="priceInCents" />
+          <BookKey book={book} fieldName="quantity" />
         </div>
       </div>
     </div>
