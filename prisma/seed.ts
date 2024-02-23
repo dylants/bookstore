@@ -112,13 +112,14 @@ async function generateInvoiceItem(props: GenerateInvoiceItemProps) {
 
 type GenerateInvoiceProps = {
   authorNames: string[];
+  markComplete?: boolean;
   numBooks: number;
   publisherNames: string[];
   vendor: BookSource;
 };
 
 async function generateInvoice(props: GenerateInvoiceProps) {
-  const { authorNames, numBooks, publisherNames, vendor } = props;
+  const { authorNames, markComplete, numBooks, publisherNames, vendor } = props;
 
   const { invoiceDate, invoiceNumber } = fakeInvoice();
   const { id: invoiceId } = await createInvoice({
@@ -138,9 +139,9 @@ async function generateInvoice(props: GenerateInvoiceProps) {
   );
   await Promise.all(invoiceItemPromises);
 
-  const invoice = completeInvoice(invoiceId);
-
-  return invoice;
+  if (markComplete) {
+    await completeInvoice(invoiceId);
+  }
 }
 
 async function main() {
@@ -150,10 +151,27 @@ async function main() {
   const authorNames = _.times(NUM_BOOKS, fakeAuthorName);
   const publisherNames = _.times(NUM_BOOKS, fakePublisherName);
 
-  // for now a single invoice for all books
+  const invoiceOneBooks = NUM_BOOKS - _.random(1, NUM_BOOKS - 1);
+  const invoiceTwoBooks = NUM_BOOKS - invoiceOneBooks;
+
   await generateInvoice({
     authorNames,
-    numBooks: NUM_BOOKS,
+    markComplete: true,
+    numBooks: invoiceOneBooks,
+    publisherNames,
+    vendor: _.sample(vendors) as BookSource,
+  });
+  await generateInvoice({
+    authorNames,
+    markComplete: true,
+    numBooks: invoiceTwoBooks,
+    publisherNames,
+    vendor: _.sample(vendors) as BookSource,
+  });
+  await generateInvoice({
+    authorNames,
+    markComplete: false,
+    numBooks: 0,
     publisherNames,
     vendor: _.sample(vendors) as BookSource,
   });
