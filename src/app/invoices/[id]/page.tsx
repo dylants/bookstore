@@ -10,12 +10,13 @@ import {
 import InvoiceItemsTable from '@/components/invoice-item/InvoiceItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { getInvoice } from '@/lib/actions/invoice';
+import { completeInvoice, getInvoice } from '@/lib/actions/invoice';
 import { getInvoiceItems } from '@/lib/actions/invoice-item';
 import { DEFAULT_LIMIT } from '@/lib/pagination';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import _ from 'lodash';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 function InvoiceDescription({ invoice }: { invoice: InvoiceHydrated }) {
@@ -60,9 +61,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   const [invoiceItems, setInvoiceItems] =
     useState<Array<InvoiceItemHydrated> | null>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   // TODO we should validate this input
-  const id = _.toNumber(params.id);
+  const invoiceId = _.toNumber(params.id);
 
   // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
   const setDelayedLoading = useCallback(() => {
@@ -75,23 +78,23 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
   const loadInvoice = useCallback(async () => {
     const doneLoading = setDelayedLoading();
-    const invoice = await getInvoice(id);
+    const invoice = await getInvoice(invoiceId);
     setInvoice(invoice);
     doneLoading();
-  }, [id, setDelayedLoading]);
+  }, [invoiceId, setDelayedLoading]);
 
   const loadInvoiceItems = useCallback(async () => {
     const doneLoading = setDelayedLoading();
     // TODO handle pagination
     const { invoiceItems } = await getInvoiceItems({
-      invoiceId: id,
+      invoiceId,
       paginationQuery: {
         first: DEFAULT_LIMIT,
       },
     });
     setInvoiceItems(invoiceItems);
     doneLoading();
-  }, [id, setDelayedLoading]);
+  }, [invoiceId, setDelayedLoading]);
 
   // on initial render, load all the things
   useEffect(() => {
@@ -122,8 +125,22 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       </div>
 
       <div className="flex flex-col gap-4 mt-8">
-        <div className="flex w-full justify-end">
-          <Button variant="secondary" disabled={invoice.isCompleted}>
+        <div className="flex w-full justify-between gap-4">
+          <Button
+            variant="secondary"
+            disabled={invoice.isCompleted}
+            onClick={async () => {
+              await completeInvoice(invoiceId);
+              loadInvoice();
+            }}
+          >
+            Publish
+          </Button>
+          <Button
+            variant="default"
+            disabled={invoice.isCompleted}
+            onClick={() => router.push(`${pathname}/add-invoice-item`)}
+          >
             Add Item
           </Button>
         </div>
