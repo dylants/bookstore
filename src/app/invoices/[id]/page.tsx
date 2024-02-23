@@ -1,6 +1,12 @@
 'use client';
 
-import Breadcrumbs from '@/components/Breadcrumbs';
+import {
+  Breadcrumbs,
+  BreadcrumbsHome,
+  BreadcrumbsDivider,
+  BreadcrumbsLink,
+  BreadcrumbsText,
+} from '@/components/Breadcrumbs';
 import InvoiceItemsTable from '@/components/invoice-item/InvoiceItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -103,7 +109,13 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
   return (
     <>
-      <Breadcrumbs invoice={invoice} />
+      <Breadcrumbs>
+        <BreadcrumbsHome />
+        <BreadcrumbsDivider />
+        <BreadcrumbsLink href="/invoices">Invoices</BreadcrumbsLink>
+        <BreadcrumbsDivider />
+        <BreadcrumbsText>{invoice.invoiceNumber}</BreadcrumbsText>
+      </Breadcrumbs>
 
       <div className="my-4">
         <InvoiceDescription invoice={invoice} />
