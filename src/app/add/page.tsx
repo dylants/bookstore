@@ -68,6 +68,7 @@ export default function AddBookPage() {
       genre: lookupBook?.genre || '',
       imageUrl: lookupBook?.imageUrl || '',
       isbn13: lookupBook?.isbn13 || '',
+      priceInCents: lookupBook?.priceInCents || '',
       publishedDate: lookupBook?.publishedDate || '',
       publisher: lookupBook?.publisher || '',
       // TODO gotta be careful here...
@@ -91,6 +92,8 @@ export default function AddBookPage() {
         // TODO fixme
         genre: Genre.FANTASY,
         isbn13: BigInt(book.isbn13),
+        // TODO fixme
+        priceInCents: 19.99,
         publishedDate: new Date(book.publishedDate),
       });
       reset();

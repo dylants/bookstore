@@ -28,6 +28,7 @@ model Book {
   format Format
   genre  Genre
 
+  priceInCents Int
   quantity     Int           @default(0)
   invoiceItems InvoiceItem[]
 }

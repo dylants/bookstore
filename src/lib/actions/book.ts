@@ -86,6 +86,7 @@ async function buildCreateUpdateBookData(
     genre: book.genre,
     imageUrl: book.imageUrl,
     isbn13: book.isbn13,
+    priceInCents: book.priceInCents,
     publishedDate: book.publishedDate,
     publisher,
     quantity: book.quantity,
