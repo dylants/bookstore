@@ -72,7 +72,7 @@ export default function AddBookPage() {
       publishedDate: lookupBook?.publishedDate || '',
       publisher: lookupBook?.publisher || '',
       // TODO gotta be careful here...
-      quantity: lookupBook?.quantity || 0,
+      quantity: lookupBook?.quantity || '',
       title: lookupBook?.title || '',
     },
   });
@@ -95,6 +95,8 @@ export default function AddBookPage() {
         // TODO fixme
         priceInCents: 19.99,
         publishedDate: new Date(book.publishedDate),
+        // TODO fixme
+        quantity: 0,
       });
       reset();
       setLookupBook({});
