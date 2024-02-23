@@ -1,6 +1,6 @@
 'use client';
 
-import Breadcrumbs from '@/app/invoices/Breadcrumbs';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import InvoiceCreate from '@/components/invoice/InvoiceCreate';
 import InvoicesTable from '@/components/invoice/InvoicesTable';
 import { getBookSources } from '@/lib/actions/book-source';
