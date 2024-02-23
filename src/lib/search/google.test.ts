@@ -1,12 +1,9 @@
-import useExternalBookSearch, {
-  ExternalBookSearchResult,
-  GoogleSearchResponse,
-  UseExternalBookSearchResult,
-} from '@/lib/search/external/useExternalBookSearch';
+import { GoogleSearchResponse, googleBookSearch } from '@/lib/search/google';
+import BookFormInput from '@/types/BookFormInput';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
-describe('useExternalBookSearch', () => {
+describe('google search', () => {
   const GOOGLE_BOOK_FOUND: GoogleSearchResponse = {
     items: [
       {
@@ -27,7 +24,7 @@ describe('useExternalBookSearch', () => {
               type: 'ISBN_13',
             },
           ],
-          publishedDate: new Date('2010-02-01'),
+          publishedDate: '2010-02-01',
           publisher: 'Little Brown & Company',
           title: 'How to Train Your Dragon',
         },
@@ -54,13 +51,8 @@ describe('useExternalBookSearch', () => {
     totalItems: 0,
   };
 
-  let search: UseExternalBookSearchResult;
-  beforeEach(() => {
-    search = useExternalBookSearch();
-  });
-
-  describe('search by ISBN', () => {
-    const isbn = '123';
+  describe('googleBookSearch', () => {
+    const isbn13 = '123';
 
     describe('when the book exists', () => {
       const server = setupServer(
@@ -68,14 +60,13 @@ describe('useExternalBookSearch', () => {
           return res(ctx.json(GOOGLE_BOOK_FOUND));
         }),
       );
-      const book: ExternalBookSearchResult = {
-        authorsHint: 'Cressida Cowell',
-        genresHint: 'Juvenile Fiction',
+      const book: Partial<BookFormInput> = {
+        authors: 'Cressida Cowell',
+        genre: 'Juvenile Fiction',
         imageUrl:
           'https://books.google.com/books/content?id=28_qngEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
-        isbn13: '9780316085274',
-        publishedDate: new Date('2010-02-01'),
-        publisherHint: 'Little Brown & Company',
+        publishedDate: '2010-02-01',
+        publisher: 'Little Brown & Company',
         title: 'How to Train Your Dragon',
       };
 
@@ -84,9 +75,12 @@ describe('useExternalBookSearch', () => {
       afterAll(() => server.close());
 
       it('should return the book details', async () => {
-        const result = await search({ isbn });
+        const result = await googleBookSearch({ isbn13 });
         expect(result).not.toBeNull();
-        expect(result).toEqual(book);
+        expect(result).toEqual({
+          ...book,
+          isbn13,
+        });
       });
     });
 
@@ -96,8 +90,8 @@ describe('useExternalBookSearch', () => {
           return res(ctx.json(GOOGLE_BOOK_FOUND_WITHOUT_DETAIL));
         }),
       );
-      const book: ExternalBookSearchResult = {
-        publisherHint: 'Little Brown & Company',
+      const book: Partial<BookFormInput> = {
+        publisher: 'Little Brown & Company',
         title: 'How to Train Your Dragon',
       };
 
@@ -106,9 +100,12 @@ describe('useExternalBookSearch', () => {
       afterAll(() => server.close());
 
       it('should return the book details', async () => {
-        const result = await search({ isbn });
+        const result = await googleBookSearch({ isbn13 });
         expect(result).not.toBeNull();
-        expect(result).toEqual(book);
+        expect(result).toEqual({
+          ...book,
+          isbn13,
+        });
       });
     });
 
@@ -123,9 +120,9 @@ describe('useExternalBookSearch', () => {
       afterEach(() => server.resetHandlers());
       afterAll(() => server.close());
 
-      it('should return null', async () => {
-        const result = await search({ isbn });
-        expect(result).toBeNull();
+      it('should return empty book', async () => {
+        const result = await googleBookSearch({ isbn13 });
+        expect(result).toEqual({});
       });
     });
   });
