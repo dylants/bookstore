@@ -1,6 +1,11 @@
 'use client';
 
-import Breadcrumbs from '@/components/Breadcrumbs';
+import {
+  Breadcrumbs,
+  BreadcrumbsDivider,
+  BreadcrumbsHome,
+  BreadcrumbsText,
+} from '@/components/Breadcrumbs';
 import InvoiceCreate from '@/components/invoice/InvoiceCreate';
 import InvoicesTable from '@/components/invoice/InvoicesTable';
 import { getBookSources } from '@/lib/actions/book-source';
@@ -58,7 +63,11 @@ export default function InvoicesPage() {
 
   return (
     <>
-      <Breadcrumbs />
+      <Breadcrumbs>
+        <BreadcrumbsHome />
+        <BreadcrumbsDivider />
+        <BreadcrumbsText>Invoices</BreadcrumbsText>
+      </Breadcrumbs>
 
       <h1 className="mt-8">Invoices</h1>
       <div className="flex w-full justify-end mb-4">
