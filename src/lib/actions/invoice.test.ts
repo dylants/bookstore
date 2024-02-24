@@ -67,21 +67,26 @@ describe('invoice actions', () => {
     it('should complete the invoice', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
+      const book1 = fakeBook();
+      book1.quantity = 7;
       const item1 = fakeInvoiceItem();
-      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...fakeBook(),
-        quantity: 7,
-      });
+      item1.bookId = book1.id;
+      item1.quantity = 5;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
+      const book2 = fakeBook();
+      book2.quantity = 0;
       const item2 = fakeInvoiceItem();
-      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...fakeBook(),
-        quantity: 0,
-      });
+      item2.bookId = book2.id;
+      item2.quantity = 3;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book2);
+
       const item3 = fakeInvoiceItem();
-      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce({
-        ...fakeBook(),
-        quantity: 2,
-      });
+      // item3 has same bookId as item1
+      item3.bookId = book1.id;
+      item3.quantity = 1;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
       prismaMock.invoiceItem.findMany.mockResolvedValue([item1, item2, item3]);
       prismaMock.invoice.update.mockResolvedValue(resolvedInvoice1);
 
@@ -91,18 +96,17 @@ describe('invoice actions', () => {
         where: { invoiceId: invoice1.id },
       });
 
-      expect(prismaMock.book.update).toHaveBeenCalledTimes(3);
+      // 3 invoice items, but only 2 books total
+      expect(prismaMock.book.update).toHaveBeenCalledTimes(2);
       expect(prismaMock.book.update).toHaveBeenNthCalledWith(1, {
-        data: { quantity: item1.quantity + 7 },
+        // book1 + item1 + item3
+        data: { quantity: 7 + 5 + 1 },
         where: { id: item1.bookId },
       });
       expect(prismaMock.book.update).toHaveBeenNthCalledWith(2, {
-        data: { quantity: item2.quantity + 0 },
+        // book2 + item2
+        data: { quantity: 0 + 3 },
         where: { id: item2.bookId },
-      });
-      expect(prismaMock.book.update).toHaveBeenNthCalledWith(3, {
-        data: { quantity: item3.quantity + 2 },
-        where: { id: item3.bookId },
       });
 
       expect(prismaMock.invoice.update).toHaveBeenCalledWith({

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { completeInvoice, getInvoice } from '@/lib/actions/invoice';
 import { getInvoiceItems } from '@/lib/actions/invoice-item';
-import { DEFAULT_LIMIT } from '@/lib/pagination';
+import { discountPercentageToDisplayString } from '@/lib/money';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import _ from 'lodash';
@@ -33,9 +33,7 @@ function InvoiceDescription({ invoice }: { invoice: InvoiceHydrated }) {
           <div className="text-right">
             <div>{vendor.accountNumber}</div>
             <div>
-              {vendor.discountPercentage
-                ? `${vendor.discountPercentage * 100}%`
-                : ''}
+              {discountPercentageToDisplayString(vendor.discountPercentage)}
             </div>
           </div>
         </div>
@@ -89,7 +87,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     const { invoiceItems } = await getInvoiceItems({
       invoiceId,
       paginationQuery: {
-        first: DEFAULT_LIMIT,
+        first: 100,
       },
     });
     setInvoiceItems(invoiceItems);

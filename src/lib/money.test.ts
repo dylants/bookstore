@@ -1,5 +1,6 @@
 import {
   convertCentsToDollars,
+  discountPercentageToDisplayString,
   convertDollarsToCents,
   determineDiscountedAmountInCents,
 } from '@/lib/money';
@@ -51,6 +52,24 @@ describe('money', () => {
           priceInCents: 2000,
         }),
       ).toEqual(0);
+    });
+  });
+
+  describe('discountPercentageToDisplayString', () => {
+    it('should work with a simple number', () => {
+      expect(discountPercentageToDisplayString(0.56)).toEqual('56%');
+    });
+
+    it('should work with a complex number', () => {
+      expect(discountPercentageToDisplayString(0.56348)).toEqual('56.35%');
+    });
+
+    it('should work with 0', () => {
+      expect(discountPercentageToDisplayString(0)).toEqual('0%');
+    });
+
+    it('should work with null', () => {
+      expect(discountPercentageToDisplayString(null)).toEqual('0%');
     });
   });
 });
