@@ -1,7 +1,9 @@
+'use client';
+
 import { InputIcon } from '@/components/ui/input-icon';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { SearchIcon } from 'lucide-react';
-import React, { useImperativeHandle } from 'react';
+import React, { useCallback, useImperativeHandle } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 export type SearchFormInput = {
@@ -9,6 +11,7 @@ export type SearchFormInput = {
 };
 
 export type SearchProps = {
+  clearOnSubmit?: boolean;
   hasError?: boolean;
   isSearching?: boolean;
   labelText?: string;
@@ -19,20 +22,32 @@ export type SearchProps = {
 const Search = React.forwardRef<
   React.ElementRef<typeof InputIcon>,
   SearchProps
->(({ hasError, isSearching, labelText, onSubmit, value }, forwardedRef) => {
-  const { handleSubmit, register } = useForm<SearchFormInput>({
+>((props, forwardedRef) => {
+  const { clearOnSubmit, hasError, isSearching, labelText, onSubmit, value } =
+    props;
+  const { handleSubmit, register, reset } = useForm<SearchFormInput>({
     values: {
       input: value || '',
     },
   });
   const { ref: formRef, ...formRest } = register('input', { required: true });
 
+  const internalOnSubmit: SubmitHandler<SearchFormInput> = useCallback(
+    (props) => {
+      if (clearOnSubmit) {
+        reset();
+      }
+      onSubmit(props);
+    },
+    [clearOnSubmit, onSubmit, reset],
+  );
+
   // https://stackoverflow.com/a/76739143/3666800
   const ref = React.useRef<HTMLInputElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLInputElement);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(internalOnSubmit)}>
       <div className="flex gap-4 items-end">
         <div className="flex flex-col flex-1">
           {labelText && <label className="text-sm">{labelText}</label>}
@@ -46,7 +61,7 @@ const Search = React.forwardRef<
             }
             asButton
             hasError={hasError}
-            onClick={handleSubmit(onSubmit)}
+            onClick={handleSubmit(internalOnSubmit)}
             // https://www.react-hook-form.com/faqs/#Howtosharerefusage
             {...formRest}
             ref={(e) => {

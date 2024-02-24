@@ -2,14 +2,23 @@ import Search from '@/components/search/Search';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Search> = {
+  args: {
+    onSubmit: () => {},
+  },
   component: Search,
 };
 
 export default meta;
 type Story = StoryObj<typeof Search>;
 
-export const Empty: Story = {
+export const Default: Story = {
   args: {},
+};
+
+export const ClearOnSubmit: Story = {
+  args: {
+    clearOnSubmit: true,
+  },
 };
 
 export const HasError: Story = {
