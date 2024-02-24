@@ -90,11 +90,11 @@ export default function AddInvoiceItemPage({
     loadInvoice();
   }, [loadInvoice]);
 
-  const inputElement = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (inputElement.current && invoice) {
-      inputElement.current.focus();
+    if (searchRef.current && invoice) {
+      searchRef.current.focus();
     }
   }, [invoice]);
 
@@ -106,6 +106,13 @@ export default function AddInvoiceItemPage({
       setIsSearching(false);
     }
   }, []);
+
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (submitButtonRef.current && lookupBook) {
+      submitButtonRef.current.focus();
+    }
+  }, [lookupBook]);
 
   const {
     formState: { errors, isSubmitting },
@@ -166,6 +173,11 @@ export default function AddInvoiceItemPage({
         setLookupBook(null);
 
         // TODO add success
+
+        // move the focus back to search so they can continue...
+        if (searchRef.current) {
+          searchRef.current.focus();
+        }
       }
     },
     [invoice, reset],
@@ -195,10 +207,11 @@ export default function AddInvoiceItemPage({
 
       <h1 className="my-4">New Invoice Item</h1>
       <Search
+        clearOnSubmit
         isSearching={isSearching}
         labelText="Enter ISBN"
         onSubmit={onSearch}
-        ref={inputElement}
+        ref={searchRef}
       />
 
       {lookupBook && (
@@ -279,6 +292,7 @@ export default function AddInvoiceItemPage({
 
               <div className="flex justify-end mt-5">
                 <Button
+                  ref={submitButtonRef}
                   type="submit"
                   disabled={isSubmitting}
                   className="w-[100px]"
