@@ -24,6 +24,8 @@ import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import { Format, Genre } from '@prisma/client';
 import { ReloadIcon } from '@radix-ui/react-icons';
+import { format } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import _ from 'lodash';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -47,6 +49,7 @@ function BookFormInputField({
   let type: string = 'text';
   if (fieldName === 'publishedDate') {
     fieldNameToDisplay = 'Published Date';
+    type = 'date';
   } else if (fieldName === 'isbn13') {
     fieldNameToDisplay = 'ISBN';
   } else if (fieldName === 'priceInCents') {
@@ -122,13 +125,22 @@ export default function AddInvoiceItemPage({
   } = useForm<BookFormInput>({
     values: {
       authors: lookupBook?.authors || '',
-      format: 'Hardcover',
+      format: '',
       genre: lookupBook?.genre || '',
       imageUrl: lookupBook?.imageUrl || '',
       isbn13: lookupBook?.isbn13 || '',
-      priceInCents: '19.99',
-      publishedDate: lookupBook?.publishedDate || '',
+      priceInCents: '',
+      publishedDate: lookupBook?.publishedDate
+        ? format(
+            zonedTimeToUtc(
+              lookupBook.publishedDate,
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+            ),
+            'yyyy-MM-dd',
+          )
+        : '',
       publisher: lookupBook?.publisher || '',
+      // default the quantity to 1 to help speed the flow up
       quantity: '1',
       title: lookupBook?.title || '',
     },
