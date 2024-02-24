@@ -144,27 +144,38 @@ async function generateInvoice(props: GenerateInvoiceProps) {
   }
 }
 
-async function main() {
-  const vendors = await generateVendors(NUM_VENDORS);
+type GenerateInvoicesProps = {
+  authorNames: string[];
+  numBooks: number;
+  publisherNames: string[];
+  vendors: BookSource[];
+};
 
-  // this represents the "scope" of available authors and publishers
-  const authorNames = _.times(NUM_BOOKS, fakeAuthorName);
-  const publisherNames = _.times(NUM_BOOKS, fakePublisherName);
+async function generateInvoices(props: GenerateInvoicesProps) {
+  const { authorNames, numBooks, publisherNames, vendors } = props;
 
-  const invoiceOneBooks = NUM_BOOKS - _.random(1, NUM_BOOKS - 1);
-  const invoiceTwoBooks = NUM_BOOKS - invoiceOneBooks;
+  // this tries to evenly split up the books, based on if the user
+  // requested 0, 1, or more than 1 books created
+  let numBooksInvoiceOne = 0;
+  let numBooksInvoiceTwo = 0;
+  if (numBooks > 0) {
+    numBooksInvoiceOne =
+      NUM_BOOKS -
+      _.random(_.min([NUM_BOOKS - 1, 1])!, _.max([NUM_BOOKS - 1, 1])!);
+    numBooksInvoiceTwo = NUM_BOOKS - numBooksInvoiceOne;
+  }
 
   await generateInvoice({
     authorNames,
     markComplete: true,
-    numBooks: invoiceOneBooks,
+    numBooks: numBooksInvoiceOne,
     publisherNames,
     vendor: _.sample(vendors) as BookSource,
   });
   await generateInvoice({
     authorNames,
     markComplete: true,
-    numBooks: invoiceTwoBooks,
+    numBooks: numBooksInvoiceTwo,
     publisherNames,
     vendor: _.sample(vendors) as BookSource,
   });
@@ -174,6 +185,21 @@ async function main() {
     numBooks: 0,
     publisherNames,
     vendor: _.sample(vendors) as BookSource,
+  });
+}
+
+async function main() {
+  const vendors = await generateVendors(NUM_VENDORS);
+
+  // this represents the "scope" of available authors and publishers
+  const authorNames = _.times(NUM_BOOKS, fakeAuthorName);
+  const publisherNames = _.times(NUM_BOOKS, fakePublisherName);
+
+  await generateInvoices({
+    authorNames,
+    numBooks: NUM_BOOKS,
+    publisherNames,
+    vendors,
   });
 }
 main()
