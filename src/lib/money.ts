@@ -18,3 +18,9 @@ export function determineDiscountedAmountInCents({
   const cost = priceInCents - priceInCents * discountPercentage;
   return cost;
 }
+
+export function discountPercentageToDisplayString(
+  discountPercentage: number | null,
+): string {
+  return `${_.round((discountPercentage ?? 0) * 100, 2)}%`;
+}

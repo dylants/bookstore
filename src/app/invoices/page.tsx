@@ -10,7 +10,6 @@ import InvoiceCreate from '@/components/invoice/InvoiceCreate';
 import InvoicesTable from '@/components/invoice/InvoicesTable';
 import { getBookSources } from '@/lib/actions/book-source';
 import { createInvoice, getInvoices } from '@/lib/actions/invoice';
-import { DEFAULT_LIMIT } from '@/lib/pagination';
 import BookSourceSerialized from '@/types/BookSourceSerialized';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import { usePathname, useRouter } from 'next/navigation';
@@ -28,7 +27,7 @@ export default function InvoicesPage() {
     const { bookSources: vendors } = await getBookSources({
       isVendor: true,
       paginationQuery: {
-        first: DEFAULT_LIMIT,
+        first: 100,
       },
     });
     setVendors(vendors);
@@ -48,7 +47,7 @@ export default function InvoicesPage() {
     // TODO handle pagination
     const { invoices } = await getInvoices({
       paginationQuery: {
-        first: DEFAULT_LIMIT,
+        first: 100,
       },
     });
     setInvoices(invoices);
