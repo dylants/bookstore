@@ -22,5 +22,14 @@ describe('date lib', () => {
         ),
       ).toEqual('2000-04-05');
     });
+
+    it('should convert Date properly', () => {
+      expect(
+        convertDateToFormInputString(
+          new Date('2001-10-12T16:00:00.000Z'),
+          'America/Chicago',
+        ),
+      ).toEqual('2001-10-12');
+    });
   });
 });
