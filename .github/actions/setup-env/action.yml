@@ -1,5 +1,5 @@
-# https://docs.github.com/en/actions/using-workflows/reusing-workflows
-name: Setup Environment
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+name: Setup Environment Action
 
 runs:
   using: 'composite'
