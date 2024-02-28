@@ -11,8 +11,10 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Setup Environment
-        uses: ./.github/actions/setup-env/action.yml
+        uses: ./.github/actions/setup-env
       - name: Run lint
         run: bun run lint
       - name: Run tests
@@ -20,7 +22,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Setup Environment
-        uses: ./.github/actions/setup-env/action.yml
+        uses: ./.github/actions/setup-env
       - name: Run build
         run: bun run build
