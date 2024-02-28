@@ -10,9 +10,9 @@ const createJestConfig = nextJest({
 const config: Config = {
   collectCoverageFrom: [
     'src/**/*.ts*',
-    '!src/app/**/layout.tsx',
-    '!src/app/**/page.tsx',
-    '!src/app/**/*Container.tsx',
+    // exclude everything but api from /app
+    '!src/app/**',
+    'src/app/api/**',
     '!src/lib/fakes/**',
     '!src/lib/schemas/**',
     '!src/types/**',

@@ -1,17 +1,9 @@
 'use client';
 
-import {
-  Breadcrumbs,
-  BreadcrumbsHome,
-  BreadcrumbsDivider,
-  BreadcrumbsLink,
-  BreadcrumbsText,
-} from '@/components/Breadcrumbs';
-import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { getInvoice } from '@/lib/actions/invoice';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import {
   convertDollarsToCents,
@@ -35,6 +27,10 @@ import {
   UseFormRegister,
   useForm,
 } from 'react-hook-form';
+
+type SearchFormInput = {
+  input: string;
+};
 
 function BookFormInputField({
   errors,
@@ -72,50 +68,44 @@ function BookFormInputField({
   );
 }
 
-export default function AddInvoiceItemPage({
-  params,
+export default function BookForm({
+  invoice,
+  onCreateInvoiceItem,
 }: {
-  params: { id: string };
+  invoice: InvoiceHydrated;
+  onCreateInvoiceItem: () => void;
 }) {
-  const [invoice, setInvoice] = useState<InvoiceHydrated | null>();
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [lookupBook, setLookupBook] = useState<Partial<BookFormInput> | null>();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // TODO we should validate this input
-  const invoiceId = _.toNumber(params.id);
-
-  const loadInvoice = useCallback(async () => {
-    const invoice = await getInvoice(invoiceId);
-    setInvoice(invoice);
-  }, [invoiceId]);
-
+  const searchRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
-    loadInvoice();
-  }, [loadInvoice]);
-
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (searchRef.current && invoice) {
+    if (searchRef.current && !isOpen) {
       searchRef.current.focus();
     }
-  }, [invoice]);
+  }, [searchRef, isOpen]);
 
-  const onSearch = useCallback(async ({ input }: { input: string }) => {
-    if (input) {
-      setIsSearching(true);
-      const book = await googleBookSearch({ isbn13: input });
-      setLookupBook(book);
-      setIsSearching(false);
-    }
-  }, []);
+  const {
+    handleSubmit: handleSearchSubmit,
+    register: registerSearchSubmit,
+    reset: resetSearchSubmit,
+  } = useForm<SearchFormInput>();
+  const { ref: formRef, ...formRest } = registerSearchSubmit('input');
 
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (submitButtonRef.current && lookupBook) {
-      submitButtonRef.current.focus();
-    }
-  }, [lookupBook]);
+  const onSearch = useCallback(
+    async ({ input }: { input: string }) => {
+      if (input) {
+        setIsSearching(true);
+        const book = await googleBookSearch({ isbn13: input });
+        setLookupBook(book);
+        resetSearchSubmit();
+        setIsSearching(false);
+      }
+      setIsOpen(true);
+    },
+    [resetSearchSubmit],
+  );
 
   const {
     formState: { errors, isSubmitting },
@@ -146,7 +136,7 @@ export default function AddInvoiceItemPage({
     },
   });
 
-  const onSubmit: SubmitHandler<BookFormInput> = useCallback(
+  const onBookSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (bookFormInput) => {
       if (invoice) {
         const book: BookCreateInput = {
@@ -181,18 +171,14 @@ export default function AddInvoiceItemPage({
         };
 
         await createInvoiceItem(invoiceItem);
+
         reset();
         setLookupBook(null);
-
-        // TODO add success
-
-        // move the focus back to search so they can continue...
-        if (searchRef.current) {
-          searchRef.current.focus();
-        }
+        setIsOpen(false);
+        onCreateInvoiceItem();
       }
     },
-    [invoice, reset],
+    [invoice, onCreateInvoiceItem, reset],
   );
 
   if (!invoice) {
@@ -205,90 +191,103 @@ export default function AddInvoiceItemPage({
 
   return (
     <>
-      <Breadcrumbs>
-        <BreadcrumbsHome />
-        <BreadcrumbsDivider />
-        <BreadcrumbsLink href="/invoices">Invoices</BreadcrumbsLink>
-        <BreadcrumbsDivider />
-        <BreadcrumbsLink href={`/invoices/${invoice.id}`}>
-          {invoice.invoiceNumber}
-        </BreadcrumbsLink>
-        <BreadcrumbsDivider />
-        <BreadcrumbsText>New</BreadcrumbsText>
-      </Breadcrumbs>
-
-      <h1 className="my-4">New Invoice Item</h1>
-      <Search
-        clearOnSubmit
-        isSearching={isSearching}
-        labelText="Enter ISBN"
-        onSubmit={onSearch}
-        ref={searchRef}
-      />
-
-      {lookupBook && (
-        <>
-          <h2 className="mt-4 mb-2">Book</h2>
-          <div className="flex flex-col">
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="flex gap-4 mt-4">
-                <div className="flex">
-                  {lookupBook?.imageUrl ? (
-                    <Image
-                      alt={lookupBook?.title || 'Unknown image'}
-                      src={lookupBook?.imageUrl}
-                      width={128}
-                      height={192}
-                    />
-                  ) : (
-                    <div className="border rounded-sm border-customPalette-200 w-[128px] h-[192px] flex justify-center items-center">
-                      No Image
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col flex-1 gap-3">
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="isbn13"
-                    register={register}
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          reset();
+          setLookupBook(null);
+          setIsOpen(open);
+        }}
+      >
+        <div className="flex w-full justify-end items-end">
+          <form
+            className="flex gap-4 items-end"
+            onSubmit={handleSearchSubmit(onSearch)}
+          >
+            <div className="flex flex-col">
+              <label className="text-sm capitalize">Scan or Enter ISBN</label>
+              <Input
+                {...formRest}
+                ref={(e) => {
+                  formRef(e);
+                  searchRef.current = e;
+                }}
+                type="text"
+                className="w-[300px]"
+              />
+            </div>
+            <Button variant="default" type="submit" className="w-[100px]">
+              {isSearching ? (
+                <ReloadIcon className="h-4 w-4 animate-spin" />
+              ) : (
+                'Add Item'
+              )}
+            </Button>
+          </form>
+        </div>
+        <DialogContent className="max-w-2xl">
+          <form onSubmit={handleSubmit(onBookSubmit)}>
+            <div className="flex gap-4 mt-4">
+              <div className="flex">
+                {lookupBook?.imageUrl ? (
+                  <Image
+                    alt={lookupBook?.title || 'Unknown image'}
+                    src={lookupBook?.imageUrl}
+                    width={128}
+                    height={192}
                   />
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="title"
-                    register={register}
-                  />
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="authors"
-                    register={register}
-                  />
-                </div>
+                ) : (
+                  <div className="border rounded-sm border-customPalette-200 w-[128px] h-[192px] flex justify-center items-center">
+                    No Image
+                  </div>
+                )}
               </div>
+              <div className="flex flex-col flex-1 gap-3">
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="isbn13"
+                  register={register}
+                />
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="title"
+                  register={register}
+                />
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="authors"
+                  register={register}
+                />
+              </div>
+            </div>
 
-              <div className="flex flex-col flex-1 gap-4 mt-3">
-                <div className="flex flex-1 gap-4">
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="genre"
-                    register={register}
-                  />
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="format"
-                    register={register}
-                  />
-                  <BookFormInputField
-                    errors={errors}
-                    fieldName="priceInCents"
-                    register={register}
-                  />
-                </div>
-                <div className="flex flex-1 gap-4">
+            <div className="flex flex-col flex-1 gap-4 mt-3">
+              <div className="flex flex-1 gap-4">
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="genre"
+                  register={register}
+                />
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="format"
+                  register={register}
+                />
+                <BookFormInputField
+                  errors={errors}
+                  fieldName="priceInCents"
+                  register={register}
+                />
+              </div>
+              <div className="flex flex-1 gap-4">
+                <div className="flex flex-1">
                   <BookFormInputField
                     errors={errors}
                     fieldName="publisher"
                     register={register}
                   />
+                </div>
+                <div className="flex flex-1 gap-4">
                   <BookFormInputField
                     errors={errors}
                     fieldName="publishedDate"
@@ -301,25 +300,25 @@ export default function AddInvoiceItemPage({
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end mt-5">
-                <Button
-                  ref={submitButtonRef}
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-[100px]"
-                >
-                  {isSubmitting ? (
-                    <ReloadIcon className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Add Book'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </>
-      )}
+            <div className="flex justify-end mt-5">
+              <Button
+                autoFocus
+                type="submit"
+                disabled={isSubmitting}
+                className="w-[100px]"
+              >
+                {isSubmitting ? (
+                  <ReloadIcon className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Add'
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
