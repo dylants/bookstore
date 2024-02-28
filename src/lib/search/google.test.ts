@@ -120,9 +120,9 @@ describe('google search', () => {
       afterEach(() => server.resetHandlers());
       afterAll(() => server.close());
 
-      it('should return empty book', async () => {
+      it('should return book with just input isbn', async () => {
         const result = await googleBookSearch({ isbn13 });
-        expect(result).toEqual({});
+        expect(result).toEqual({ isbn13 });
       });
     });
   });

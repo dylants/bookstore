@@ -75,7 +75,9 @@ export async function googleBookSearch(
 
     return book;
   } else {
-    logger.trace('no data found');
-    return {};
+    logger.trace('no data found, returning only input ISBN number');
+    return {
+      isbn13,
+    };
   }
 }

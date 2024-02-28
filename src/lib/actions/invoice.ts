@@ -48,8 +48,14 @@ async function updateBookQuantity(
     where: { id: bookId },
   });
 
+  logger.trace(
+    'book.quantity: %d increasedQuantity: %d',
+    book.quantity,
+    increasedQuantity,
+  );
   const updatedQuantity = book.quantity + increasedQuantity;
 
+  logger.trace('updating book id: %s to quantity: %d', bookId, updatedQuantity);
   await tx.book.update({
     data: { quantity: updatedQuantity },
     where: { id: bookId },
@@ -143,6 +149,7 @@ export async function getInvoices({
       },
       vendor: true,
     },
+    orderBy: { createdAt: 'desc' },
   });
 
   const items = rawItems.map((item) => ({

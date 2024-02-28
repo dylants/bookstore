@@ -9,6 +9,7 @@ import {
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
 import { Invoice } from '@prisma/client';
+import { buildPaginationRequest } from '@/lib/pagination';
 
 jest.mock('../serializers/book-source', () => ({
   serializeBookSource: (vendor: unknown) => vendor,
@@ -141,6 +142,16 @@ describe('invoice actions', () => {
 
       const result = await getInvoices({});
 
+      expect(prismaMock.invoice.findMany).toHaveBeenCalledWith({
+        ...buildPaginationRequest({}),
+        include: {
+          _count: {
+            select: { invoiceItems: true },
+          },
+          vendor: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
       expect(result).toEqual({
         invoices: [
           {
