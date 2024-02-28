@@ -1,8 +1,7 @@
+import { convertDateToFormInputString } from '@/lib/date';
 import { convertCentsToDollars } from '@/lib/money';
 import BookFormInput from '@/types/BookFormInput';
 import BookHydrated from '@/types/BookHydrated';
-import { format } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
 
 export function transformBookHydratedToBookFormInput(
   book: BookHydrated,
@@ -16,7 +15,7 @@ export function transformBookHydratedToBookFormInput(
     isbn13: book.isbn13.toString(),
     priceInCents: convertCentsToDollars(book.priceInCents).toString(),
     publishedDate: book.publishedDate
-      ? format(zonedTimeToUtc(book.publishedDate, timezone), 'yyyy-MM-dd')
+      ? convertDateToFormInputString(book.publishedDate, timezone)
       : '',
     publisher: book.publisher.name,
     quantity: book.quantity.toString(),
