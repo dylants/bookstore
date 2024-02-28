@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Environment
-        uses: ./.github/actions/setup-env.yml
+        uses: ./.github/actions/setup-env
       - name: Run lint
         run: bun run lint
       - name: Run tests
@@ -21,6 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Environment
-        uses: ./.github/actions/setup-env.yml
+        uses: ./.github/actions/setup-env
       - name: Run build
         run: bun run build
