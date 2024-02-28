@@ -14,6 +14,10 @@ describe('money', () => {
     it('should convert string', () => {
       expect(convertCentsToDollars('1025')).toEqual(10.25);
     });
+
+    it('should convert string 1999', () => {
+      expect(convertCentsToDollars('1999')).toEqual(19.99);
+    });
   });
 
   describe('convertDollarsToCents', () => {
@@ -23,6 +27,10 @@ describe('money', () => {
 
     it('should convert string', () => {
       expect(convertDollarsToCents('10.25')).toEqual(1025);
+    });
+
+    it('should convert string 19.99', () => {
+      expect(convertDollarsToCents('19.99')).toEqual(1999);
     });
   });
 
