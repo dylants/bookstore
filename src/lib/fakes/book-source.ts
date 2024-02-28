@@ -16,6 +16,10 @@ export function fakePublisher(): BookSource {
   };
 }
 
+export function fakePublisherSerialized(): BookSourceSerialized {
+  return serializeBookSource(fakePublisher());
+}
+
 export function fakeVendor(): BookSource {
   // some vendors can also be publishers, so randomly assign isPublisher
   const isPublisher = faker.datatype.boolean();

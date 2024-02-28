@@ -9,7 +9,7 @@ import {
   convertDollarsToCents,
   determineDiscountedAmountInCents,
 } from '@/lib/money';
-import { googleBookSearch } from '@/lib/search/google';
+import { findBookByIsbn13 } from '@/lib/search/book';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
@@ -97,7 +97,10 @@ export default function BookForm({
     async ({ input }: { input: string }) => {
       if (input) {
         setIsSearching(true);
-        const book = await googleBookSearch({ isbn13: input });
+        const book = await findBookByIsbn13({
+          isbn13: input,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
         setLookupBook(book);
         resetSearchSubmit();
         setIsSearching(false);
@@ -115,11 +118,11 @@ export default function BookForm({
   } = useForm<BookFormInput>({
     values: {
       authors: lookupBook?.authors || '',
-      format: '',
+      format: lookupBook?.format || '',
       genre: lookupBook?.genre || '',
       imageUrl: lookupBook?.imageUrl || '',
       isbn13: lookupBook?.isbn13 || '',
-      priceInCents: '',
+      priceInCents: lookupBook?.priceInCents || '',
       publishedDate: lookupBook?.publishedDate
         ? format(
             zonedTimeToUtc(
@@ -131,6 +134,7 @@ export default function BookForm({
         : '',
       publisher: lookupBook?.publisher || '',
       // default the quantity to 1 to help speed the flow up
+      // we don't want to use the book's value, since this is a new invoice
       quantity: '1',
       title: lookupBook?.title || '',
     },
@@ -149,8 +153,7 @@ export default function BookForm({
           // the user assumes they are entering in dollars, so convert to cents
           priceInCents: convertDollarsToCents(bookFormInput.priceInCents),
           publishedDate: new Date(bookFormInput.publishedDate),
-          // TODO we need to lookup the value from our database
-          quantity: 0,
+          quantity: _.toNumber(lookupBook?.quantity || 0),
         };
 
         const { discountPercentage } = invoice.vendor;
@@ -178,7 +181,7 @@ export default function BookForm({
         onCreateInvoiceItem();
       }
     },
-    [invoice, onCreateInvoiceItem, reset],
+    [lookupBook, invoice, onCreateInvoiceItem, reset],
   );
 
   if (!invoice) {
