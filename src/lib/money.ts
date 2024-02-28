@@ -5,7 +5,8 @@ export function convertCentsToDollars(cents: string | number): number {
 }
 
 export function convertDollarsToCents(dollars: string | number): number {
-  return _.toNumber(dollars) * 100;
+  // math is annoying in js
+  return _.round(_.toNumber(dollars) * 100);
 }
 
 export function determineDiscountedAmountInCents({
