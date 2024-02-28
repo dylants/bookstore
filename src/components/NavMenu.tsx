@@ -17,7 +17,10 @@ import Link from 'next/link';
 export default function NavMenu() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus-visible:outline-none">
+      <DropdownMenuTrigger
+        className="focus-visible:outline-none"
+        data-testid="nav-menu"
+      >
         <HamburgerMenuIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
