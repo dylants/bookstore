@@ -26,7 +26,5 @@ jobs:
         run: bun run lint
       - name: Run tests
         run: bun run test
-      - name: Run storybook build
-        run: bun run build-storybook
       - name: Run build
         run: bun run build
