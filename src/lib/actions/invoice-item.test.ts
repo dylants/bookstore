@@ -85,6 +85,7 @@ describe('invoice-item actions', () => {
             },
           },
         },
+        orderBy: { createdAt: 'desc' },
         where: {},
       });
       expect(result).toEqual({
@@ -141,6 +142,7 @@ describe('invoice-item actions', () => {
             },
           },
         },
+        orderBy: { createdAt: 'desc' },
         where: { invoiceId: 123 },
       });
     });

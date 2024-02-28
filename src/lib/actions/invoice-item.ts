@@ -87,6 +87,7 @@ export async function getInvoiceItems({
         },
       },
     },
+    orderBy: { createdAt: 'desc' },
     where: { invoiceId },
   });
 
