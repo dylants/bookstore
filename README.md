@@ -4,6 +4,8 @@ An application to help run a book store.
 
 ## Getting Started
 
+_This app uses [bun](https://bun.sh/) for dependency management and script execution._
+
 1. Install dependencies
 
 ```
