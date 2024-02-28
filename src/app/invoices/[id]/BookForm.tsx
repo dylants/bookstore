@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
+import { convertDateToFormInputString } from '@/lib/date';
 import {
   convertDollarsToCents,
   determineDiscountedAmountInCents,
@@ -16,8 +17,6 @@ import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import { Format, Genre } from '@prisma/client';
 import { ReloadIcon } from '@radix-ui/react-icons';
-import { format } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
 import _ from 'lodash';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -124,12 +123,9 @@ export default function BookForm({
       isbn13: lookupBook?.isbn13 || '',
       priceInCents: lookupBook?.priceInCents || '',
       publishedDate: lookupBook?.publishedDate
-        ? format(
-            zonedTimeToUtc(
-              lookupBook.publishedDate,
-              Intl.DateTimeFormat().resolvedOptions().timeZone,
-            ),
-            'yyyy-MM-dd',
+        ? convertDateToFormInputString(
+            lookupBook.publishedDate,
+            Intl.DateTimeFormat().resolvedOptions().timeZone,
           )
         : '',
       publisher: lookupBook?.publisher || '',
