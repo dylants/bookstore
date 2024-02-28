@@ -9,7 +9,6 @@ on:
 
 jobs:
   ci:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -27,7 +26,6 @@ jobs:
       - name: Run tests
         run: bun run test
   build:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
