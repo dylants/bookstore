@@ -7,7 +7,7 @@ An application to help run a book store.
 1. Install dependencies
 
 ```
-$ yarn
+$ bun install
 ```
 
 2. Setup the [database](#database)
@@ -15,7 +15,7 @@ $ yarn
 3. Start the application
 
 ```
-$ yarn dev
+$ bun dev
 ```
 
 ## Database
@@ -68,13 +68,13 @@ The following commands require an `.env.local` file with the `DATABASE_URL`.
 Run the seeds:
 
 ```
-$ yarn db:seed
+$ bun db:seed
 ```
 
 Reset the database, re-run migrations, and re-seed the data:
 
 ```
-$ yarn db:reset
+$ bun db:reset
 ```
 
 #### Overrides
@@ -101,13 +101,13 @@ Lint and Jest tests are run during CI. These unit tests are stored along side th
 To run the tests:
 
 ```
-$ yarn test
+$ bun run test
 ```
 
 To run tests in watch mode:
 
 ```
-$ yarn test:watch
+$ bun run test:watch
 ```
 
 ### Playwright e2e Tests
@@ -117,13 +117,13 @@ Playwright tests are stored in [tests](tests/).
 To run the tests:
 
 ```
-$ yarn playwright test
+$ bun playwright test
 ```
 
 To run the tests with the Playwright UI:
 
 ```
-$ yarn playwright test --ui
+$ bun playwright test --ui
 ```
 
 ## Storybook
@@ -133,5 +133,5 @@ This app uses [Storybook](https://storybook.js.org/) to demo UI components.
 To run storybook:
 
 ```
-$ yarn storybook
+$ bun storybook
 ```
