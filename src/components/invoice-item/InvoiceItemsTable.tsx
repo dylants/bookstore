@@ -1,7 +1,9 @@
 import DataTable from '@/components/table/DataTable';
 import SortableHeader from '@/components/table/SortableHeader';
+import BookHydrated from '@/types/BookHydrated';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import { ColumnDef } from '@tanstack/react-table';
+import Image from 'next/image';
 
 function RenderMoney({ value }: { value: number }) {
   return <>${value / 100}</>;
@@ -9,30 +11,38 @@ function RenderMoney({ value }: { value: number }) {
 
 const columns: ColumnDef<InvoiceItemHydrated>[] = [
   {
-    accessorFn: (invoiceItem) => invoiceItem.book.isbn13,
+    accessorFn: (invoiceItem) => invoiceItem.book?.isbn13,
     header: ({ column }) => (
-      <SortableHeader column={column} text="ISBN" className="justify-start" />
+      <SortableHeader column={column} text="SKU" className="justify-start" />
     ),
     id: 'isbn',
   },
   {
-    accessorFn: (invoiceItem) => invoiceItem.book.title,
-    header: ({ column }) => (
-      <SortableHeader column={column} text="Title" className="justify-start" />
-    ),
-    id: 'title',
+    accessorFn: (invoiceItem) => invoiceItem.book,
+    cell: (props) => {
+      const book = props.getValue() as BookHydrated | null;
+
+      return (
+        <div className="flex items-center">
+          {book?.imageUrl && (
+            <Image
+              alt={book.title}
+              src={book.imageUrl}
+              width={16}
+              height={24}
+            />
+          )}
+        </div>
+      );
+    },
+    header: 'Image',
   },
   {
-    accessorFn: (invoiceItem) =>
-      invoiceItem.book.authors.map((a) => a.name).join(', '),
+    accessorFn: (invoiceItem) => invoiceItem.book?.title,
     header: ({ column }) => (
-      <SortableHeader
-        column={column}
-        text="Authors"
-        className="justify-start"
-      />
+      <SortableHeader column={column} text="Name" className="justify-start" />
     ),
-    id: 'author',
+    id: 'title',
   },
   {
     accessorKey: 'itemCostInCents',

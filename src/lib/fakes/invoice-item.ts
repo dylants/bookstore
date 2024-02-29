@@ -3,7 +3,7 @@ import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { convertDollarsToCents } from '@/lib/money';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import { faker } from '@faker-js/faker';
-import { InvoiceItem } from '@prisma/client';
+import { InvoiceItem, ProductType } from '@prisma/client';
 
 export function fakeInvoiceItem(): InvoiceItem {
   const itemCostInCents =
@@ -18,6 +18,7 @@ export function fakeInvoiceItem(): InvoiceItem {
     id: faker.number.int(),
     invoiceId: faker.number.int(),
     itemCostInCents,
+    productType: ProductType.BOOK,
     quantity,
     totalCostInCents,
   };
