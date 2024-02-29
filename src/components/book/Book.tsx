@@ -1,7 +1,7 @@
 import { formatToDisplayString } from '@/lib/book/format';
+import { genreToDisplayString } from '@/lib/book/genre';
 import { convertCentsToDollars } from '@/lib/money';
 import BookHydrated from '@/types/BookHydrated';
-import _ from 'lodash';
 import Image from 'next/image';
 
 function BookKey({
@@ -21,13 +21,10 @@ function BookKey({
     case 'format':
       fieldNameToDisplay = fieldName;
       fieldToDisplay = formatToDisplayString(book[fieldName]);
+      break;
     case 'genre':
       fieldNameToDisplay = fieldName;
-      // TODO should this be a function?
-      fieldToDisplay = _(book[fieldName])
-        .split('_')
-        .map((w) => _.capitalize(_.lowerCase(w)))
-        .join(' ');
+      fieldToDisplay = genreToDisplayString(book[fieldName]);
       break;
     case 'isbn13':
       fieldNameToDisplay = 'ISBN';

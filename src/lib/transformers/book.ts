@@ -1,10 +1,10 @@
 import { stringToFormat } from '@/lib/book/format';
+import { stringToGenre } from '@/lib/book/genre';
 import { convertDateToFormInputString } from '@/lib/date';
 import { convertCentsToDollars, convertDollarsToCents } from '@/lib/money';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import BookHydrated from '@/types/BookHydrated';
-import { Genre } from '@prisma/client';
 import _ from 'lodash';
 
 export function transformBookHydratedToBookFormInput({
@@ -40,8 +40,7 @@ export function transformBookFormInputToBookCreateInput({
   return {
     ...bookFormInput,
     format: stringToFormat(bookFormInput.format),
-    // TODO fixme
-    genre: Genre.FANTASY,
+    genre: stringToGenre(bookFormInput.genre),
     isbn13: BigInt(bookFormInput.isbn13),
     // the book form input is presented as dollars, so convert to cents
     priceInCents: convertDollarsToCents(bookFormInput.priceInCents),
