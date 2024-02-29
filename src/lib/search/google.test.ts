@@ -9,7 +9,7 @@ describe('google search', () => {
       {
         volumeInfo: {
           authors: ['Cressida Cowell'],
-          categories: ['Juvenile Fiction'],
+          categories: ['YOUNG_ADULT_FANTASY'],
           imageLinks: {
             thumbnail:
               'http://books.google.com/books/content?id=28_qngEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
@@ -62,7 +62,7 @@ describe('google search', () => {
       );
       const book: Partial<BookFormInput> = {
         authors: 'Cressida Cowell',
-        genre: 'Juvenile Fiction',
+        genre: 'YOUNG_ADULT_FANTASY',
         imageUrl:
           'https://books.google.com/books/content?id=28_qngEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
         publishedDate: '2010-02-01',
