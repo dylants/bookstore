@@ -1,21 +1,19 @@
 'use client';
 
+import BookFormSelectFormat from '@/app/invoices/[id]/BookFormSelectFormat';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import { convertDateToFormInputString } from '@/lib/date';
-import {
-  convertDollarsToCents,
-  determineDiscountedAmountInCents,
-} from '@/lib/money';
+import { determineDiscountedAmountInCents } from '@/lib/money';
 import { findBookByIsbn13 } from '@/lib/search/book';
+import { transformBookFormInputToBookCreateInput } from '@/lib/transformers/book';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
-import { Format, Genre } from '@prisma/client';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import _ from 'lodash';
 import Image from 'next/image';
@@ -110,10 +108,13 @@ export default function BookForm({
   );
 
   const {
+    clearErrors,
     formState: { errors, isSubmitting },
+    getValues,
     handleSubmit,
     register,
     reset,
+    setValue,
   } = useForm<BookFormInput>({
     values: {
       authors: lookupBook?.authors || '',
@@ -136,21 +137,16 @@ export default function BookForm({
     },
   });
 
+  // register the format as required since we're using an external component to render
+  register('format', { required: true });
+
   const onBookSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (bookFormInput) => {
       if (invoice) {
-        const book: BookCreateInput = {
-          ...bookFormInput,
-          // TODO fixme
-          format: Format.HARDCOVER,
-          // TODO fixme
-          genre: Genre.FANTASY,
-          isbn13: BigInt(bookFormInput.isbn13),
-          // the user assumes they are entering in dollars, so convert to cents
-          priceInCents: convertDollarsToCents(bookFormInput.priceInCents),
-          publishedDate: new Date(bookFormInput.publishedDate),
-          quantity: _.toNumber(lookupBook?.quantity || 0),
-        };
+        const book: BookCreateInput = transformBookFormInputToBookCreateInput({
+          bookFormInput,
+          quantity: lookupBook?.quantity,
+        });
 
         const { discountPercentage } = invoice.vendor;
 
@@ -267,10 +263,13 @@ export default function BookForm({
                   fieldName="genre"
                   register={register}
                 />
-                <BookFormInputField
-                  errors={errors}
-                  fieldName="format"
-                  register={register}
+                <BookFormSelectFormat
+                  hasError={!!errors.format}
+                  onSelect={(value) => {
+                    setValue('format', value);
+                    clearErrors('format');
+                  }}
+                  selectedFormat={getValues('format')}
                 />
                 <BookFormInputField
                   errors={errors}

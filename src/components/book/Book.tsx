@@ -1,3 +1,4 @@
+import { formatToDisplayString } from '@/lib/book/format';
 import { convertCentsToDollars } from '@/lib/money';
 import BookHydrated from '@/types/BookHydrated';
 import _ from 'lodash';
@@ -17,6 +18,9 @@ function BookKey({
       fieldNameToDisplay = 'By';
       fieldToDisplay = book[fieldName].map((a) => a.name).join(', ');
       break;
+    case 'format':
+      fieldNameToDisplay = fieldName;
+      fieldToDisplay = formatToDisplayString(book[fieldName]);
     case 'genre':
       fieldNameToDisplay = fieldName;
       // TODO should this be a function?
@@ -72,6 +76,7 @@ export default function Book({ book }: { book: BookHydrated }) {
         <div>
           <BookKey book={book} fieldName="isbn13" />
           <BookKey book={book} fieldName="authors" />
+          <BookKey book={book} fieldName="format" />
           <BookKey book={book} fieldName="genre" />
           <BookKey book={book} fieldName="priceInCents" />
           <BookKey book={book} fieldName="quantity" />

@@ -19,10 +19,10 @@ export async function findBookByIsbn13({
   const bookHydrated = await getBook(BigInt(isbn13));
   if (bookHydrated) {
     logger.trace('book found internally, with ID: %s', bookHydrated.id);
-    const bookFormInput = transformBookHydratedToBookFormInput(
+    const bookFormInput = transformBookHydratedToBookFormInput({
       bookHydrated,
       timezone,
-    );
+    });
     logger.trace('returning book %j', bookFormInput);
     return bookFormInput;
   }
