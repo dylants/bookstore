@@ -41,7 +41,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/bookstore"
 
 ### Run Migrations
 
-To run migrations (note: this will automatically run the [seed script](prisma/seed.ts) after migrations):
+To run migrations (note: this will automatically run the [seed script](#seeds) after migrations):
 
 ```
 $ npx prisma migrate dev
@@ -63,17 +63,17 @@ $ npx prisma migrate dev --name <update name>
 
 ### Seeds
 
-Database seeds are found in the [seed script](prisma/seed.ts).
+Database seeds are found in the [seed script directory](prisma/seed/).
 
 The following commands require an `.env.local` file with the `DATABASE_URL`.
 
-Run the seeds:
+To run the seed script to generate fake data:
 
 ```
 $ bun db:seed
 ```
 
-Reset the database, re-run migrations, and re-seed the data:
+Reset the database, re-run migrations, and re-seed with fake data:
 
 ```
 $ bun db:reset
@@ -81,7 +81,7 @@ $ bun db:reset
 
 #### Overrides
 
-The seed script provides values for the number of entities to create. These can be overridden via the environment variables:
+The seed script to generate fake data provides values for the number of entities to create. These can be overridden via the environment variables:
 
 ```
 SEED_NUM_VENDORS
