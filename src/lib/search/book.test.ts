@@ -33,10 +33,10 @@ describe('book search', () => {
         isbn13: '123',
         timezone: 'zone',
       });
-      expect(mockTransformBookHydratedToBookFormInput).toHaveBeenCalledWith(
-        'book',
-        'zone',
-      );
+      expect(mockTransformBookHydratedToBookFormInput).toHaveBeenCalledWith({
+        bookHydrated: 'book',
+        timezone: 'zone',
+      });
       expect(mockGoogleBookSearch).not.toHaveBeenCalled();
       expect(result).toEqual('transformed book');
     });
