@@ -12,6 +12,7 @@ import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
+import { ProductType } from '@prisma/client';
 
 export async function createInvoiceItem(
   invoiceItem: InvoiceItemCreateInput,
@@ -24,6 +25,13 @@ export async function createInvoiceItem(
     totalCostInCents,
   } = invoiceItem;
 
+  // we only handle invoice items of product type Book at this time
+  const productType = ProductType.BOOK;
+  if (!bookInput) {
+    logger.error('createInvoiceItem asked to create without bookInput');
+    throw new Error('Book required as input at this time');
+  }
+
   const book = await upsertBook(bookInput);
 
   const rawInvoiceItem = await prisma.invoiceItem.create({
@@ -35,6 +43,7 @@ export async function createInvoiceItem(
         connect: { id: invoiceId },
       },
       itemCostInCents,
+      productType,
       quantity,
       totalCostInCents,
     },
@@ -48,11 +57,14 @@ export async function createInvoiceItem(
     },
   });
 
+  // we can assume the book is available based on code above
+  const rawInvoiceItemBook = rawInvoiceItem.book!;
+
   const invoiceItemCreated = {
     ...rawInvoiceItem,
     book: {
-      ...rawInvoiceItem.book,
-      publisher: serializeBookSource(rawInvoiceItem.book.publisher),
+      ...rawInvoiceItemBook,
+      publisher: serializeBookSource(rawInvoiceItemBook.publisher),
     },
   };
 
@@ -91,13 +103,28 @@ export async function getInvoiceItems({
     where: { invoiceId },
   });
 
-  const items = rawItems.map((item) => ({
-    ...item,
-    book: {
-      ...item.book,
-      publisher: serializeBookSource(item.book.publisher),
-    },
-  }));
+  const items = rawItems.map((item) => {
+    if (item.productType !== ProductType.BOOK) {
+      // we have no other product types at this time, so this should not happen
+      logger.warn('non-book product type encountered: %j', item);
+      return {
+        ...item,
+        book: undefined,
+        bookId: null,
+      };
+    }
+
+    // we can assume the book is available based on code above
+    const itemBook = item.book!;
+
+    return {
+      ...item,
+      book: {
+        ...itemBook,
+        publisher: serializeBookSource(itemBook.publisher),
+      },
+    };
+  });
 
   const { items: invoiceItems, pageInfo } =
     buildPaginationResponse<InvoiceItemHydrated>({

@@ -5,6 +5,6 @@ type InvoiceItemCreateInput = Omit<
   InvoiceItem,
   'id' | 'createdAt' | 'updatedAt' | 'bookId'
 > & {
-  book: BookCreateInput;
+  book?: BookCreateInput;
 };
 export default InvoiceItemCreateInput;

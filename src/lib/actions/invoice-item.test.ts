@@ -6,6 +6,7 @@ import {
   fakeInvoiceItemHydrated,
 } from '@/lib/fakes/invoice-item';
 import { buildPaginationRequest } from '@/lib/pagination';
+import { ProductType } from '@prisma/client';
 
 const mockUpsertBook = jest.fn();
 jest.mock('./book', () => ({
@@ -48,6 +49,7 @@ describe('invoice-item actions', () => {
             connect: { id: invoiceItem1.invoiceId },
           },
           itemCostInCents: invoiceItem1.itemCostInCents,
+          productType: invoiceItem1.productType,
           quantity: invoiceItem1.quantity,
           totalCostInCents: invoiceItem1.totalCostInCents,
         },
@@ -62,6 +64,14 @@ describe('invoice-item actions', () => {
       });
 
       expect(result).toEqual(invoiceItemHydrated1);
+    });
+
+    it('should throw error without book', async () => {
+      await expect(
+        createInvoiceItem(invoiceItem1),
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Book required as input at this time"`,
+      );
     });
   });
 
@@ -144,6 +154,38 @@ describe('invoice-item actions', () => {
         },
         orderBy: { createdAt: 'desc' },
         where: { invoiceId: 123 },
+      });
+    });
+
+    it('should process non-book product type invoice items', async () => {
+      prismaMock.invoiceItem.findMany.mockResolvedValue([
+        invoiceItemHydrated1,
+        invoiceItemHydrated2,
+        {
+          ...invoiceItemHydrated3,
+          productType: 'foo' as ProductType,
+        },
+      ]);
+
+      const result = await getInvoiceItems({});
+
+      expect(result).toEqual({
+        invoiceItems: [
+          invoiceItemHydrated1,
+          invoiceItemHydrated2,
+          {
+            ...invoiceItemHydrated3,
+            book: undefined,
+            bookId: null,
+            productType: 'foo',
+          },
+        ],
+        pageInfo: {
+          endCursor: invoiceItemHydrated3.id.toString(),
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: invoiceItemHydrated1.id.toString(),
+        },
       });
     });
   });

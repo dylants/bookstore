@@ -15,6 +15,7 @@ import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
+import { ProductType } from '@prisma/client';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import _ from 'lodash';
 import Image from 'next/image';
@@ -163,6 +164,7 @@ export default function BookForm({
           book,
           invoiceId: invoice.id,
           itemCostInCents,
+          productType: ProductType.BOOK,
           quantity,
           totalCostInCents,
         };

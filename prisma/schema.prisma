@@ -80,11 +80,13 @@ model InvoiceItem {
   quantity         Int
   totalCostInCents Int
 
-  book   Book @relation(fields: [bookId], references: [id])
-  bookId Int
-
   invoice   Invoice @relation(fields: [invoiceId], references: [id])
   invoiceId Int
+
+  productType ProductType
+
+  book   Book? @relation(fields: [bookId], references: [id])
+  bookId Int?
 }
 
 enum Format {
@@ -109,4 +111,10 @@ enum Genre {
   // Non-Fiction
   BUSINESS_AND_FINANCE
   COOKBOOKS
+}
+
+enum ProductType {
+  BOOK
+
+  // eventually other product types like general merchandise, etc
 }

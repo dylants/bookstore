@@ -8,7 +8,7 @@ import {
 } from '@/lib/actions/invoice';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
-import { Invoice } from '@prisma/client';
+import { Invoice, ProductType } from '@prisma/client';
 import { buildPaginationRequest } from '@/lib/pagination';
 
 jest.mock('../serializers/book-source', () => ({
@@ -129,6 +129,28 @@ describe('invoice actions', () => {
         _count: { invoiceItems: 3 },
         numInvoiceItems: 3,
       });
+    });
+
+    it('should skip updating books for non-book product types', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
+      const book1 = fakeBook();
+      const item1 = fakeInvoiceItem();
+      item1.bookId = book1.id;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
+      const item2 = fakeInvoiceItem();
+      // item2 is not a BOOK product type
+      item2.productType = 'foo' as ProductType;
+      item2.bookId = null;
+
+      prismaMock.invoiceItem.findMany.mockResolvedValue([item1, item2]);
+      prismaMock.invoice.update.mockResolvedValue(resolvedInvoice1);
+
+      await completeInvoice(invoice1.id);
+
+      // 2 invoice items, but only 1 of type book
+      expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
     });
   });
 
