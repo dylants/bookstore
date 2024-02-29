@@ -1,6 +1,7 @@
 'use client';
 
 import BookFormSelectFormat from '@/app/invoices/[id]/BookFormSelectFormat';
+import BookFormSelectGenre from '@/app/invoices/[id]/BookFormSelectGenre';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -137,8 +138,9 @@ export default function BookForm({
     },
   });
 
-  // register the format as required since we're using an external component to render
+  // register these fields as required since we're using external components to render
   register('format', { required: true });
+  register('genre', { required: true });
 
   const onBookSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (bookFormInput) => {
@@ -258,10 +260,13 @@ export default function BookForm({
 
             <div className="flex flex-col flex-1 gap-4 mt-3">
               <div className="flex flex-1 gap-4">
-                <BookFormInputField
-                  errors={errors}
-                  fieldName="genre"
-                  register={register}
+                <BookFormSelectGenre
+                  hasError={!!errors.genre}
+                  onSelect={(value) => {
+                    setValue('genre', value);
+                    clearErrors('genre');
+                  }}
+                  selectedGenre={getValues('genre')}
                 />
                 <BookFormSelectFormat
                   hasError={!!errors.format}
