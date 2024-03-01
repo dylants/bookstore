@@ -82,8 +82,8 @@ async function buildCreateUpdateBookData(
 
   return {
     authors,
-    format: book.format,
-    genre: book.genre,
+    format: { connect: { id: book.formatId } },
+    genre: { connect: { id: book.genreId } },
     imageUrl: book.imageUrl,
     isbn13: book.isbn13,
     priceInCents: book.priceInCents,
@@ -105,6 +105,8 @@ export async function createBook(book: BookCreateInput): Promise<BookHydrated> {
         data: data as Prisma.BookCreateInput,
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
       });
@@ -135,6 +137,8 @@ export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
         create: data as Prisma.BookCreateInput,
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
         update: data as Prisma.BookUpdateInput,
@@ -174,6 +178,8 @@ export async function getBooks({
     ...paginationRequest,
     include: {
       authors: true,
+      format: true,
+      genre: true,
       publisher: true,
     },
   });
@@ -200,6 +206,8 @@ export async function findBooksBySearchString(
   const rawBooks = await prisma.book.findMany({
     include: {
       authors: true,
+      format: true,
+      genre: true,
       publisher: true,
     },
     where: {
@@ -223,6 +231,8 @@ export async function getBook(
   const book = await prisma.book.findUnique({
     include: {
       authors: true,
+      format: true,
+      genre: true,
       publisher: true,
     },
     where: { isbn13 },

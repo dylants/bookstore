@@ -5,29 +5,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GENRE_OPTIONS } from '@/lib/book/genre';
+import { Genre } from '@prisma/client';
 import clsx from 'clsx';
+import _ from 'lodash';
+import { useCallback } from 'react';
 
 export default function BookFormSelectGenre({
+  genres,
   hasError,
   onSelect,
-  selectedGenre,
+  selectedGenreId,
 }: {
+  genres: Array<Genre>;
   hasError?: boolean;
-  onSelect: (value: string) => void;
-  selectedGenre?: string;
+  onSelect: (id: number) => void;
+  selectedGenreId?: number;
 }) {
+  const onValueChange = useCallback(
+    async (value: string) => {
+      const valueAsNumber = _.toNumber(value);
+      return onSelect(valueAsNumber);
+    },
+    [onSelect],
+  );
+
   return (
     <div className="flex flex-col flex-1">
       <label className="text-sm capitalize">Genre</label>
-      <Select onValueChange={onSelect} value={selectedGenre}>
+      <Select onValueChange={onValueChange} value={selectedGenreId?.toString()}>
         <SelectTrigger className={clsx(hasError ? 'border-red-500' : '')}>
           <SelectValue placeholder="Select Genre..." />
         </SelectTrigger>
         <SelectContent>
-          {GENRE_OPTIONS.map((genre) => (
-            <SelectItem key={genre.value} value={genre.value}>
-              {genre.label}
+          {genres.map((genre) => (
+            <SelectItem key={genre.id} value={genre.id.toString()}>
+              {genre.displayName}
             </SelectItem>
           ))}
         </SelectContent>

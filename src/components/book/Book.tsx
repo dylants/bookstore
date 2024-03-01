@@ -1,5 +1,3 @@
-import { formatToDisplayString } from '@/lib/book/format';
-import { genreToDisplayString } from '@/lib/book/genre';
 import { convertCentsToDollars } from '@/lib/money';
 import BookHydrated from '@/types/BookHydrated';
 import Image from 'next/image';
@@ -20,11 +18,11 @@ function BookKey({
       break;
     case 'format':
       fieldNameToDisplay = fieldName;
-      fieldToDisplay = formatToDisplayString(book[fieldName]);
+      fieldToDisplay = book[fieldName].displayName;
       break;
     case 'genre':
       fieldNameToDisplay = fieldName;
-      fieldToDisplay = genreToDisplayString(book[fieldName]);
+      fieldToDisplay = book[fieldName].displayName;
       break;
     case 'isbn13':
       fieldNameToDisplay = 'ISBN';

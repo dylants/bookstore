@@ -3,6 +3,11 @@ import BookFormInput from '@/types/BookFormInput';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
+const mockFindGenreOrThrow = jest.fn();
+jest.mock('../actions/genre', () => ({
+  findGenreOrThrow: (...args: unknown[]) => mockFindGenreOrThrow(...args),
+}));
+
 describe('google search', () => {
   const GOOGLE_BOOK_FOUND: GoogleSearchResponse = {
     items: [
@@ -54,6 +59,10 @@ describe('google search', () => {
   describe('googleBookSearch', () => {
     const isbn13 = '123';
 
+    beforeEach(() => {
+      mockFindGenreOrThrow.mockReset();
+    });
+
     describe('when the book exists', () => {
       const server = setupServer(
         rest.get('https://www.googleapis.com/*', (_, res, ctx) => {
@@ -62,7 +71,7 @@ describe('google search', () => {
       );
       const book: Partial<BookFormInput> = {
         authors: 'Cressida Cowell',
-        genre: 'YOUNG_ADULT_FANTASY',
+        genreId: 23,
         imageUrl:
           'https://books.google.com/books/content?id=28_qngEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
         publishedDate: '2010-02-01',
@@ -75,6 +84,7 @@ describe('google search', () => {
       afterAll(() => server.close());
 
       it('should return the book details', async () => {
+        mockFindGenreOrThrow.mockReturnValue({ id: 23 });
         const result = await googleBookSearch({ isbn13 });
         expect(result).not.toBeNull();
         expect(result).toEqual({

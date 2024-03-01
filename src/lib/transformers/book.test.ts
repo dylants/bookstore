@@ -1,6 +1,8 @@
 import { fakeAuthor } from '@/lib/fakes/author';
 import { fakePublisherSerialized } from '@/lib/fakes/book-source';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeFormat } from '@/lib/fakes/format';
+import { fakeGenre } from '@/lib/fakes/genre';
 import {
   transformBookFormInputToBookCreateInput,
   transformBookHydratedToBookFormInput,
@@ -8,7 +10,16 @@ import {
 import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import BookHydrated from '@/types/BookHydrated';
-import { Format, Genre } from '@prisma/client';
+
+const mockFindFormatOrThrow = jest.fn();
+jest.mock('../actions/format', () => ({
+  findFormatOrThrow: (...args: unknown[]) => mockFindFormatOrThrow(...args),
+}));
+
+const mockFindGenreOrThrow = jest.fn();
+jest.mock('../actions/genre', () => ({
+  findGenreOrThrow: (...args: unknown[]) => mockFindGenreOrThrow(...args),
+}));
 
 describe('book transformers', () => {
   const date = new Date('2000-01-02T06:00:00.000Z');
@@ -18,8 +29,16 @@ describe('book transformers', () => {
       { ...fakeAuthor(), name: 'Author 1' },
       { ...fakeAuthor(), name: 'Author 2' },
     ],
-    format: Format.TRADE_PAPERBACK,
-    genre: Genre.FANTASY,
+    format: {
+      ...fakeFormat(),
+      id: 2,
+    },
+    formatId: 2,
+    genre: {
+      ...fakeGenre(),
+      id: 3,
+    },
+    genreId: 3,
     id: 123,
     imageUrl: 'http://image.com',
     isbn13: BigInt('987'),
@@ -35,8 +54,8 @@ describe('book transformers', () => {
   };
   const bookFormInput: BookFormInput = {
     authors: 'Author 1, Author 2',
-    format: 'TRADE_PAPERBACK',
-    genre: 'FANTASY',
+    formatId: 2,
+    genreId: 3,
     imageUrl: 'http://image.com',
     isbn13: '987',
     priceInCents: '19.99',
@@ -47,8 +66,8 @@ describe('book transformers', () => {
   };
   const bookCreateInput: BookCreateInput = {
     authors: 'Author 1, Author 2',
-    format: 'TRADE_PAPERBACK',
-    genre: 'FANTASY',
+    formatId: 2,
+    genreId: 3,
     imageUrl: 'http://image.com',
     isbn13: BigInt('987'),
     priceInCents: 1999,
@@ -85,6 +104,14 @@ describe('book transformers', () => {
   });
 
   describe('transformBookFormInputToBookCreateInput', () => {
+    beforeEach(() => {
+      mockFindFormatOrThrow.mockReset();
+      mockFindGenreOrThrow.mockReset();
+
+      mockFindFormatOrThrow.mockReturnValue({ id: 2 });
+      mockFindGenreOrThrow.mockReturnValue({ id: 3 });
+    });
+
     it('should transform properly', () => {
       expect(
         transformBookFormInputToBookCreateInput({
@@ -106,6 +133,28 @@ describe('book transformers', () => {
         ...bookCreateInput,
         quantity: 0,
       });
+    });
+
+    it('should throw error without formatId', () => {
+      expect(() =>
+        transformBookFormInputToBookCreateInput({
+          bookFormInput: {
+            ...bookFormInput,
+            formatId: undefined,
+          },
+        }),
+      ).toThrowErrorMatchingInlineSnapshot(`"formatId required"`);
+    });
+
+    it('should throw error without genreId', () => {
+      expect(() =>
+        transformBookFormInputToBookCreateInput({
+          bookFormInput: {
+            ...bookFormInput,
+            genreId: undefined,
+          },
+        }),
+      ).toThrowErrorMatchingInlineSnapshot(`"genreId required"`);
     });
   });
 });

@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Select,
   SelectContent,
@@ -5,29 +7,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FORMAT_OPTIONS } from '@/lib/book/format';
+import { Format } from '@prisma/client';
 import clsx from 'clsx';
+import _ from 'lodash';
+import { useCallback } from 'react';
 
 export default function BookFormSelectFormat({
+  formats,
   hasError,
   onSelect,
-  selectedFormat,
+  selectedFormatId,
 }: {
+  formats: Array<Format>;
   hasError?: boolean;
-  onSelect: (value: string) => void;
-  selectedFormat?: string;
+  onSelect: (id: number) => void;
+  selectedFormatId?: number;
 }) {
+  const onValueChange = useCallback(
+    async (value: string) => {
+      const valueAsNumber = _.toNumber(value);
+      return onSelect(valueAsNumber);
+    },
+    [onSelect],
+  );
+
   return (
     <div className="flex flex-col flex-1">
       <label className="text-sm capitalize">Format</label>
-      <Select onValueChange={onSelect} value={selectedFormat}>
+      <Select
+        onValueChange={onValueChange}
+        value={selectedFormatId?.toString()}
+      >
         <SelectTrigger className={clsx(hasError ? 'border-red-500' : '')}>
           <SelectValue placeholder="Select Format..." />
         </SelectTrigger>
         <SelectContent>
-          {FORMAT_OPTIONS.map((format) => (
-            <SelectItem key={format.value} value={format.value}>
-              {format.label}
+          {formats.map((format) => (
+            <SelectItem key={format.id} value={format.id.toString()}>
+              {format.displayName}
             </SelectItem>
           ))}
         </SelectContent>
