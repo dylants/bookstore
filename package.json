@@ -9,6 +9,9 @@
     "build": "next build",
     "build-storybook": "storybook build",
     "check-types": "tsc --noemit",
+    "ci:db": "bun run ci:db:reset & bun run ci:db:seed",
+    "ci:db:seed": "dotenv -e .env.local -- ts-node -r tsconfig-paths/register --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed/run-ci.ts",
+    "ci:db:reset": "dotenv -e .env.local -- prisma migrate reset --skip-seed --force",
     "db:seed": "dotenv -e .env.local -- prisma db seed",
     "db:reset": "dotenv -e .env.local -- prisma migrate reset",
     "dev": "next dev",
@@ -17,6 +20,7 @@
     "start": "next start",
     "storybook": "storybook dev -p 6006",
     "test": "jest --coverage",
+    "test:e2e": "bun run ci:db && bun playwright test",
     "test:watch": "jest --watch"
   },
   "prisma": {

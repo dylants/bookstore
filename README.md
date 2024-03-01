@@ -128,6 +128,12 @@ To run the tests with the Playwright UI:
 $ bun playwright test --ui
 ```
 
+To run the full e2e tests, which _!!resets the database!!_, applies seeds for CI, then runs the playwright e2e tests:
+
+```
+$ bun run test:e2e
+```
+
 ## Storybook
 
 This app uses [Storybook](https://storybook.js.org/) to demo UI components.
