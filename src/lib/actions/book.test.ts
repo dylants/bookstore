@@ -118,8 +118,8 @@ describe('book actions', () => {
               },
             ],
           },
-          format: book1.format,
-          genre: book1.genre,
+          format: { connect: { id: book1.formatId } },
+          genre: { connect: { id: book1.genreId } },
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
           priceInCents: book1.priceInCents,
@@ -136,6 +136,8 @@ describe('book actions', () => {
         },
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
       });
@@ -168,8 +170,8 @@ describe('book actions', () => {
               },
             ],
           },
-          format: book1.format,
-          genre: book1.genre,
+          format: { connect: { id: book1.formatId } },
+          genre: { connect: { id: book1.genreId } },
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
           priceInCents: book1.priceInCents,
@@ -186,6 +188,8 @@ describe('book actions', () => {
         },
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
         update: {
@@ -197,8 +201,8 @@ describe('book actions', () => {
               },
             ],
           },
-          format: book1.format,
-          genre: book1.genre,
+          format: { connect: { id: book1.formatId } },
+          genre: { connect: { id: book1.genreId } },
           imageUrl: book1.imageUrl,
           isbn13: book1.isbn13,
           priceInCents: book1.priceInCents,
@@ -270,6 +274,8 @@ describe('book actions', () => {
       expect(prismaMock.book.findMany).toHaveBeenCalledWith({
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
         where: {
@@ -293,6 +299,8 @@ describe('book actions', () => {
       expect(prismaMock.book.findUnique).toHaveBeenCalledWith({
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
         where: { isbn13 },

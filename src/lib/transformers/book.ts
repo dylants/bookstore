@@ -1,5 +1,3 @@
-import { stringToFormat } from '@/lib/book/format';
-import { stringToGenre } from '@/lib/book/genre';
 import { convertDateToFormInputString } from '@/lib/date';
 import { convertCentsToDollars, convertDollarsToCents } from '@/lib/money';
 import BookCreateInput from '@/types/BookCreateInput';
@@ -16,8 +14,8 @@ export function transformBookHydratedToBookFormInput({
 }): BookFormInput {
   return {
     authors: bookHydrated.authors.map((a) => a.name).join(', '),
-    format: bookHydrated.format,
-    genre: bookHydrated.genre,
+    formatId: bookHydrated.format.id,
+    genreId: bookHydrated.genre.id,
     imageUrl: bookHydrated.imageUrl,
     isbn13: bookHydrated.isbn13.toString(),
     priceInCents: convertCentsToDollars(bookHydrated.priceInCents).toString(),
@@ -37,14 +35,32 @@ export function transformBookFormInputToBookCreateInput({
   bookFormInput: BookFormInput;
   quantity?: string;
 }): BookCreateInput {
+  const {
+    formatId,
+    genreId,
+    isbn13,
+    priceInCents,
+    publishedDate,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    quantity: ignoreQuantity,
+    ...rest
+  } = bookFormInput;
+
+  if (!formatId) {
+    throw new Error('formatId required');
+  }
+  if (!genreId) {
+    throw new Error('genreId required');
+  }
+
   return {
-    ...bookFormInput,
-    format: stringToFormat(bookFormInput.format),
-    genre: stringToGenre(bookFormInput.genre),
-    isbn13: BigInt(bookFormInput.isbn13),
+    ...rest,
+    formatId,
+    genreId,
+    isbn13: BigInt(isbn13),
     // the book form input is presented as dollars, so convert to cents
-    priceInCents: convertDollarsToCents(bookFormInput.priceInCents),
-    publishedDate: new Date(bookFormInput.publishedDate),
+    priceInCents: convertDollarsToCents(priceInCents),
+    publishedDate: new Date(publishedDate),
     quantity: _.toNumber(quantity || 0),
   };
 }

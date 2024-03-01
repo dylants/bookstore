@@ -2,10 +2,15 @@ import BookCreateInput from '@/types/BookCreateInput';
 
 type BookFormInput = Omit<
   BookCreateInput,
-  'format' | 'genre' | 'isbn13' | 'priceInCents' | 'publishedDate' | 'quantity'
+  | 'formatId'
+  | 'genreId'
+  | 'isbn13'
+  | 'priceInCents'
+  | 'publishedDate'
+  | 'quantity'
 > & {
-  format: string;
-  genre: string;
+  formatId: number | undefined;
+  genreId: number | undefined;
   isbn13: string;
   priceInCents: string;
   publishedDate: string;

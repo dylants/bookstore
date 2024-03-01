@@ -20,7 +20,7 @@
     "test:watch": "jest --watch"
   },
   "prisma": {
-    "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} prisma/seed/fake.ts"
+    "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} prisma/seed/run-fake.ts"
   },
   "dependencies": {
     "@prisma/client": "5.8.1",

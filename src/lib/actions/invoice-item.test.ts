@@ -57,6 +57,8 @@ describe('invoice-item actions', () => {
           book: {
             include: {
               authors: true,
+              format: true,
+              genre: true,
               publisher: true,
             },
           },
@@ -91,6 +93,8 @@ describe('invoice-item actions', () => {
           book: {
             include: {
               authors: true,
+              format: true,
+              genre: true,
               publisher: true,
             },
           },
@@ -148,6 +152,8 @@ describe('invoice-item actions', () => {
           book: {
             include: {
               authors: true,
+              format: true,
+              genre: true,
               publisher: true,
             },
           },

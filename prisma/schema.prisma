@@ -25,8 +25,11 @@ model Book {
   publisher   BookSource @relation(fields: [publisherId], references: [id])
   publisherId Int
 
-  format Format
-  genre  Genre
+  format   Format @relation(fields: [formatId], references: [id])
+  formatId Int
+
+  genre   Genre @relation(fields: [genreId], references: [id])
+  genreId Int
 
   priceInCents Int
   quantity     Int           @default(0)
@@ -89,28 +92,24 @@ model InvoiceItem {
   bookId Int?
 }
 
-enum Format {
-  HARDCOVER
-  MASS_MARKET
-  TRADE_PAPERBACK
+model Format {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  displayName String @unique
+
+  books Book[]
 }
 
-enum Genre {
-  // Fiction
-  FANTASY
-  LITERARY_FICTION
-  ROMANCE
-  SCIENCE_FICTION
+model Genre {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
 
-  // Young Adult
-  YOUNG_ADULT_FANTASY
+  displayName String @unique
 
-  // Kids
-  MIDDLE_GRADE
-
-  // Non-Fiction
-  BUSINESS_AND_FINANCE
-  COOKBOOKS
+  books Book[]
 }
 
 enum ProductType {

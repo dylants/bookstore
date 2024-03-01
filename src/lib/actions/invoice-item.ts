@@ -51,6 +51,8 @@ export async function createInvoiceItem(
       book: {
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
       },
@@ -95,6 +97,8 @@ export async function getInvoiceItems({
       book: {
         include: {
           authors: true,
+          format: true,
+          genre: true,
           publisher: true,
         },
       },

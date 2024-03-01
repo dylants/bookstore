@@ -12,10 +12,13 @@ import {
 import InvoiceItemsTable from '@/components/invoice-item/InvoiceItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { getFormats } from '@/lib/actions/format';
+import { getGenres } from '@/lib/actions/genre';
 import { completeInvoice, getInvoice } from '@/lib/actions/invoice';
 import { getInvoiceItems } from '@/lib/actions/invoice-item';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
+import { Format, Genre } from '@prisma/client';
 import _ from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -23,6 +26,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   const [invoice, setInvoice] = useState<InvoiceHydrated | null>();
   const [invoiceItems, setInvoiceItems] =
     useState<Array<InvoiceItemHydrated> | null>();
+  const [formats, setFormats] = useState<Array<Format>>();
+  const [genres, setGenres] = useState<Array<Genre>>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // TODO we should validate this input
@@ -57,13 +62,35 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     doneLoading();
   }, [invoiceId, setDelayedLoading]);
 
+  const loadFormats = useCallback(async () => {
+    // TODO handle pagination
+    const { formats } = await getFormats({
+      paginationQuery: {
+        first: 100,
+      },
+    });
+    setFormats(formats);
+  }, []);
+
+  const loadGenres = useCallback(async () => {
+    // TODO handle pagination
+    const { genres } = await getGenres({
+      paginationQuery: {
+        first: 100,
+      },
+    });
+    setGenres(genres);
+  }, []);
+
   // on initial render, load all the things
   useEffect(() => {
     loadInvoice();
     loadInvoiceItems();
-  }, [loadInvoice, loadInvoiceItems]);
+    loadFormats();
+    loadGenres();
+  }, [loadFormats, loadGenres, loadInvoice, loadInvoiceItems]);
 
-  if (!invoice) {
+  if (!invoice || !formats || !genres) {
     return (
       <div className="flex h-full items-center justify-center">
         <LoadingSpinner />
@@ -101,6 +128,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
       {!invoice.isCompleted && (
         <BookForm
+          formats={formats}
+          genres={genres}
           invoice={invoice}
           onCreateInvoiceItem={() => {
             loadInvoiceItems();

@@ -1,6 +1,6 @@
 'use server';
 
-import { stringToGenre } from '@/lib/book/genre';
+import { findGenreOrThrow } from '@/lib/actions/genre';
 import logger from '@/lib/logger';
 import BookFormInput from '@/types/BookFormInput';
 
@@ -62,9 +62,9 @@ export async function googleBookSearch(
     // TODO map Google genres to our genres
     const googleGenre = categories?.[0] || '';
     logger.trace('google genre returned: %s', googleGenre);
-    let genre = undefined;
+    let genreId = undefined;
     try {
-      genre = stringToGenre(googleGenre);
+      genreId = (await findGenreOrThrow(googleGenre)).id;
     } catch {
       // ignore, no matching genre was found
       logger.trace('unable to map google genre to internal genre');
@@ -72,7 +72,7 @@ export async function googleBookSearch(
 
     const book: Partial<BookFormInput> = {
       authors: authors?.join(', '),
-      genre,
+      genreId,
       imageUrl: imageLinks?.thumbnail?.replaceAll('http://', 'https://'),
       isbn13,
       publishedDate,

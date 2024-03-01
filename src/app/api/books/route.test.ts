@@ -134,34 +134,6 @@ describe('/api/books', () => {
       expect(res.statusText).toEqual('Validation error: Required at "title"');
     });
 
-    it('should fail with invalid format', async () => {
-      const req = new NextRequest(new Request(buildBooksUrl()), {
-        body: JSON.stringify({
-          ...validPostBody,
-          format: 'hello',
-        }),
-        method: 'POST',
-      });
-      const res = await POST(req);
-
-      expect(res.status).toEqual(400);
-      expect(res.statusText).toMatch(/Validation error: Invalid enum value/);
-    });
-
-    it('should fail with invalid genre', async () => {
-      const req = new NextRequest(new Request(buildBooksUrl()), {
-        body: JSON.stringify({
-          ...validPostBody,
-          genre: 'hello',
-        }),
-        method: 'POST',
-      });
-      const res = await POST(req);
-
-      expect(res.status).toEqual(400);
-      expect(res.statusText).toMatch(/Validation error: Invalid enum value/);
-    });
-
     it('should fail with invalid isbn13', async () => {
       const req = new NextRequest(new Request(buildBooksUrl()), {
         body: JSON.stringify({

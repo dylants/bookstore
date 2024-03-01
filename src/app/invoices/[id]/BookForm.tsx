@@ -5,7 +5,6 @@ import BookFormSelectGenre from '@/app/invoices/[id]/BookFormSelectGenre';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import { convertDateToFormInputString } from '@/lib/date';
 import { determineDiscountedAmountInCents } from '@/lib/money';
@@ -15,7 +14,7 @@ import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
-import { ProductType } from '@prisma/client';
+import { Format, Genre, ProductType } from '@prisma/client';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import _ from 'lodash';
 import Image from 'next/image';
@@ -68,9 +67,13 @@ function BookFormInputField({
 }
 
 export default function BookForm({
+  formats,
+  genres,
   invoice,
   onCreateInvoiceItem,
 }: {
+  formats: Array<Format>;
+  genres: Array<Genre>;
   invoice: InvoiceHydrated;
   onCreateInvoiceItem: () => void;
 }) {
@@ -120,8 +123,8 @@ export default function BookForm({
   } = useForm<BookFormInput>({
     values: {
       authors: lookupBook?.authors || '',
-      format: lookupBook?.format || '',
-      genre: lookupBook?.genre || '',
+      formatId: lookupBook?.formatId,
+      genreId: lookupBook?.genreId,
       imageUrl: lookupBook?.imageUrl || '',
       isbn13: lookupBook?.isbn13 || '',
       priceInCents: lookupBook?.priceInCents || '',
@@ -140,16 +143,17 @@ export default function BookForm({
   });
 
   // register these fields as required since we're using external components to render
-  register('format', { required: true });
-  register('genre', { required: true });
+  register('formatId', { required: true });
+  register('genreId', { required: true });
 
   const onBookSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (bookFormInput) => {
       if (invoice) {
-        const book: BookCreateInput = transformBookFormInputToBookCreateInput({
-          bookFormInput,
-          quantity: lookupBook?.quantity,
-        });
+        const book: BookCreateInput =
+          await transformBookFormInputToBookCreateInput({
+            bookFormInput,
+            quantity: lookupBook?.quantity,
+          });
 
         const { discountPercentage } = invoice.vendor;
 
@@ -179,14 +183,6 @@ export default function BookForm({
     },
     [lookupBook, invoice, onCreateInvoiceItem, reset],
   );
-
-  if (!invoice) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -263,20 +259,22 @@ export default function BookForm({
             <div className="flex flex-col flex-1 gap-4 mt-3">
               <div className="flex flex-1 gap-4">
                 <BookFormSelectGenre
-                  hasError={!!errors.genre}
+                  genres={genres}
+                  hasError={!!errors.genreId}
                   onSelect={(value) => {
-                    setValue('genre', value);
-                    clearErrors('genre');
+                    setValue('genreId', value);
+                    clearErrors('genreId');
                   }}
-                  selectedGenre={getValues('genre')}
+                  selectedGenreId={getValues('genreId')}
                 />
                 <BookFormSelectFormat
-                  hasError={!!errors.format}
+                  formats={formats}
+                  hasError={!!errors.formatId}
                   onSelect={(value) => {
-                    setValue('format', value);
-                    clearErrors('format');
+                    setValue('formatId', value);
+                    clearErrors('formatId');
                   }}
-                  selectedFormat={getValues('format')}
+                  selectedFormatId={getValues('formatId')}
                 />
                 <BookFormInputField
                   errors={errors}

@@ -1,18 +1,14 @@
 import { fakeAuthor } from '@/lib/fakes/author';
 import { fakePublisher } from '@/lib/fakes/book-source';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
+import { fakeFormat } from '@/lib/fakes/format';
+import { fakeGenre } from '@/lib/fakes/genre';
 import { convertDollarsToCents } from '@/lib/money';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import BookHydrated from '@/types/BookHydrated';
 import { faker } from '@faker-js/faker';
-import { Book, Format, Genre } from '@prisma/client';
+import { Book } from '@prisma/client';
 import _ from 'lodash';
-
-const formatKeys = Object.keys(Format) as Format[];
-const randomFormat = (): Format => _.sample(formatKeys) as Format;
-
-const genreKeys = Object.keys(Genre) as Genre[];
-const randomGenre = (): Genre => _.sample(genreKeys) as Genre;
 
 const randomImage = (): string =>
   `https://picsum.photos/id/${_.random(1, 500)}/128/192`;
@@ -26,8 +22,8 @@ export function fakeBook(): Book {
 
   return {
     ...fakeCreatedAtUpdatedAt(),
-    format: randomFormat(),
-    genre: randomGenre(),
+    formatId: faker.number.int(),
+    genreId: faker.number.int(),
     id: faker.number.int(),
     imageUrl: randomImage(),
     isbn13: fakeIsbn13(),
@@ -41,11 +37,15 @@ export function fakeBook(): Book {
 
 export function fakeBookHydrated(): BookHydrated {
   const authors = [fakeAuthor()];
+  const format = fakeFormat();
+  const genre = fakeGenre();
   const publisher = fakePublisher();
 
   return {
     ...fakeBook(),
     authors,
+    format,
+    genre,
     publisher: serializeBookSource(publisher),
   };
 }
