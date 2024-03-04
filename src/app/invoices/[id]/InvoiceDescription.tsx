@@ -13,7 +13,9 @@ export default function InvoiceDescription({
       data-testid="invoice-description"
     >
       <div className="flex flex-col">
-        <div className="font-bold">{vendor.name}</div>
+        <div className="font-bold" data-testid="vendor-name">
+          {vendor.name}
+        </div>
         <div className="grid grid-cols-2 gap-0">
           <div>
             <div>Discount:</div>
@@ -33,8 +35,10 @@ export default function InvoiceDescription({
             {invoice.isCompleted && <div>Received:</div>}
           </div>
           <div className="text-right">
-            <div>{invoice.invoiceNumber}</div>
-            <div>{invoice.invoiceDate.toLocaleDateString()}</div>
+            <div data-testid="invoice-number">{invoice.invoiceNumber}</div>
+            <div data-testid="invoice-date">
+              {invoice.invoiceDate.toLocaleDateString()}
+            </div>
             {invoice.isCompleted && (
               <div>{invoice.dateReceived?.toLocaleDateString()}</div>
             )}

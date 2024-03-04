@@ -30,7 +30,7 @@ function BookKey({
       break;
     case 'priceInCents':
       fieldNameToDisplay = 'Price';
-      fieldToDisplay = `$${convertCentsToDollars(book[fieldName])}`;
+      fieldToDisplay = `$${convertCentsToDollars(book[fieldName]).toFixed(2)}`;
       break;
     case 'publishedDate':
       fieldNameToDisplay = 'Published Date';
@@ -56,7 +56,7 @@ function BookKey({
 
 export default function Book({ book }: { book: BookHydrated }) {
   return (
-    <div className="flex gap-4 h-[192px]">
+    <div className="flex gap-4 h-[192px]" data-testid={`${book.isbn13}`}>
       {book.imageUrl ? (
         <Image alt={book.title} src={book.imageUrl} width={128} height={192} />
       ) : (

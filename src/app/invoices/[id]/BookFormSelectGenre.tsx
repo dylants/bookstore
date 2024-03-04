@@ -33,7 +33,10 @@ export default function BookFormSelectGenre({
     <div className="flex flex-col flex-1">
       <label className="text-sm capitalize">Genre</label>
       <Select onValueChange={onValueChange} value={selectedGenreId?.toString()}>
-        <SelectTrigger className={clsx(hasError ? 'border-red-500' : '')}>
+        <SelectTrigger
+          className={clsx(hasError ? 'border-red-500' : '')}
+          data-testid="select-genre"
+        >
           <SelectValue placeholder="Select Genre..." />
         </SelectTrigger>
         <SelectContent>

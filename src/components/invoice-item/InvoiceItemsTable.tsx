@@ -6,7 +6,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 
 function RenderMoney({ value }: { value: number }) {
-  return <>${value / 100}</>;
+  return <>${(value / 100).toFixed(2)}</>;
 }
 
 const columns: ColumnDef<InvoiceItemHydrated>[] = [

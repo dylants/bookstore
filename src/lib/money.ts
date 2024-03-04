@@ -16,7 +16,7 @@ export function determineDiscountedAmountInCents({
   priceInCents: number;
   discountPercentage: number;
 }): number {
-  const cost = priceInCents - priceInCents * discountPercentage;
+  const cost = priceInCents - _.round(priceInCents * discountPercentage);
   return cost;
 }
 
