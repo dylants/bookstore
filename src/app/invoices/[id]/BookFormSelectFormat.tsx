@@ -38,7 +38,10 @@ export default function BookFormSelectFormat({
         onValueChange={onValueChange}
         value={selectedFormatId?.toString()}
       >
-        <SelectTrigger className={clsx(hasError ? 'border-red-500' : '')}>
+        <SelectTrigger
+          className={clsx(hasError ? 'border-red-500' : '')}
+          data-testid="select-format"
+        >
           <SelectValue placeholder="Select Format..." />
         </SelectTrigger>
         <SelectContent>

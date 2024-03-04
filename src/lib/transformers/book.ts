@@ -3,6 +3,7 @@ import { convertCentsToDollars, convertDollarsToCents } from '@/lib/money';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookFormInput from '@/types/BookFormInput';
 import BookHydrated from '@/types/BookHydrated';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import _ from 'lodash';
 
 export function transformBookHydratedToBookFormInput({
@@ -31,9 +32,11 @@ export function transformBookHydratedToBookFormInput({
 export function transformBookFormInputToBookCreateInput({
   bookFormInput,
   quantity,
+  timezone,
 }: {
   bookFormInput: BookFormInput;
   quantity?: string;
+  timezone: string;
 }): BookCreateInput {
   const {
     formatId,
@@ -60,7 +63,7 @@ export function transformBookFormInputToBookCreateInput({
     isbn13: BigInt(isbn13),
     // the book form input is presented as dollars, so convert to cents
     priceInCents: convertDollarsToCents(priceInCents),
-    publishedDate: new Date(publishedDate),
+    publishedDate: zonedTimeToUtc(publishedDate, timezone),
     quantity: _.toNumber(quantity || 0),
   };
 }

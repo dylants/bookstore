@@ -61,6 +61,15 @@ describe('money', () => {
         }),
       ).toEqual(0);
     });
+
+    it('should work with non-round numbers', () => {
+      expect(
+        determineDiscountedAmountInCents({
+          discountPercentage: 0.4,
+          priceInCents: 2699,
+        }),
+      ).toEqual(1619);
+    });
   });
 
   describe('discountPercentageToDisplayString', () => {

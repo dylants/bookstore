@@ -55,13 +55,15 @@ function BookFormInputField({
 
   return (
     <div className="flex flex-col flex-1">
-      <label className="text-sm capitalize">{fieldNameToDisplay}</label>
-      <Input
-        step={type === 'number' ? 'any' : ''}
-        type={type}
-        variant={errors[fieldName] ? 'error' : 'default'}
-        {...register(fieldName, { required: true })}
-      />
+      <label className="text-sm capitalize">
+        {fieldNameToDisplay}
+        <Input
+          step={type === 'number' ? 'any' : ''}
+          type={type}
+          variant={errors[fieldName] ? 'error' : 'default'}
+          {...register(fieldName, { required: true })}
+        />
+      </label>
     </div>
   );
 }
@@ -92,7 +94,11 @@ export default function BookForm({
     handleSubmit: handleSearchSubmit,
     register: registerSearchSubmit,
     reset: resetSearchSubmit,
-  } = useForm<SearchFormInput>();
+  } = useForm<SearchFormInput>({
+    values: {
+      input: '',
+    },
+  });
   const { ref: formRef, ...formRest } = registerSearchSubmit('input');
 
   const onSearch = useCallback(
@@ -149,11 +155,11 @@ export default function BookForm({
   const onBookSubmit: SubmitHandler<BookFormInput> = useCallback(
     async (bookFormInput) => {
       if (invoice) {
-        const book: BookCreateInput =
-          await transformBookFormInputToBookCreateInput({
-            bookFormInput,
-            quantity: lookupBook?.quantity,
-          });
+        const book: BookCreateInput = transformBookFormInputToBookCreateInput({
+          bookFormInput,
+          quantity: lookupBook?.quantity,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
 
         const { discountPercentage } = invoice.vendor;
 
@@ -200,16 +206,18 @@ export default function BookForm({
             onSubmit={handleSearchSubmit(onSearch)}
           >
             <div className="flex flex-col">
-              <label className="text-sm capitalize">Scan or Enter ISBN</label>
-              <Input
-                {...formRest}
-                ref={(e) => {
-                  formRef(e);
-                  searchRef.current = e;
-                }}
-                type="text"
-                className="w-[300px]"
-              />
+              <label className="text-sm capitalize">
+                Scan or Enter SKU
+                <Input
+                  {...formRest}
+                  ref={(e) => {
+                    formRef(e);
+                    searchRef.current = e;
+                  }}
+                  type="text"
+                  className="w-[300px]"
+                />
+              </label>
             </div>
             <Button variant="default" type="submit" className="w-[100px]">
               {isSearching ? (

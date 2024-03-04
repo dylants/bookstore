@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import BookSourceSerialized from '@/types/BookSourceSerialized';
+import { zonedTimeToUtc } from 'date-fns-tz';
 import { useCallback, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
@@ -45,7 +46,12 @@ export default function InvoiceCreate({
     (data: InvoiceCreateFormInput) => {
       onCreate({
         ...data,
-        invoiceDate: new Date(data.invoiceDate),
+        invoiceDate: new Date(
+          zonedTimeToUtc(
+            data.invoiceDate,
+            Intl.DateTimeFormat().resolvedOptions().timeZone,
+          ),
+        ),
       });
       reset();
       setIsOpen(false);

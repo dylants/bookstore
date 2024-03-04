@@ -71,7 +71,7 @@ describe('book transformers', () => {
     imageUrl: 'http://image.com',
     isbn13: BigInt('987'),
     priceInCents: 1999,
-    publishedDate: new Date('2000-01-02T00:00:00.000Z'),
+    publishedDate: new Date('2000-01-02T06:00:00.000Z'),
     publisher: 'Publisher 1',
     quantity: 12,
     title: 'My Book',
@@ -117,6 +117,7 @@ describe('book transformers', () => {
         transformBookFormInputToBookCreateInput({
           bookFormInput,
           quantity: '42',
+          timezone: 'America/Chicago',
         }),
       ).toEqual({
         ...bookCreateInput,
@@ -128,6 +129,7 @@ describe('book transformers', () => {
       expect(
         transformBookFormInputToBookCreateInput({
           bookFormInput,
+          timezone: 'America/Chicago',
         }),
       ).toEqual({
         ...bookCreateInput,
@@ -142,6 +144,7 @@ describe('book transformers', () => {
             ...bookFormInput,
             formatId: undefined,
           },
+          timezone: 'America/Chicago',
         }),
       ).toThrowErrorMatchingInlineSnapshot(`"formatId required"`);
     });
@@ -153,6 +156,7 @@ describe('book transformers', () => {
             ...bookFormInput,
             genreId: undefined,
           },
+          timezone: 'America/Chicago',
         }),
       ).toThrowErrorMatchingInlineSnapshot(`"genreId required"`);
     });
