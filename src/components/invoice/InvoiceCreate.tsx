@@ -72,21 +72,25 @@ export default function InvoiceCreate({
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4 mt-4">
             <div className="flex flex-col flex-1">
-              <label className="text-sm">Number</label>
-              <Input
-                type="text"
-                placeholder="Invoice number"
-                variant={errors.invoiceNumber ? 'error' : 'default'}
-                {...register('invoiceNumber', { required: true })}
-              />
+              <label className="text-sm">
+                Number
+                <Input
+                  type="text"
+                  placeholder="Invoice number"
+                  variant={errors.invoiceNumber ? 'error' : 'default'}
+                  {...register('invoiceNumber', { required: true })}
+                />
+              </label>
             </div>
             <div className="flex flex-col flex-1">
-              <label className="text-sm">Date</label>
-              <Input
-                type="date"
-                variant={errors.invoiceDate ? 'error' : 'default'}
-                {...register('invoiceDate', { required: true })}
-              />
+              <label className="text-sm">
+                Date
+                <Input
+                  type="date"
+                  variant={errors.invoiceDate ? 'error' : 'default'}
+                  {...register('invoiceDate', { required: true })}
+                />
+              </label>
             </div>
             <div className="flex flex-col flex-1">
               <label className="text-sm">Vendor</label>

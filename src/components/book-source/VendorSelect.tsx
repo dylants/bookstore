@@ -41,7 +41,10 @@ export default function VendorSelect({
         onValueChange={onValueChange}
         value={selectedVendorId?.toString()}
       >
-        <SelectTrigger className={clsx(hasError ? 'border-red-500' : '')}>
+        <SelectTrigger
+          className={clsx(hasError ? 'border-red-500' : '')}
+          data-testid="select-vendor"
+        >
           <SelectValue placeholder="Select Vendor..." />
         </SelectTrigger>
         <SelectContent>

@@ -8,14 +8,17 @@ export default function InvoiceDescription({
 }) {
   const { vendor } = invoice;
   return (
-    <div className="flex w-full justify-between text-lg">
+    <div
+      className="flex w-full justify-between text-lg"
+      data-testid="invoice-description"
+    >
       <div className="flex flex-col">
         <div className="font-bold">{vendor.name}</div>
         <div className="grid grid-cols-2 gap-0">
           <div>
             <div>Discount:</div>
           </div>
-          <div className="text-right">
+          <div className="text-right" data-testid="discount-percentage">
             <div>
               {discountPercentageToDisplayString(vendor.discountPercentage)}
             </div>
