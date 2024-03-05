@@ -20,7 +20,7 @@
     "start": "next start",
     "storybook": "storybook dev -p 6006",
     "test": "jest --coverage",
-    "test:e2e": "bun run ci:db && bun playwright test",
+    "test:e2e": "bun playwright test",
     "test:watch": "jest --watch"
   },
   "prisma": {

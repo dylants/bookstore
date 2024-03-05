@@ -1,0 +1,34 @@
+name: E2E Tests
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e_setup:
+    name: e2e test setup
+    runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.waitFor200FromVercelPreview.outputs.url }}
+    steps:
+      - name: Waiting for 200 from the Vercel Preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        id: waitFor200FromVercelPreview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+  e2e_tests:
+    needs: e2e_setup
+    name: e2e tests
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run e2e tests
+        run: bun run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.e2e_setup.outputs.preview_url }}
