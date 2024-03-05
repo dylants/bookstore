@@ -60,6 +60,26 @@ model BookSource {
   invoices           Invoice[]
 }
 
+model Format {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  displayName String @unique
+
+  books Book[]
+}
+
+model Genre {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  displayName String @unique
+
+  books Book[]
+}
+
 model Invoice {
   id            Int       @id @default(autoincrement())
   createdAt     DateTime  @default(now()) @db.Timestamptz(3)
@@ -90,26 +110,6 @@ model InvoiceItem {
 
   book   Book? @relation(fields: [bookId], references: [id])
   bookId Int?
-}
-
-model Format {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
-
-  displayName String @unique
-
-  books Book[]
-}
-
-model Genre {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
-
-  displayName String @unique
-
-  books Book[]
 }
 
 enum ProductType {
