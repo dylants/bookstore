@@ -1,13 +1,10 @@
+import Dollars from '@/components/Dollars';
 import DataTable from '@/components/table/DataTable';
 import SortableHeader from '@/components/table/SortableHeader';
 import BookHydrated from '@/types/BookHydrated';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
-
-function RenderMoney({ value }: { value: number }) {
-  return <>${(value / 100).toFixed(2)}</>;
-}
 
 const columns: ColumnDef<InvoiceItemHydrated>[] = [
   {
@@ -48,7 +45,7 @@ const columns: ColumnDef<InvoiceItemHydrated>[] = [
     accessorKey: 'itemCostInCents',
     cell: (props) => (
       <div className="text-right">
-        <RenderMoney value={props.getValue() as number} />
+        <Dollars amountInCents={props.getValue() as number} />
       </div>
     ),
     header: ({ column }) => <SortableHeader column={column} text="Item Cost" />,
@@ -66,7 +63,7 @@ const columns: ColumnDef<InvoiceItemHydrated>[] = [
     accessorKey: 'totalCostInCents',
     cell: (props) => (
       <div className="text-right">
-        <RenderMoney value={props.getValue() as number} />
+        <Dollars amountInCents={props.getValue() as number} />
       </div>
     ),
     header: ({ column }) => (
