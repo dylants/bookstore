@@ -30,5 +30,9 @@ export function discountPercentageToDisplayString(
 }
 
 export function computeTax(priceInCents: number): number {
+  if (priceInCents < 0) {
+    return 0;
+  }
+
   return _.round(priceInCents * TAX);
 }

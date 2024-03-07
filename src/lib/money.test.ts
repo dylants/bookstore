@@ -103,5 +103,9 @@ describe('money', () => {
     it('should work with 0', () => {
       expect(computeTax(0)).toEqual(0);
     });
+
+    it('should work with a negative number', () => {
+      expect(computeTax(-500)).toEqual(0);
+    });
   });
 });
