@@ -3,6 +3,7 @@ import {
   discountPercentageToDisplayString,
   convertDollarsToCents,
   determineDiscountedAmountInCents,
+  computeTax,
 } from '@/lib/money';
 
 describe('money', () => {
@@ -87,6 +88,20 @@ describe('money', () => {
 
     it('should work with null', () => {
       expect(discountPercentageToDisplayString(null)).toEqual('0%');
+    });
+  });
+
+  describe('computeTax', () => {
+    it('should work with a simple number', () => {
+      expect(computeTax(500)).toEqual(41);
+    });
+
+    it('should work with a large number', () => {
+      expect(computeTax(56348)).toEqual(4649);
+    });
+
+    it('should work with 0', () => {
+      expect(computeTax(0)).toEqual(0);
     });
   });
 });
