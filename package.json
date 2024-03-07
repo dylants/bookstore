@@ -19,9 +19,9 @@
     "lint": "bun run eslint && bun run check-types",
     "start": "next start",
     "storybook": "storybook dev -p 6006",
-    "test": "jest --coverage",
+    "test": "TZ=UTC jest --coverage",
     "test:e2e": "bun run ci:db && bun playwright test",
-    "test:watch": "jest --watch"
+    "test:watch": "TZ=UTC jest --watch"
   },
   "prisma": {
     "seed": "ts-node -r tsconfig-paths/register --compiler-options {\"module\":\"CommonJS\"} prisma/seed/run-fake.ts"
