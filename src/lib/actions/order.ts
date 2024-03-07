@@ -179,3 +179,47 @@ export async function completeOrder(
     };
   }
 }
+
+export async function deleteOrderOrThrow(orderId: Order['id']) {
+  const order = await prisma.order.findFirstOrThrow({
+    where: { id: orderId },
+  });
+
+  if (order.orderState !== OrderState.OPEN) {
+    throw new BadRequestError('Order state must be in OPEN state to delete');
+  }
+
+  await prisma.order.delete({
+    where: { id: orderId },
+  });
+}
+
+export async function deleteOrder(
+  orderId: Order['id'],
+): Promise<HttpResponse<null, BadRequestError>> {
+  try {
+    await deleteOrderOrThrow(orderId);
+
+    return {
+      data: null,
+      status: 200,
+    };
+  } catch (err: unknown) {
+    if (err instanceof BadRequestError) {
+      return {
+        data: null,
+        error: {
+          ...err,
+          message: err.message,
+          name: err.name,
+        },
+        status: 400,
+      };
+    }
+
+    return {
+      data: null,
+      status: 500,
+    };
+  }
+}

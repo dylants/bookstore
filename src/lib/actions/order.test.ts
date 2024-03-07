@@ -1,6 +1,12 @@
 import { fakeOrder } from '@/lib/fakes/order';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
-import { completeOrder, completeOrderOrThrow, createOrder } from './order';
+import {
+  completeOrder,
+  completeOrderOrThrow,
+  createOrder,
+  deleteOrder,
+  deleteOrderOrThrow,
+} from './order';
 import { OrderState, ProductType } from '@prisma/client';
 import fakeOrderItem from '@/lib/fakes/order-item';
 import { fakeBook } from '@/lib/fakes/book';
@@ -238,6 +244,82 @@ describe('order action', () => {
       );
 
       expect(await completeOrder(1)).toEqual({
+        data: null,
+        status: 500,
+      });
+    });
+  });
+
+  describe('deleteOrderOrThrow', () => {
+    it('should delete the order', async () => {
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
+      prismaMock.order.delete.mockResolvedValue(order1);
+
+      await deleteOrderOrThrow(order1.id);
+
+      expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
+        where: { id: order1.id },
+      });
+
+      expect(prismaMock.order.delete).toHaveBeenCalledWith({
+        where: { id: order1.id },
+      });
+    });
+
+    it('should throw BadRequestError when attempting to delete order not in OPEN state', async () => {
+      const order = {
+        ...order1,
+        orderState: OrderState.PAID,
+      };
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+
+      expect.assertions(2);
+      try {
+        await deleteOrderOrThrow(order.id);
+      } catch (err) {
+        expect(err instanceof BadRequestError).toBeTruthy();
+        const error: BadRequestError = err as BadRequestError;
+        expect(error.message).toEqual(
+          'Order state must be in OPEN state to delete',
+        );
+      }
+    });
+  });
+
+  describe('deleteOrder', () => {
+    it('should return 200 when successful', async () => {
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
+      prismaMock.order.delete.mockResolvedValue(order1);
+
+      expect(await deleteOrder(1)).toEqual({
+        data: null,
+        status: 200,
+      });
+    });
+
+    it('should return error when deleteOrderOrThrow throws BadRequestError', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new BadRequestError('bad input'),
+      );
+
+      expect(await deleteOrder(1)).toEqual({
+        data: null,
+        error: {
+          message: 'bad input',
+          name: BadRequestError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when deleteOrderOrThrow throws Error', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new Error('unrecognized error'),
+      );
+
+      expect(await deleteOrder(1)).toEqual({
         data: null,
         status: 500,
       });
