@@ -1,5 +1,8 @@
 import _ from 'lodash';
 
+// TODO should we store this somewhere else?
+const TAX = 0.0825;
+
 export function convertCentsToDollars(cents: string | number): number {
   return _.toNumber(cents) / 100;
 }
@@ -24,4 +27,12 @@ export function discountPercentageToDisplayString(
   discountPercentage: number | null,
 ): string {
   return `${_.round((discountPercentage ?? 0) * 100, 2)}%`;
+}
+
+export function computeTax(priceInCents: number): number {
+  if (priceInCents < 0) {
+    return 0;
+  }
+
+  return _.round(priceInCents * TAX);
 }
