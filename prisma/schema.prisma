@@ -34,6 +34,7 @@ model Book {
   priceInCents Int
   quantity     Int           @default(0)
   invoiceItems InvoiceItem[]
+  OrderItem    OrderItem[]
 }
 
 model Author {
@@ -116,4 +117,46 @@ enum ProductType {
   BOOK
 
   // eventually other product types like general merchandise, etc
+}
+
+model Order {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  orderUID        String     @unique @default(uuid())
+  orderState      OrderState
+  orderOpenedDate DateTime   @db.Timestamptz(1)
+  orderClosedDate DateTime?  @db.Timestamptz(1)
+  subTotalInCents Int
+  taxInCents      Int
+  totalInCents    Int
+
+  orderItems OrderItem[]
+}
+
+enum OrderState {
+  // "open" states
+  OPEN
+
+  // "closed" states
+  PAID
+}
+
+model OrderItem {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  productPriceInCents Int
+  quantity            Int
+  totalPriceInCents   Int
+
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+
+  productType ProductType
+
+  book   Book? @relation(fields: [bookId], references: [id])
+  bookId Int?
 }
