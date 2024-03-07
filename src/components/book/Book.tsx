@@ -1,4 +1,4 @@
-import { convertCentsToDollars } from '@/lib/money';
+import Dollars from '@/components/Dollars';
 import BookHydrated from '@/types/BookHydrated';
 import Image from 'next/image';
 
@@ -10,7 +10,7 @@ function BookKey({
   fieldName: keyof BookHydrated;
 }) {
   let fieldNameToDisplay: string;
-  let fieldToDisplay: string | undefined;
+  let fieldToDisplay: string | JSX.Element | undefined;
   switch (fieldName) {
     case 'authors':
       fieldNameToDisplay = 'By';
@@ -30,7 +30,7 @@ function BookKey({
       break;
     case 'priceInCents':
       fieldNameToDisplay = 'Price';
-      fieldToDisplay = `$${convertCentsToDollars(book[fieldName]).toFixed(2)}`;
+      fieldToDisplay = <Dollars amountInCents={book[fieldName]} />;
       break;
     case 'publishedDate':
       fieldNameToDisplay = 'Published Date';
