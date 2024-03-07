@@ -1,5 +1,6 @@
 'use server';
 
+import { updateBookQuantity } from '@/lib/actions/book';
 import logger from '@/lib/logger';
 import {
   buildPaginationRequest,
@@ -39,36 +40,11 @@ export async function createInvoice(
   };
 }
 
-async function updateBookQuantity(
-  tx: Prisma.TransactionClient,
-  bookId: number,
-  increasedQuantity: number,
-): Promise<void> {
-  const book = await tx.book.findUniqueOrThrow({
-    where: { id: bookId },
-  });
-
-  logger.trace(
-    'book.quantity: %d increasedQuantity: %d',
-    book.quantity,
-    increasedQuantity,
-  );
-  const updatedQuantity = book.quantity + increasedQuantity;
-
-  logger.trace('updating book id: %s to quantity: %d', bookId, updatedQuantity);
-  await tx.book.update({
-    data: { quantity: updatedQuantity },
-    where: { id: bookId },
-  });
-}
-
 export async function completeInvoice(
   invoiceId: Invoice['id'],
 ): Promise<InvoiceHydrated> {
   const invoiceItems = await prisma.invoiceItem.findMany({
-    where: {
-      invoiceId: invoiceId,
-    },
+    where: { invoiceId },
   });
 
   // condense all the book updates by book ID
@@ -104,7 +80,11 @@ export async function completeInvoice(
       );
       await Promise.all(
         bookUpdates.map((update) =>
-          updateBookQuantity(tx, update.id, update.increasedQuantity),
+          updateBookQuantity({
+            bookId: update.id,
+            quantityChange: update.increasedQuantity,
+            tx,
+          }),
         ),
       );
 
