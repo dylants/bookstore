@@ -23,6 +23,7 @@ import { useState } from 'react';
 export type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  idFieldName?: string;
   isLoading?: boolean;
   noDataText?: string;
   onClick?: (id: unknown) => void;
@@ -31,6 +32,7 @@ export type DataTableProps<TData, TValue> = {
 export default function DataTable<TData, TValue>({
   columns,
   data,
+  idFieldName = 'id',
   isLoading,
   noDataText = 'No items',
   onClick,
@@ -45,7 +47,7 @@ export default function DataTable<TData, TValue>({
         [id: string]: string;
       };
 
-      return rowWithPossibleId?.id ?? index.toString();
+      return rowWithPossibleId?.[idFieldName] ?? index.toString();
     },
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,

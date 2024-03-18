@@ -99,6 +99,29 @@ export const Clickable: Story = {
   },
 };
 
+export const ClickableWithIdFieldName: Story = {
+  render: () => {
+    const clickableData: DataTableEntity[] = _.times(9, (index) => {
+      return {
+        ...fakeDataTableEntity(),
+        uid: `${index}-uid`,
+      };
+    });
+
+    return (
+      <div>
+        <DataTable
+          columns={columns}
+          data={clickableData}
+          idFieldName={'uid'}
+          onClick={(id) => console.log(`clicked ${id}`)}
+        />
+      </div>
+    );
+  },
+};
+ClickableWithIdFieldName.storyName = 'Clckable w/idFieldName';
+
 export const Loading: Story = {
   render: () => {
     return (
