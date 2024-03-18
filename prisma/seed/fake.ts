@@ -7,10 +7,19 @@ import { fakeInvoice } from '@/lib/fakes/invoice';
 import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
 import prisma from '@/lib/prisma';
 import BookCreateInput from '@/types/BookCreateInput';
-import { BookSource, Format, Genre, Invoice } from '@prisma/client';
+import {
+  Book,
+  BookSource,
+  Format,
+  Genre,
+  Invoice,
+  ProductType,
+} from '@prisma/client';
 import retry from 'async-retry';
 import _ from 'lodash';
 import generateCoreSeeds from './core';
+import { completeOrderOrThrow, createOrder } from '@/lib/actions/order';
+import { createOrderItem } from '@/lib/actions/order-item';
 
 // ***********************************************************
 // ********************* BEGIN VARIABLES *********************
@@ -193,6 +202,49 @@ async function generateInvoices(props: GenerateInvoicesProps) {
   });
 }
 
+type GenerateOrderProps = {
+  books: Array<Book>;
+  completeOrder?: boolean;
+};
+
+async function generateOrder(props: GenerateOrderProps) {
+  const { books, completeOrder } = props;
+
+  const order = await createOrder();
+
+  const booksInRandomOrder = _.shuffle(books);
+  if (books.length === 0) {
+    return;
+  } else {
+    await createOrderItem({
+      bookId: booksInRandomOrder[0].id,
+      orderId: order.id,
+      productType: ProductType.BOOK,
+      quantity: 1,
+    });
+
+    if (books.length > 1) {
+      await createOrderItem({
+        bookId: booksInRandomOrder[1].id,
+        orderId: order.id,
+        productType: ProductType.BOOK,
+        quantity: 1,
+      });
+    }
+  }
+
+  if (completeOrder) {
+    await completeOrderOrThrow(order.id);
+  }
+}
+
+async function generateOrders() {
+  const books = await prisma.book.findMany();
+
+  await generateOrder({ books, completeOrder: true });
+  await generateOrder({ books, completeOrder: false });
+}
+
 export default async function generateFakeSeeds() {
   await generateCoreSeeds();
 
@@ -213,4 +265,6 @@ export default async function generateFakeSeeds() {
     publisherNames,
     vendors,
   });
+
+  await generateOrders();
 }
