@@ -1,4 +1,3 @@
-import { fakeOrder } from '@/lib/fakes/order';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import {
   completeOrder,
@@ -6,15 +5,33 @@ import {
   createOrder,
   deleteOrder,
   deleteOrderOrThrow,
-} from './order';
-import { OrderState, ProductType } from '@prisma/client';
-import fakeOrderItem from '@/lib/fakes/order-item';
+  getOrder,
+  getOrders,
+} from '@/lib/actions/order';
+import { Order, OrderState, ProductType } from '@prisma/client';
+import { fakeOrder } from '@/lib/fakes/order';
+import { fakeOrderItem } from '@/lib/fakes/order-item';
 import { fakeBook } from '@/lib/fakes/book';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import BadRequestError from '@/lib/errors/BadRequestError';
+import { buildPaginationRequest } from '@/lib/pagination';
 
 describe('order action', () => {
   const order1 = fakeOrder();
+  const resolvedOrder1 = {
+    ...order1,
+    _count: { orderItems: 3 },
+  } as Order;
+  const order2 = fakeOrder();
+  const resolvedOrder2 = {
+    ...order2,
+    _count: { orderItems: 8 },
+  } as Order;
+  const order3 = fakeOrder();
+  const resolvedOrder3 = {
+    ...order3,
+    _count: { orderItems: 0 },
+  } as Order;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2021-02-03T12:13:14.000Z'));
@@ -85,7 +102,7 @@ describe('order action', () => {
         where: { id: order.id },
       });
 
-      // 3 invoice items, but only 2 books total
+      // 3 order items, but only 2 books total
       expect(prismaMock.book.update).toHaveBeenCalledTimes(2);
       expect(prismaMock.book.update).toHaveBeenNthCalledWith(1, {
         // book1 - item1 - item3
@@ -131,7 +148,7 @@ describe('order action', () => {
 
       await completeOrderOrThrow(order.id);
 
-      // 2 invoice items, but only 1 of type book
+      // 2 order items, but only 1 of type book
       expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
     });
 
@@ -323,6 +340,109 @@ describe('order action', () => {
         data: null,
         status: 500,
       });
+    });
+  });
+  describe('getOrders', () => {
+    it('should get orders when provided with default input', async () => {
+      prismaMock.order.findMany.mockResolvedValue([
+        resolvedOrder1,
+        resolvedOrder2,
+        resolvedOrder3,
+      ]);
+
+      const result = await getOrders({});
+
+      expect(prismaMock.order.findMany).toHaveBeenCalledWith({
+        ...buildPaginationRequest({}),
+        include: {
+          _count: {
+            select: { orderItems: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(result).toEqual({
+        orders: [
+          {
+            ...resolvedOrder1,
+            numOrderItems: 3,
+          },
+          {
+            ...resolvedOrder2,
+            numOrderItems: 8,
+          },
+          {
+            ...resolvedOrder3,
+            numOrderItems: 0,
+          },
+        ],
+        pageInfo: {
+          endCursor: order3.id.toString(),
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: order1.id.toString(),
+        },
+      });
+    });
+
+    it('should get orders when provided with pagination query input', async () => {
+      prismaMock.order.findMany.mockResolvedValue([
+        resolvedOrder2,
+        resolvedOrder3,
+      ]);
+
+      const result = await getOrders({
+        paginationQuery: {
+          after: '1',
+          first: 2,
+        },
+      });
+
+      expect(result).toEqual({
+        orders: [
+          {
+            ...resolvedOrder2,
+            numOrderItems: 8,
+          },
+          {
+            ...resolvedOrder3,
+            numOrderItems: 0,
+          },
+        ],
+        pageInfo: {
+          endCursor: order3.id.toString(),
+          hasNextPage: false,
+          hasPreviousPage: true,
+          startCursor: order2.id.toString(),
+        },
+      });
+    });
+  });
+
+  describe('getOrder', () => {
+    it('should provide the correct input to prisma', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(resolvedOrder1);
+
+      const result = await getOrder('uid123');
+
+      expect(prismaMock.order.findUnique).toHaveBeenCalledWith({
+        include: {
+          _count: {
+            select: { orderItems: true },
+          },
+        },
+        where: { orderUID: 'uid123' },
+      });
+      expect(result).toEqual({
+        ...resolvedOrder1,
+        numOrderItems: 3,
+      });
+    });
+
+    it('should return null when no order exists', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(null);
+      const result = await getOrder('uid123');
+      expect(result).toEqual(null);
     });
   });
 });

@@ -1,9 +1,11 @@
+import { fakeBookHydrated } from '@/lib/fakes/book';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { convertDollarsToCents } from '@/lib/money';
+import OrderItemHydrated from '@/types/OrderItemHydrated';
 import { faker } from '@faker-js/faker';
 import { OrderItem, ProductType } from '@prisma/client';
 
-export default function fakeOrderItem(): OrderItem {
+export function fakeOrderItem(): OrderItem {
   const productPriceInCents = convertDollarsToCents(
     faker.commerce.price({ max: 50, min: 2 }),
   );
@@ -20,5 +22,15 @@ export default function fakeOrderItem(): OrderItem {
     productType: ProductType.BOOK,
     quantity,
     totalPriceInCents,
+  };
+}
+
+export function fakeOrderItemHydrated(): OrderItemHydrated {
+  const orderItem = fakeOrderItem();
+  const book = fakeBookHydrated();
+
+  return {
+    ...orderItem,
+    book,
   };
 }

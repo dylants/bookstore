@@ -1,5 +1,6 @@
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
 import { computeTax, convertDollarsToCents } from '@/lib/money';
+import OrderHydrated from '@/types/OrderHydrated';
 import { faker } from '@faker-js/faker';
 import { Order, OrderState } from '@prisma/client';
 
@@ -20,5 +21,16 @@ export function fakeOrder(orderState: OrderState = OrderState.OPEN): Order {
     subTotalInCents,
     taxInCents,
     totalInCents,
+  };
+}
+
+export function fakeOrderHydrated(
+  orderState: OrderState = OrderState.OPEN,
+): OrderHydrated {
+  const order = fakeOrder(orderState);
+
+  return {
+    ...order,
+    numOrderItems: faker.number.int(50),
   };
 }
