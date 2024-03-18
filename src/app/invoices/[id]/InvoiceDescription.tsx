@@ -1,5 +1,6 @@
 import { discountPercentageToDisplayString } from '@/lib/money';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
+import { NotepadTextIcon } from 'lucide-react';
 
 export default function InvoiceDescription({
   invoice,
@@ -13,36 +14,35 @@ export default function InvoiceDescription({
       data-testid="invoice-description"
     >
       <div className="flex flex-col">
-        <div className="font-bold" data-testid="vendor-name">
-          {vendor.name}
+        <div className="font-bold flex gap-2 items-center">
+          <NotepadTextIcon /> Invoice Details
         </div>
-        <div className="grid grid-cols-2 gap-0">
-          <div>
-            <div>Discount:</div>
-          </div>
+        <div data-testid="vendor-name">{vendor.name}</div>
+        <div className="grid grid-cols-2">
+          <div>Discount:</div>
           <div className="text-right" data-testid="discount-percentage">
-            <div>
-              {discountPercentageToDisplayString(vendor.discountPercentage)}
-            </div>
+            {discountPercentageToDisplayString(vendor.discountPercentage)}
           </div>
         </div>
       </div>
       <div>
-        <div className="grid grid-cols-2 gap-1">
-          <div>
-            <div>Invoice Number:</div>
-            <div>Invoice Date:</div>
-            {invoice.isCompleted && <div>Received:</div>}
+        <div className="grid grid-cols-2">
+          <div>Invoice Number:</div>
+          <div className="text-right" data-testid="invoice-number">
+            {invoice.invoiceNumber}
           </div>
-          <div className="text-right">
-            <div data-testid="invoice-number">{invoice.invoiceNumber}</div>
-            <div data-testid="invoice-date">
-              {invoice.invoiceDate.toLocaleDateString()}
-            </div>
-            {invoice.isCompleted && (
-              <div>{invoice.dateReceived?.toLocaleDateString()}</div>
-            )}
+          <div>Invoice Date:</div>
+          <div className="text-right" data-testid="invoice-date">
+            {invoice.invoiceDate.toLocaleDateString()}
           </div>
+          {invoice.isCompleted && (
+            <>
+              <div>Received:</div>
+              <div className="text-right">
+                {invoice.dateReceived?.toLocaleDateString()}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
