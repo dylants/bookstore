@@ -4,6 +4,7 @@ import {
   convertDollarsToCents,
   determineDiscountedAmountInCents,
   computeTax,
+  determineDiscountPercentage,
 } from '@/lib/money';
 
 describe('money', () => {
@@ -70,6 +71,44 @@ describe('money', () => {
           priceInCents: 2699,
         }),
       ).toEqual(1619);
+    });
+  });
+
+  describe('determineDiscountPercentage', () => {
+    it('should work with a simple numbers', () => {
+      expect(
+        determineDiscountPercentage({
+          discountedPriceInCents: 1000,
+          fullPriceInCents: 2000,
+        }),
+      ).toEqual(0.5);
+    });
+
+    it('should work with no discount', () => {
+      expect(
+        determineDiscountPercentage({
+          discountedPriceInCents: 2000,
+          fullPriceInCents: 2000,
+        }),
+      ).toEqual(0);
+    });
+
+    it('should work with full discount', () => {
+      expect(
+        determineDiscountPercentage({
+          discountedPriceInCents: 0,
+          fullPriceInCents: 2000,
+        }),
+      ).toEqual(1);
+    });
+
+    it('should work with non-round numbers', () => {
+      expect(
+        determineDiscountPercentage({
+          discountedPriceInCents: 1619,
+          fullPriceInCents: 2699,
+        }),
+      ).toEqual(0.4);
     });
   });
 

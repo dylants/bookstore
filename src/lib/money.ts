@@ -23,6 +23,16 @@ export function determineDiscountedAmountInCents({
   return cost;
 }
 
+export function determineDiscountPercentage({
+  discountedPriceInCents,
+  fullPriceInCents,
+}: {
+  discountedPriceInCents: number;
+  fullPriceInCents: number;
+}): number {
+  return _.round(1 - discountedPriceInCents / fullPriceInCents, 2);
+}
+
 export function discountPercentageToDisplayString(
   discountPercentage: number | null,
 ): string {
