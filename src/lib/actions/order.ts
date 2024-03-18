@@ -5,8 +5,15 @@ import BadRequestError from '@/lib/errors/BadRequestError';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import logger from '@/lib/logger';
 import { computeTax } from '@/lib/money';
+import {
+  buildPaginationRequest,
+  buildPaginationResponse,
+} from '@/lib/pagination';
 import prisma from '@/lib/prisma';
 import { HttpResponse } from '@/types/HttpResponse';
+import OrderHydrated from '@/types/OrderHydrated';
+import PageInfo from '@/types/PageInfo';
+import PaginationQuery from '@/types/PaginationQuery';
 import {
   Order,
   OrderItem,
@@ -221,5 +228,67 @@ export async function deleteOrder(
       data: null,
       status: 500,
     };
+  }
+}
+
+export interface GetOrdersParams {
+  paginationQuery?: PaginationQuery;
+}
+
+export interface GetOrdersResult {
+  orders: Array<OrderHydrated>;
+  pageInfo: PageInfo;
+}
+
+export async function getOrders({
+  paginationQuery,
+}: GetOrdersParams): Promise<GetOrdersResult> {
+  const paginationRequest = buildPaginationRequest({ paginationQuery });
+
+  const rawItems = await prisma.order.findMany({
+    ...paginationRequest,
+    include: {
+      _count: {
+        select: { orderItems: true },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const items = rawItems.map((item) => ({
+    ...item,
+    numOrderItems: item._count.orderItems,
+  }));
+
+  const { items: orders, pageInfo } = buildPaginationResponse<OrderHydrated>({
+    items,
+    paginationQuery,
+  });
+
+  return {
+    orders,
+    pageInfo,
+  };
+}
+
+export async function getOrder(
+  orderUID: Order['orderUID'],
+): Promise<OrderHydrated | null> {
+  const order = await prisma.order.findUnique({
+    include: {
+      _count: {
+        select: { orderItems: true },
+      },
+    },
+    where: { orderUID },
+  });
+
+  if (order) {
+    return {
+      ...order,
+      numOrderItems: order._count.orderItems,
+    };
+  } else {
+    return null;
   }
 }
