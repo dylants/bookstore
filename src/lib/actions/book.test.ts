@@ -287,6 +287,28 @@ describe('book actions', () => {
       });
       expect(result).toEqual([book1, book2, book3]);
     });
+
+    it('should process multiple words', async () => {
+      prismaMock.book.findMany.mockResolvedValue([book2]);
+
+      const result = await findBooksBySearchString('the other book');
+
+      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
+        include: {
+          authors: true,
+          format: true,
+          genre: true,
+          publisher: true,
+        },
+        where: {
+          OR: [
+            { authors: { some: { name: { search: 'the & other & book' } } } },
+            { title: { search: 'the & other & book' } },
+          ],
+        },
+      });
+      expect(result).toEqual([book2]);
+    });
   });
 
   describe('getBook', () => {

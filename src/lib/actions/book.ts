@@ -242,8 +242,9 @@ export async function getBooks({
 }
 
 export async function findBooksBySearchString(
-  search: string,
+  searchString: string,
 ): Promise<Array<BookHydrated>> {
+  const search = searchString.split(' ').join(' & ');
   const rawBooks = await prisma.book.findMany({
     include: {
       authors: true,
