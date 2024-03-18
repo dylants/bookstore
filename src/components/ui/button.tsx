@@ -23,7 +23,7 @@ const buttonVariants = cva(
           'bg-customPalette-300 text-customPalette-100 shadow hover:bg-customPalette-400/90',
         destructive:
           'bg-red-500 text-customPalette-100 shadow-sm hover:bg-red-500/90',
-        ghost: 'hover:bg-customPalette-100 hover:text-customPalette-300/80',
+        ghost: 'hover:bg-customPalette-100/10',
         link: 'underline-offset-4 hover:underline',
         outline:
           'border border-customPalette-300 bg-white shadow-sm hover:bg-white/50',

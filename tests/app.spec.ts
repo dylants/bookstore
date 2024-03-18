@@ -6,10 +6,8 @@ test.describe('app', () => {
 
     await expect(page.getByRole('main')).toHaveText('Welcome');
 
-    await page.getByRole('navigation').getByTestId('nav-menu').click();
+    await page.getByRole('navigation').getByText('Search').click();
 
-    await page.getByText('List').click();
-
-    await expect(page.getByRole('heading')).toHaveText('Books');
+    await expect(page.getByRole('heading')).toHaveText('Search');
   });
 });

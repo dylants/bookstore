@@ -7,7 +7,6 @@ import {
   BreadcrumbsText,
 } from '@/components/Breadcrumbs';
 import OrdersTable from '@/components/order/OrdersTable';
-import { Button } from '@/components/ui/button';
 import { getOrders } from '@/lib/actions/order';
 import OrderHydrated from '@/types/OrderHydrated';
 import { usePathname, useRouter } from 'next/navigation';
@@ -53,15 +52,14 @@ export default function OrdersPage() {
       </Breadcrumbs>
 
       <h1 className="mt-8">Orders</h1>
-      <div className="flex w-full justify-end mb-4">
-        <Button variant="secondary">New Order</Button>
-      </div>
 
-      <OrdersTable
-        orders={orders || []}
-        isLoading={!orders || isLoading}
-        onClick={(uid) => router.push(`${pathname}/${uid}`)}
-      />
+      <div className="mt-4">
+        <OrdersTable
+          orders={orders || []}
+          isLoading={!orders || isLoading}
+          onClick={(uid) => router.push(`${pathname}/${uid}`)}
+        />
+      </div>
     </>
   );
 }
