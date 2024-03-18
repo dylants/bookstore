@@ -161,6 +161,7 @@ export default function BookForm({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
 
+        // TODO allow dynamic discountPercentage per invoice item
         const { discountPercentage } = invoice.vendor;
 
         const itemCostInCents = determineDiscountedAmountInCents({
