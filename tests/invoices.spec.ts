@@ -72,11 +72,13 @@ async function verifyInvoiceDetails({
 async function enterInNewBook({
   book,
   page,
+  discountPercentage,
   itemCost,
   totalCost,
 }: {
   book: BookFormInputStrings;
   page: Page;
+  discountPercentage: string;
   itemCost: string;
   totalCost: string;
 }) {
@@ -109,7 +111,7 @@ async function enterInNewBook({
   // verify the row added to the table
   const row = page.getByRole('row').nth(1);
   await expect(row).toHaveText(
-    `${book.isbn13}${book.title}$${itemCost}${book.quantity}$${totalCost}`,
+    `${book.isbn13}${book.title}$${book.price}${discountPercentage}$${itemCost}${book.quantity}$${totalCost}`,
   );
 }
 
@@ -117,12 +119,14 @@ async function enterInExistingBook({
   additionalQuantity,
   book,
   page,
+  discountPercentage,
   itemCost,
   totalCost,
 }: {
   additionalQuantity?: string;
   book: BookFormInputStrings;
   page: Page;
+  discountPercentage: string;
   itemCost: string;
   totalCost: string;
 }) {
@@ -159,7 +163,7 @@ async function enterInExistingBook({
   // verify the row added to the table
   const row = page.getByRole('row').nth(1);
   await expect(row).toHaveText(
-    `${book.isbn13}${book.title}$${itemCost}${quantity}$${totalCost}`,
+    `${book.isbn13}${book.title}$${book.price}${discountPercentage}$${itemCost}${quantity}$${totalCost}`,
   );
 }
 
@@ -246,6 +250,7 @@ test.describe('invoices', () => {
     // create invoice item for book1
     await enterInNewBook({
       book: book1,
+      discountPercentage: '40%',
       itemCost: book1Cost,
       page,
       totalCost: book1Cost,
@@ -255,6 +260,7 @@ test.describe('invoices', () => {
     await enterInExistingBook({
       additionalQuantity: book1AdditionalQuantity,
       book: book1,
+      discountPercentage: '40%',
       itemCost: book1Cost,
       page,
       totalCost: book1AdditionalQuantityTotalCost,
@@ -263,6 +269,7 @@ test.describe('invoices', () => {
     // create invoice item for book2
     await enterInNewBook({
       book: book2,
+      discountPercentage: '40%',
       itemCost: book2Cost,
       page,
       totalCost: book2Cost,
