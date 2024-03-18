@@ -8,6 +8,7 @@ import PageInfo from '@/types/PageInfo';
 import BookHydrated from '@/types/BookHydrated';
 import { Separator } from '@/components/ui/separator';
 
+// TODO this page is no longer available through site navigation
 export default function ListPage() {
   const [books, setBooks] = useState<Array<BookHydrated> | null>();
   const [pageInfo, setPageInfo] = useState<PageInfo>();

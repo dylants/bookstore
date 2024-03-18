@@ -231,8 +231,7 @@ test.describe('invoices', () => {
     await expect(page.getByRole('main')).toHaveText('Welcome');
 
     // navigate to the invoices page
-    await page.getByRole('navigation').getByTestId('nav-menu').click();
-    await page.getByText('Invoices').click();
+    await page.getByRole('navigation').getByText('Invoices').click();
     await expect(page.getByRole('heading')).toHaveText('Invoices');
 
     await createInvoice({ invoice, page });
@@ -280,11 +279,12 @@ test.describe('invoices', () => {
 
     await verifyInvoiceDetails({ invoice, isComplete: true, page });
 
-    // navigate to the list books page
-    await page.getByRole('navigation').getByTestId('nav-menu').click();
-    await page.getByText('List').click();
-    await expect(page.getByRole('heading')).toHaveText('Books');
+    // verify the books via search
+    await page.getByRole('navigation').getByText('Search').click();
+    await expect(page.getByRole('heading')).toHaveText('Search');
 
+    await page.getByRole('textbox').fill(book1.title);
+    await page.getByRole('textbox').press('Enter');
     await verifyBookDetails({
       book: book1,
       page,
@@ -292,6 +292,9 @@ test.describe('invoices', () => {
         _.toNumber(book1.quantity) + _.toNumber(book1AdditionalQuantity)
       ).toString(),
     });
+
+    await page.getByRole('textbox').fill(book2.title);
+    await page.getByRole('textbox').press('Enter');
     await verifyBookDetails({
       book: book2,
       page,
