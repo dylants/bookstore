@@ -11,6 +11,7 @@ import {
   MagnifyingGlassIcon,
   CardStackIcon,
   ReaderIcon,
+  BackpackIcon,
 } from '@radix-ui/react-icons';
 import Link from 'next/link';
 
@@ -37,6 +38,14 @@ export default function NavMenu() {
             <div className="flex items-center w-full cursor-pointer">
               <ReaderIcon />
               <span className="pl-2">Invoices</span>
+            </div>
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/orders">
+          <DropdownMenuItem>
+            <div className="flex items-center w-full cursor-pointer">
+              <BackpackIcon />
+              <span className="pl-2">Orders</span>
             </div>
           </DropdownMenuItem>
         </Link>
