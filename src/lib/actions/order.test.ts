@@ -47,7 +47,7 @@ describe('order action', () => {
       prismaMock.order.create.mockResolvedValue(order1);
       prismaMock.order.update.mockResolvedValue(order1);
 
-      await createOrder();
+      const result = await createOrder();
 
       expect(prismaMock.order.create).toHaveBeenCalledWith({
         data: {
@@ -61,6 +61,11 @@ describe('order action', () => {
       expect(prismaMock.order.update).toHaveBeenCalledWith({
         data: { orderUID: `210203121314-${order1.id}` },
         where: { id: order1.id },
+      });
+
+      expect(result).toEqual({
+        ...order1,
+        orderItems: [],
       });
     });
   });

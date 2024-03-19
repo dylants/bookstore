@@ -21,7 +21,10 @@ describe('order item actions', () => {
       orderItem1.bookId = book1.id;
       prismaMock.orderItem.create.mockResolvedValue(orderItem1);
 
-      await createOrderItem(orderItem1);
+      await createOrderItem({
+        ...orderItem1,
+        orderUID: order1.orderUID,
+      });
 
       expect(prismaMock.orderItem.create).toHaveBeenCalledWith({
         data: {
@@ -29,7 +32,7 @@ describe('order item actions', () => {
             connect: { id: book1.id },
           },
           order: {
-            connect: { id: order1.id },
+            connect: { orderUID: order1.orderUID },
           },
           productPriceInCents: book1.priceInCents,
           productType: ProductType.BOOK,
@@ -57,6 +60,7 @@ describe('order item actions', () => {
         createOrderItem({
           ...orderItem1,
           bookId: null,
+          orderUID: order1.orderUID,
         }),
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"bookId required as input at this time"`,

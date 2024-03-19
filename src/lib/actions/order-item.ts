@@ -9,7 +9,7 @@ import { OrderItem, Prisma, ProductType } from '@prisma/client';
 export async function createOrderItem(
   orderItem: OrderItemCreateInput,
 ): Promise<OrderItem> {
-  const { bookId, orderId, quantity } = orderItem;
+  const { bookId, orderUID, quantity } = orderItem;
 
   // we only handle order items of product type Book at this time
   const productType = ProductType.BOOK;
@@ -30,7 +30,7 @@ export async function createOrderItem(
             connect: { id: bookId },
           },
           order: {
-            connect: { id: orderId },
+            connect: { orderUID },
           },
           productPriceInCents,
           productType,
