@@ -234,7 +234,7 @@ async function generateOrder(props: GenerateOrderProps) {
   }
 
   if (completeOrder) {
-    await completeOrderOrThrow(order.id);
+    await completeOrderOrThrow(order.orderUID);
   }
 }
 

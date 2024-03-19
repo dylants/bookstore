@@ -79,11 +79,11 @@ export async function recomputeOrderTotals({
 }
 
 export async function completeOrderOrThrow(
-  orderId: Order['id'],
+  orderUID: Order['orderUID'],
 ): Promise<Order> {
   const order = await prisma.order.findFirstOrThrow({
     include: { orderItems: true },
-    where: { id: orderId },
+    where: { orderUID },
   });
 
   if (order.orderState !== OrderState.OPEN) {
@@ -131,21 +131,21 @@ export async function completeOrderOrThrow(
       );
 
       logger.trace(
-        'book updates successful, performing transaction, orderId: %s',
-        orderId,
+        'book updates successful, performing transaction, orderUID: %s',
+        orderUID,
       );
       // TODO here we'd actually perform the transaction
 
       logger.trace(
-        'transaction successful, marking order paid, orderId: %s',
-        orderId,
+        'transaction successful, marking order paid, orderUID: %s',
+        orderUID,
       );
       const order = await tx.order.update({
         data: {
           orderClosedDate: new Date(),
           orderState: OrderState.PAID,
         },
-        where: { id: orderId },
+        where: { orderUID },
       });
 
       logger.trace('order marked as paid and closed!');
@@ -158,12 +158,12 @@ export async function completeOrderOrThrow(
 }
 
 export async function completeOrder(
-  orderId: Order['id'],
+  orderUID: Order['orderUID'],
 ): Promise<
   HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
 > {
   try {
-    const order = await completeOrderOrThrow(orderId);
+    const order = await completeOrderOrThrow(orderUID);
 
     return {
       data: order,
@@ -192,9 +192,9 @@ export async function completeOrder(
   }
 }
 
-export async function deleteOrderOrThrow(orderId: Order['id']) {
+export async function deleteOrderOrThrow(orderUID: Order['orderUID']) {
   const order = await prisma.order.findFirstOrThrow({
-    where: { id: orderId },
+    where: { orderUID },
   });
 
   if (order.orderState !== OrderState.OPEN) {
@@ -202,15 +202,15 @@ export async function deleteOrderOrThrow(orderId: Order['id']) {
   }
 
   await prisma.order.delete({
-    where: { id: orderId },
+    where: { orderUID },
   });
 }
 
 export async function deleteOrder(
-  orderId: Order['id'],
+  orderUID: Order['orderUID'],
 ): Promise<HttpResponse<null, BadRequestError>> {
   try {
-    await deleteOrderOrThrow(orderId);
+    await deleteOrderOrThrow(orderUID);
 
     return {
       data: null,
