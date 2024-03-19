@@ -47,7 +47,7 @@ const Search = React.forwardRef<
   useImperativeHandle(forwardedRef, () => ref.current as HTMLInputElement);
 
   return (
-    <form onSubmit={handleSubmit(internalOnSubmit)}>
+    <form className="w-full" onSubmit={handleSubmit(internalOnSubmit)}>
       <div className="flex gap-4 items-end">
         <div className="flex flex-col flex-1">
           {labelText && <label className="text-sm">{labelText}</label>}
