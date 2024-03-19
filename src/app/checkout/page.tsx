@@ -12,18 +12,24 @@ import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
-import { createOrder, getOrderWithItems } from '@/lib/actions/order';
+import {
+  completeOrder,
+  createOrder,
+  getOrderWithItems,
+} from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function CheckoutPage() {
   const [order, setOrder] = useState<OrderWithItemsHydrated | null>();
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const orderUID = searchParams.get('orderUID');
@@ -35,6 +41,8 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (orderUID) {
       loadOrder(orderUID);
+    } else {
+      setOrder(null);
     }
   }, [loadOrder, orderUID]);
 
@@ -74,10 +82,33 @@ export default function CheckoutPage() {
           setOrder(await getOrderWithItems(orderUID));
         }
         setIsSearching(false);
+
+        // update the URL to include the orderUID (if not there)
+        // do this last to retain the animations
+        const params = new URLSearchParams(searchParams.toString());
+        if (!params.get('orderUID')) {
+          params.set('orderUID', orderUID);
+          router.push(`${pathname}?${params.toString()}`);
+        }
       }
     },
-    [order],
+    [order, pathname, router, searchParams],
   );
+
+  const onComplete = useCallback(async () => {
+    if (!order) {
+      return;
+    }
+
+    const response = await completeOrder(order.orderUID);
+    if (response.status === 200) {
+      // TODO should we do more on success here?
+      router.push('/checkout');
+    } else {
+      // TODO handle errors
+      console.error(response);
+    }
+  }, [order, router]);
 
   if (orderUID && !order) {
     return (
@@ -129,12 +160,7 @@ export default function CheckoutPage() {
                 transition={{ delay: 0.2 }}
                 exit={{ opacity: 0 }}
               >
-                <Button
-                  variant="secondary"
-                  onClick={() => console.log('complete')}
-                >
-                  Complete Order
-                </Button>
+                <Button onClick={onComplete}>Complete Order</Button>
               </motion.div>
             )}
           </div>
