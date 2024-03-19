@@ -5,16 +5,17 @@ import {
   createOrder,
   deleteOrder,
   deleteOrderOrThrow,
-  getOrder,
+  getOrderWithItems,
   getOrders,
 } from '@/lib/actions/order';
 import { Order, OrderState, ProductType } from '@prisma/client';
 import { fakeOrder } from '@/lib/fakes/order';
-import { fakeOrderItem } from '@/lib/fakes/order-item';
+import { fakeOrderItem, fakeOrderItemHydrated } from '@/lib/fakes/order-item';
 import { fakeBook } from '@/lib/fakes/book';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import { buildPaginationRequest } from '@/lib/pagination';
+import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 
 describe('order action', () => {
   const order1 = fakeOrder();
@@ -419,30 +420,78 @@ describe('order action', () => {
     });
   });
 
-  describe('getOrder', () => {
+  describe('getOrderWithItems', () => {
     it('should provide the correct input to prisma', async () => {
-      prismaMock.order.findUnique.mockResolvedValue(resolvedOrder1);
+      const orderWithItems: OrderWithItemsHydrated = {
+        ...fakeOrder(),
+        orderItems: [fakeOrderItemHydrated(), fakeOrderItemHydrated()],
+      };
 
-      const result = await getOrder('uid123');
+      prismaMock.order.findUnique.mockResolvedValue(orderWithItems);
+
+      const result = await getOrderWithItems('uid123');
 
       expect(prismaMock.order.findUnique).toHaveBeenCalledWith({
         include: {
-          _count: {
-            select: { orderItems: true },
+          orderItems: {
+            include: {
+              book: {
+                include: {
+                  authors: true,
+                  format: true,
+                  genre: true,
+                  publisher: true,
+                },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
           },
         },
         where: { orderUID: 'uid123' },
       });
-      expect(result).toEqual({
-        ...resolvedOrder1,
-        numOrderItems: 3,
-      });
+      expect(result).toEqual(orderWithItems);
     });
 
     it('should return null when no order exists', async () => {
       prismaMock.order.findUnique.mockResolvedValue(null);
-      const result = await getOrder('uid123');
+      const result = await getOrderWithItems('uid123');
       expect(result).toEqual(null);
+    });
+
+    it('should process non-book product type order items', async () => {
+      const order = fakeOrder();
+      const orderItemHydrated1 = fakeOrderItemHydrated();
+      const orderItemHydrated2 = fakeOrderItemHydrated();
+      const orderItemHydrated3 = fakeOrderItemHydrated();
+      const orderWithNonBookItems: OrderWithItemsHydrated = {
+        ...order,
+        orderItems: [
+          orderItemHydrated1,
+          orderItemHydrated2,
+          {
+            ...orderItemHydrated3,
+            productType: 'foo' as ProductType,
+          },
+        ],
+      };
+
+      prismaMock.order.findUnique.mockResolvedValue(orderWithNonBookItems);
+
+      const result = await getOrderWithItems('uid123');
+
+      expect(result).toEqual({
+        ...order,
+        orderItems: [
+          orderItemHydrated1,
+          orderItemHydrated2,
+          {
+            ...orderItemHydrated3,
+            book: undefined,
+            bookId: null,
+            productType: 'foo',
+          },
+        ],
+      });
     });
   });
 });
