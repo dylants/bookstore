@@ -25,7 +25,7 @@ import {
 } from '@prisma/client';
 import { format } from 'date-fns';
 
-export async function createOrder(): Promise<Order> {
+export async function createOrder(): Promise<OrderWithItemsHydrated> {
   const { id } = await prisma.order.create({
     data: {
       orderOpenedDate: new Date(),
@@ -45,7 +45,10 @@ export async function createOrder(): Promise<Order> {
 
   logger.trace('created order in DB: %j', createdOrder);
 
-  return createdOrder;
+  return {
+    ...createdOrder,
+    orderItems: [],
+  };
 }
 
 export async function recomputeOrderTotals({
