@@ -10,24 +10,45 @@ import {
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
 import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
 import { createOrder, getOrderWithItems } from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function CheckoutPage() {
   const [order, setOrder] = useState<OrderWithItemsHydrated | null>();
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const searchParams = useSearchParams();
+
+  const orderUID = searchParams.get('orderUID');
+
+  const loadOrder = useCallback(async (orderUID: string) => {
+    setOrder(await getOrderWithItems(orderUID));
+  }, []);
+
+  useEffect(() => {
+    if (orderUID) {
+      loadOrder(orderUID);
+    }
+  }, [loadOrder, orderUID]);
 
   const searchRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
+    // if the orderUID is supplied, we must wait for the order to load
+    if (orderUID && !order) {
+      return;
+    }
+
     if (searchRef.current) {
       searchRef.current.focus();
     }
-  }, [searchRef]);
+  }, [order, orderUID, searchRef]);
 
   const onSearch = useCallback(
     async ({ input }: { input: string }) => {
@@ -58,6 +79,14 @@ export default function CheckoutPage() {
     [order],
   );
 
+  if (orderUID && !order) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <>
       <Breadcrumbs>
@@ -68,44 +97,70 @@ export default function CheckoutPage() {
 
       <h1 className="mt-8">Checkout</h1>
 
-      <div
-        className={clsx(
-          'flex flex-col justify-center gap-4',
-          order && 'mt-4',
-          !order && 'mx-[100px] h-[400px]',
-        )}
-      >
-        <div className="flex gap-16 w-full items-end">
-          <div className="flex flex-grow w-full">
-            <Search
-              onSubmit={onSearch}
-              clearOnSubmit
-              isSearching={isSearching}
-              labelText="SKU"
-              ref={searchRef}
-            />
-          </div>
-          {order && (
-            <Button variant="secondary" onClick={() => console.log('complete')}>
-              Complete Order
-            </Button>
+      <AnimatePresence initial={false}>
+        <div
+          className={clsx(
+            'flex flex-col justify-center gap-4',
+            order && 'mt-4',
+            !order && 'mx-[100px] h-[400px]',
           )}
+        >
+          <div className="flex w-full justify-between items-end">
+            <motion.div
+              layout
+              className={clsx(
+                'flex',
+                order && 'w-[300px]',
+                !order && 'flex-grow',
+              )}
+            >
+              <Search
+                onSubmit={onSearch}
+                clearOnSubmit
+                isSearching={isSearching}
+                labelText="SKU"
+                ref={searchRef}
+              />
+            </motion.div>
+            {order && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                exit={{ opacity: 0 }}
+              >
+                <Button
+                  variant="secondary"
+                  onClick={() => console.log('complete')}
+                >
+                  Complete Order
+                </Button>
+              </motion.div>
+            )}
+          </div>
+
+          <div>
+            {order ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="mt-4">
+                  <OrderItemsTable orderItems={order.orderItems} />
+                </div>
+
+                <div className="flex justify-end mt-4">
+                  <OrderTotal order={order} />
+                </div>
+              </motion.div>
+            ) : (
+              <p className="text-center">Scan item or enter SKU to begin</p>
+            )}
+          </div>
         </div>
-
-        {order ? (
-          <>
-            <div className="mt-4">
-              <OrderItemsTable orderItems={order.orderItems} />
-            </div>
-
-            <div className="flex justify-end mt-4">
-              <OrderTotal order={order} />
-            </div>
-          </>
-        ) : (
-          <p className="text-center">Scan item or enter SKU to begin</p>
-        )}
-      </div>
+      </AnimatePresence>
     </>
   );
 }
