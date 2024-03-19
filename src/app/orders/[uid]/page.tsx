@@ -1,5 +1,6 @@
 'use client';
 
+import OpenOrderActions from '@/app/orders/[uid]/OpenOrderActions';
 import OrderDescription from '@/app/orders/[uid]/OrderDescription';
 import OrderTotal from '@/app/orders/[uid]/OrderTotal';
 import {
@@ -11,12 +12,15 @@ import {
 } from '@/components/Breadcrumbs';
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { getOrderWithItems } from '@/lib/actions/order';
+import { deleteOrder, getOrderWithItems } from '@/lib/actions/order';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
+import { OrderState } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function OrderPage({ params }: { params: { uid: string } }) {
   const [order, setOrder] = useState<OrderWithItemsHydrated | null>();
+  const router = useRouter();
 
   const orderUID = params.uid;
 
@@ -28,6 +32,19 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
   useEffect(() => {
     loadOrder();
   }, [loadOrder]);
+
+  const onDelete = useCallback(async () => {
+    const response = await deleteOrder(orderUID);
+    if (response.status === 200) {
+      router.push('/orders');
+    } else {
+      // TODO handle errors
+    }
+  }, [orderUID, router]);
+
+  const onCheckout = useCallback(async () => {
+    router.push(`/checkout?orderUID=${orderUID}`);
+  }, [orderUID, router]);
 
   if (!order) {
     return (
@@ -48,6 +65,12 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
       </Breadcrumbs>
 
       <OrderDescription order={order} />
+
+      {order.orderState === OrderState.OPEN && (
+        <div className="mt-4">
+          <OpenOrderActions onCheckout={onCheckout} onDelete={onDelete} />
+        </div>
+      )}
 
       <hr className="my-8 mx-8 bg-slate-300" />
 
