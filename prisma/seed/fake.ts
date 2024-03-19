@@ -218,7 +218,7 @@ async function generateOrder(props: GenerateOrderProps) {
   } else {
     await createOrderItem({
       bookId: booksInRandomOrder[0].id,
-      orderId: order.id,
+      orderUID: order.orderUID,
       productType: ProductType.BOOK,
       quantity: 1,
     });
@@ -226,7 +226,7 @@ async function generateOrder(props: GenerateOrderProps) {
     if (books.length > 1) {
       await createOrderItem({
         bookId: booksInRandomOrder[1].id,
-        orderId: order.id,
+        orderUID: order.orderUID,
         productType: ProductType.BOOK,
         quantity: 1,
       });
