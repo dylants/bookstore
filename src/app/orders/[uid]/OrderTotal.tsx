@@ -1,7 +1,7 @@
 import Dollars from '@/components/Dollars';
-import OrderHydrated from '@/types/OrderHydrated';
+import { Order } from '@prisma/client';
 
-export default function OrderTotal({ order }: { order: OrderHydrated }) {
+export default function OrderTotal({ order }: { order: Order }) {
   return (
     <div className="grid grid-cols-2 gap-2">
       <div>Subtotal:</div>

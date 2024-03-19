@@ -10,8 +10,10 @@ import {
   buildPaginationResponse,
 } from '@/lib/pagination';
 import prisma from '@/lib/prisma';
+import { serializeBookSource } from '@/lib/serializers/book-source';
 import { HttpResponse } from '@/types/HttpResponse';
 import OrderHydrated from '@/types/OrderHydrated';
+import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
 import {
@@ -271,24 +273,59 @@ export async function getOrders({
   };
 }
 
-export async function getOrder(
+export async function getOrderWithItems(
   orderUID: Order['orderUID'],
-): Promise<OrderHydrated | null> {
+): Promise<OrderWithItemsHydrated | null> {
   const order = await prisma.order.findUnique({
     include: {
-      _count: {
-        select: { orderItems: true },
+      // We're not paginating the order items, which assumes the list is
+      // not long. But at this point we can assume that safely.
+      orderItems: {
+        include: {
+          book: {
+            include: {
+              authors: true,
+              format: true,
+              genre: true,
+              publisher: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
       },
     },
     where: { orderUID },
   });
 
-  if (order) {
-    return {
-      ...order,
-      numOrderItems: order._count.orderItems,
-    };
-  } else {
+  if (!order) {
     return null;
   }
+
+  const items = order.orderItems.map((item) => {
+    if (item.productType !== ProductType.BOOK) {
+      // we have no other product types at this time, so this should not happen
+      logger.warn('non-book product type encountered: %j', item);
+      return {
+        ...item,
+        book: undefined,
+        bookId: null,
+      };
+    }
+
+    // we can assume the book is available based on code above
+    const itemBook = item.book!;
+
+    return {
+      ...item,
+      book: {
+        ...itemBook,
+        publisher: serializeBookSource(itemBook.publisher),
+      },
+    };
+  });
+
+  return {
+    ...order,
+    orderItems: items,
+  };
 }

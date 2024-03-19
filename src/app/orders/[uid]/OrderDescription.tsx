@@ -1,7 +1,7 @@
-import OrderHydrated from '@/types/OrderHydrated';
+import { Order } from '@prisma/client';
 import { GiftIcon } from 'lucide-react';
 
-export default function OrderDescription({ order }: { order: OrderHydrated }) {
+export default function OrderDescription({ order }: { order: Order }) {
   return (
     <div className="flex w-full justify-between text-lg">
       <div className="flex flex-col">
