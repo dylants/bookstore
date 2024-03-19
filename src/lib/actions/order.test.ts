@@ -101,11 +101,11 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await completeOrderOrThrow(order.id);
+      await completeOrderOrThrow(order.orderUID);
 
       expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
         include: { orderItems: true },
-        where: { id: order.id },
+        where: { orderUID: order.orderUID },
       });
 
       // 3 order items, but only 2 books total
@@ -126,7 +126,7 @@ describe('order action', () => {
           orderClosedDate: new Date('2021-02-03T12:13:14.000Z'),
           orderState: OrderState.PAID,
         },
-        where: { id: order.id },
+        where: { orderUID: order.orderUID },
       });
     });
 
@@ -152,7 +152,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await completeOrderOrThrow(order.id);
+      await completeOrderOrThrow(order.orderUID);
 
       // 2 order items, but only 1 of type book
       expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
@@ -178,7 +178,7 @@ describe('order action', () => {
 
       expect.assertions(3);
       try {
-        await completeOrderOrThrow(order.id);
+        await completeOrderOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof NegativeBookQuantityError).toBeTruthy();
         const error: NegativeBookQuantityError =
@@ -199,7 +199,7 @@ describe('order action', () => {
 
       expect.assertions(2);
       try {
-        await completeOrderOrThrow(order.id);
+        await completeOrderOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof BadRequestError).toBeTruthy();
         const error: BadRequestError = err as BadRequestError;
@@ -220,7 +220,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      expect(await completeOrder(1)).toEqual({
+      expect(await completeOrder('1')).toEqual({
         data: order,
         status: 200,
       });
@@ -232,7 +232,7 @@ describe('order action', () => {
         new BadRequestError('bad input'),
       );
 
-      expect(await completeOrder(1)).toEqual({
+      expect(await completeOrder('1')).toEqual({
         data: null,
         error: {
           message: 'bad input',
@@ -249,7 +249,7 @@ describe('order action', () => {
         new NegativeBookQuantityError(book),
       );
 
-      expect(await completeOrder(1)).toEqual({
+      expect(await completeOrder('1')).toEqual({
         data: null,
         error: {
           book,
@@ -266,7 +266,7 @@ describe('order action', () => {
         new Error('unrecognized error'),
       );
 
-      expect(await completeOrder(1)).toEqual({
+      expect(await completeOrder('1')).toEqual({
         data: null,
         status: 500,
       });
@@ -278,14 +278,14 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
       prismaMock.order.delete.mockResolvedValue(order1);
 
-      await deleteOrderOrThrow(order1.id);
+      await deleteOrderOrThrow(order1.orderUID);
 
       expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
-        where: { id: order1.id },
+        where: { orderUID: order1.orderUID },
       });
 
       expect(prismaMock.order.delete).toHaveBeenCalledWith({
-        where: { id: order1.id },
+        where: { orderUID: order1.orderUID },
       });
     });
 
@@ -298,7 +298,7 @@ describe('order action', () => {
 
       expect.assertions(2);
       try {
-        await deleteOrderOrThrow(order.id);
+        await deleteOrderOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof BadRequestError).toBeTruthy();
         const error: BadRequestError = err as BadRequestError;
@@ -314,7 +314,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
       prismaMock.order.delete.mockResolvedValue(order1);
 
-      expect(await deleteOrder(1)).toEqual({
+      expect(await deleteOrder('1')).toEqual({
         data: null,
         status: 200,
       });
@@ -326,7 +326,7 @@ describe('order action', () => {
         new BadRequestError('bad input'),
       );
 
-      expect(await deleteOrder(1)).toEqual({
+      expect(await deleteOrder('1')).toEqual({
         data: null,
         error: {
           message: 'bad input',
@@ -342,7 +342,7 @@ describe('order action', () => {
         new Error('unrecognized error'),
       );
 
-      expect(await deleteOrder(1)).toEqual({
+      expect(await deleteOrder('1')).toEqual({
         data: null,
         status: 500,
       });
