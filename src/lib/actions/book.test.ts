@@ -309,6 +309,25 @@ describe('book actions', () => {
       });
       expect(result).toEqual([book2]);
     });
+
+    it('should process ISBN13', async () => {
+      prismaMock.book.findMany.mockResolvedValue([book2]);
+
+      const result = await findBooksBySearchString('9780765376671');
+
+      expect(prismaMock.book.findMany).toHaveBeenCalledWith({
+        include: {
+          authors: true,
+          format: true,
+          genre: true,
+          publisher: true,
+        },
+        where: {
+          OR: [{ isbn13: { equals: 9780765376671 } }],
+        },
+      });
+      expect(result).toEqual([book2]);
+    });
   });
 
   describe('getBook', () => {

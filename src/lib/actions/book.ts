@@ -13,6 +13,7 @@ import BookHydrated from '@/types/BookHydrated';
 import { Book, Prisma } from '@prisma/client';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
+import _ from 'lodash';
 
 export async function buildAuthorsInput(
   tx: Prisma.TransactionClient,
@@ -244,7 +245,18 @@ export async function getBooks({
 export async function findBooksBySearchString(
   searchString: string,
 ): Promise<Array<BookHydrated>> {
-  const search = searchString.split(' ').join(' & ');
+  let whereClauses: Prisma.BookWhereInput[];
+  const searchStringNumber = _.toNumber(searchString);
+  if (_.isFinite(searchStringNumber)) {
+    whereClauses = [{ isbn13: { equals: searchStringNumber } }];
+  } else {
+    const search = searchString.split(' ').join(' & ');
+    whereClauses = [
+      { authors: { some: { name: { search } } } },
+      { title: { search } },
+    ];
+  }
+
   const rawBooks = await prisma.book.findMany({
     include: {
       authors: true,
@@ -253,7 +265,7 @@ export async function findBooksBySearchString(
       publisher: true,
     },
     where: {
-      OR: [{ authors: { some: { name: { search } } } }, { title: { search } }],
+      OR: whereClauses,
     },
   });
 
