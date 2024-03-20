@@ -41,39 +41,41 @@ const checkmarkVariants = cva('', {
 });
 
 export interface CheckmarkProps
-  extends React.HTMLAttributes<HTMLElement>,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof checkmarkVariants> {
-  color: string;
+  color?: string;
 }
 
 function Checkmark({
   className,
   color = '#00cc88',
   size = 'large',
+  ...props
 }: CheckmarkProps) {
-  let pixelSize, fillSize: number;
+  let pixelSize, strokeWidth: number;
   switch (size) {
     case 'small':
       pixelSize = 20;
-      fillSize = 3;
+      strokeWidth = 2;
       break;
     case 'xLarge':
       pixelSize = 200;
-      fillSize = 10;
+      strokeWidth = 10;
       break;
     case 'large':
     default:
       pixelSize = 100;
-      fillSize = 5;
+      strokeWidth = 5;
       break;
   }
 
   return (
     <div
       className={cn(
-        `w-[${pixelSize}px] h-[${pixelSize}px] stroke-[${fillSize}] fill-transparent`,
+        `w-[${pixelSize}px] h-[${pixelSize}px] fill-transparent`,
         className,
       )}
+      {...props}
     >
       <motion.svg
         width={pixelSize}
@@ -88,6 +90,7 @@ function Checkmark({
           cy={pixelSize / 2}
           r={pixelSize * 0.4}
           stroke={color}
+          strokeWidth={strokeWidth}
           variants={draw}
           custom={1.2}
         />
@@ -97,6 +100,7 @@ function Checkmark({
           x2={pixelSize * 0.455}
           y2={pixelSize * 0.675}
           stroke={color}
+          strokeWidth={strokeWidth}
           variants={draw}
           custom={0}
         />
@@ -106,6 +110,7 @@ function Checkmark({
           x2={pixelSize * 0.7}
           y2={pixelSize * 0.32}
           stroke={color}
+          strokeWidth={strokeWidth}
           variants={draw}
           custom={0.5}
         />

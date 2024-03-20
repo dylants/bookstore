@@ -16,10 +16,10 @@ export const Large: Story = {
   args: { size: 'large' },
 };
 
-export const XLarge: Story = {
+export const ExtraLarge: Story = {
   args: { size: 'xLarge' },
 };
 
-export const Blue: Story = {
+export const DifferentColor: Story = {
   args: { color: '#0044ff', size: 'xLarge' },
 };
