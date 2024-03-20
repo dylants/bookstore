@@ -12,16 +12,13 @@ import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
-import {
-  completeOrder,
-  createOrder,
-  getOrderWithItems,
-} from '@/lib/actions/order';
+import { createOrder, getOrderWithItems } from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -95,21 +92,6 @@ export default function CheckoutPage() {
     [order, pathname, router, searchParams],
   );
 
-  const onComplete = useCallback(async () => {
-    if (!order) {
-      return;
-    }
-
-    const response = await completeOrder(order.orderUID);
-    if (response.status === 200) {
-      // TODO should we do more on success here?
-      router.push('/checkout');
-    } else {
-      // TODO handle errors
-      console.error(response);
-    }
-  }, [order, router]);
-
   if (orderUID && !order) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -160,7 +142,9 @@ export default function CheckoutPage() {
                 transition={{ delay: 0.2 }}
                 exit={{ opacity: 0 }}
               >
-                <Button onClick={onComplete}>Complete Order</Button>
+                <Link href={`/checkout/${order.orderUID}/process-transaction`}>
+                  <Button>Complete Order</Button>
+                </Link>
               </motion.div>
             )}
           </div>
