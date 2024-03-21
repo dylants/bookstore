@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export default function OrderPage({ params }: { params: { uid: string } }) {
   const [order, setOrder] = useState<OrderWithItemsHydrated | null>();
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   const orderUID = params.uid;
@@ -35,11 +36,14 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
   }, [loadOrder]);
 
   const onDelete = useCallback(async () => {
+    setIsDeleting(true);
     const response = await deleteOrder(orderUID);
     if (response.status === 200) {
       router.push('/orders');
     } else {
       // TODO handle errors
+      console.error(response.error);
+      setIsDeleting(false);
     }
   }, [orderUID, router]);
 
@@ -64,12 +68,16 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
       <OrderDescription order={order} />
 
       {order.orderState === OrderState.OPEN && (
-        <div className="mt-4">
-          <div className="flex gap-4 justify-end">
+        <div className="mt-4 flex justify-end">
+          <div className="grid gap-4 grid-cols-2 w-[325px]">
             <Link href={`/checkout?orderUID=${orderUID}`}>
               <Button variant="secondary">Resume Checkout</Button>
             </Link>
-            <Button variant="destructive" onClick={onDelete}>
+            <Button
+              variant="destructive"
+              isLoading={isDeleting}
+              onClick={onDelete}
+            >
               Delete Order
             </Button>
           </div>

@@ -15,7 +15,6 @@ import BookFormInput from '@/types/BookFormInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import { Format, Genre, ProductType } from '@prisma/client';
-import { ReloadIcon } from '@radix-ui/react-icons';
 import _ from 'lodash';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -220,12 +219,13 @@ export default function BookForm({
                 />
               </label>
             </div>
-            <Button variant="default" type="submit" className="w-[100px]">
-              {isSearching ? (
-                <ReloadIcon className="h-4 w-4 animate-spin" />
-              ) : (
-                'Add Item'
-              )}
+            <Button
+              variant="default"
+              type="submit"
+              className="w-[100px]"
+              isLoading={isSearching}
+            >
+              Add Item
             </Button>
           </form>
         </div>
@@ -318,14 +318,10 @@ export default function BookForm({
               <Button
                 autoFocus
                 type="submit"
-                disabled={isSubmitting}
+                isLoading={isSubmitting}
                 className="w-[100px]"
               >
-                {isSubmitting ? (
-                  <ReloadIcon className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Add'
-                )}
+                Add
               </Button>
             </div>
           </form>
