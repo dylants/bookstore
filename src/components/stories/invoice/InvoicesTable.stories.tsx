@@ -21,13 +21,7 @@ export const Default: Story = {
 
     return (
       <div>
-        <InvoicesTable
-          invoices={invoices}
-          onClick={(id) => {
-            const invoice = invoices.find((i) => i.id === id);
-            console.log(`clicked invoice number ${invoice?.invoiceNumber}`);
-          }}
-        />
+        <InvoicesTable invoices={invoices} linkPathname="#" />
       </div>
     );
   },

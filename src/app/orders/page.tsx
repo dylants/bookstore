@@ -9,14 +9,13 @@ import {
 import OrdersTable from '@/components/order/OrdersTable';
 import { getOrders } from '@/lib/actions/order';
 import OrderHydrated from '@/types/OrderHydrated';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Array<OrderHydrated> | null>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
   const setDelayedLoading = useCallback(() => {
@@ -57,7 +56,7 @@ export default function OrdersPage() {
         <OrdersTable
           orders={orders || []}
           isLoading={!orders || isLoading}
-          onClick={(uid) => router.push(`${pathname}/${uid}`)}
+          linkPathname={pathname}
         />
       </div>
     </>

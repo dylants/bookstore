@@ -26,12 +26,7 @@ export const Default: Story = {
 
     return (
       <div>
-        <OrdersTable
-          orders={orders}
-          onClick={(uid) => {
-            console.log(`clicked order UID ${uid}`);
-          }}
-        />
+        <OrdersTable orders={orders} linkPathname="#" />
       </div>
     );
   },

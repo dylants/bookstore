@@ -74,11 +74,11 @@ const columns: ColumnDef<OrderHydrated>[] = [
 export default function OrdersTable({
   orders,
   isLoading,
-  onClick,
+  linkPathname,
 }: {
   orders: OrderHydrated[];
   isLoading?: boolean;
-  onClick?: (id: string) => void;
+  linkPathname: string;
 }) {
   return (
     <DataTable
@@ -86,8 +86,8 @@ export default function OrdersTable({
       data={orders}
       idFieldName={'orderUID'}
       isLoading={isLoading}
+      linkPathname={linkPathname}
       noDataText="No Orders found"
-      onClick={(uid) => onClick?.(uid as string)}
     />
   );
 }
