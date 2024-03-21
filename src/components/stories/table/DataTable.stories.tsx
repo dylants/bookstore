@@ -89,11 +89,7 @@ export const Clickable: Story = {
   render: () => {
     return (
       <div>
-        <DataTable
-          columns={columns}
-          data={data}
-          onClick={(id) => console.log(`clicked ${id}`)}
-        />
+        <DataTable columns={columns} data={data} linkPathname="#" />
       </div>
     );
   },
@@ -114,7 +110,7 @@ export const ClickableWithIdFieldName: Story = {
           columns={columns}
           data={clickableData}
           idFieldName={'uid'}
-          onClick={(id) => console.log(`clicked ${id}`)}
+          linkPathname="#"
         />
       </div>
     );

@@ -12,7 +12,7 @@ import { getBookSources } from '@/lib/actions/book-source';
 import { createInvoice, getInvoices } from '@/lib/actions/invoice';
 import BookSourceSerialized from '@/types/BookSourceSerialized';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function InvoicesPage() {
@@ -20,7 +20,6 @@ export default function InvoicesPage() {
   const [vendors, setVendors] = useState<Array<BookSourceSerialized>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   const loadVendors = useCallback(async () => {
     // TODO handle pagination
@@ -83,7 +82,7 @@ export default function InvoicesPage() {
       <InvoicesTable
         invoices={invoices || []}
         isLoading={!invoices || isLoading}
-        onClick={(id) => router.push(`${pathname}/${id}`)}
+        linkPathname={pathname}
       />
     </>
   );

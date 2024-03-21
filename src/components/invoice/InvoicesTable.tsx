@@ -57,19 +57,19 @@ const columns: ColumnDef<InvoiceHydrated>[] = [
 export default function InvoicesTable({
   invoices,
   isLoading,
-  onClick,
+  linkPathname,
 }: {
   invoices: InvoiceHydrated[];
   isLoading?: boolean;
-  onClick?: (id: number) => void;
+  linkPathname: string;
 }) {
   return (
     <DataTable
       columns={columns}
       data={invoices}
       isLoading={isLoading}
+      linkPathname={linkPathname}
       noDataText="No Invoices found"
-      onClick={(id) => onClick?.(id as number)}
     />
   );
 }

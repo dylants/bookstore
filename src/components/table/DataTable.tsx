@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { useState } from 'react';
 
 export type DataTableProps<TData, TValue> = {
@@ -25,8 +26,8 @@ export type DataTableProps<TData, TValue> = {
   data: TData[];
   idFieldName?: string;
   isLoading?: boolean;
+  linkPathname?: string;
   noDataText?: string;
-  onClick?: (id: unknown) => void;
 };
 
 export default function DataTable<TData, TValue>({
@@ -34,8 +35,8 @@ export default function DataTable<TData, TValue>({
   data,
   idFieldName = 'id',
   isLoading,
+  linkPathname,
   noDataText = 'No items',
-  onClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
@@ -69,15 +70,21 @@ export default function DataTable<TData, TValue>({
     <>
       {table.getRowModel().rows?.length ? (
         table.getRowModel().rows.map((row) => (
-          <TableRow
-            key={row.id}
-            data-state={row.getIsSelected() && 'selected'}
-            onClick={() => onClick?.(row.id)}
-            className={clsx(onClick && 'cursor-pointer')}
-          >
+          <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
             {row.getVisibleCells().map((cell) => (
-              <TableCell key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              <TableCell key={cell.id} className={clsx(linkPathname && 'p-0')}>
+                {linkPathname ? (
+                  <Link
+                    href={`${linkPathname}/${row.id}`}
+                    className="block p-2"
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Link>
+                ) : (
+                  <>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </>
+                )}
               </TableCell>
             ))}
           </TableRow>
