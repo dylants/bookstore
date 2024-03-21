@@ -10,7 +10,7 @@ import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
 import BookCreateInput from '@/types/BookCreateInput';
 import BookHydrated from '@/types/BookHydrated';
-import { Book, Prisma } from '@prisma/client';
+import { Book, Prisma, ProductType } from '@prisma/client';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import _ from 'lodash';
@@ -159,6 +159,49 @@ export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
       // so this entire operation needs to be executed in serial
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     },
+  );
+}
+
+/**
+ * Reduces all book updates by book ID
+ */
+export async function reduceBookUpdates(
+  items: Array<{
+    bookId: number | null;
+    productType: ProductType;
+    quantity: number;
+  }>,
+): Promise<
+  Array<{ decreasedQuantity: number; id: number; increasedQuantity: number }>
+> {
+  return items.reduce(
+    (acc, item) => {
+      if (item.productType !== ProductType.BOOK || item.bookId === null) {
+        logger.warn(
+          'non-book product type encountered, skipping invoice item: %j',
+          item,
+        );
+        return acc;
+      }
+
+      const match = acc.find((i) => i.id === item.bookId);
+      if (match) {
+        match.decreasedQuantity -= item.quantity;
+        match.increasedQuantity += item.quantity;
+      } else {
+        acc.push({
+          decreasedQuantity: -item.quantity,
+          id: item.bookId,
+          increasedQuantity: item.quantity,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{
+      decreasedQuantity: number;
+      id: number;
+      increasedQuantity: number;
+    }>,
   );
 }
 

@@ -1,6 +1,6 @@
 'use server';
 
-import { updateBookQuantity } from '@/lib/actions/book';
+import { reduceBookUpdates, updateBookQuantity } from '@/lib/actions/book';
 import logger from '@/lib/logger';
 import {
   buildPaginationRequest,
@@ -12,7 +12,7 @@ import InvoiceCreateInput from '@/types/InvoiceCreateInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
-import { Invoice, Prisma, ProductType } from '@prisma/client';
+import { Invoice, Prisma } from '@prisma/client';
 
 export async function createInvoice(
   invoice: InvoiceCreateInput,
@@ -48,29 +48,7 @@ export async function completeInvoice(
   });
 
   // condense all the book updates by book ID
-  const bookUpdates = invoiceItems.reduce(
-    (acc, item) => {
-      if (item.productType !== ProductType.BOOK || item.bookId === null) {
-        logger.warn(
-          'non-book product type encountered, skipping invoice item: %j',
-          item,
-        );
-        return acc;
-      }
-
-      const match = acc.find((i) => i.id === item.bookId);
-      if (match) {
-        match.increasedQuantity += item.quantity;
-      } else {
-        acc.push({
-          id: item.bookId,
-          increasedQuantity: item.quantity,
-        });
-      }
-      return acc;
-    },
-    [] as Array<{ id: number; increasedQuantity: number }>,
-  );
+  const bookUpdates = await reduceBookUpdates(invoiceItems);
 
   return prisma.$transaction(
     async (tx) => {
