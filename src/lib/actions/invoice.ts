@@ -48,7 +48,7 @@ export async function completeInvoice(
   });
 
   // condense all the book updates by book ID
-  const bookUpdates = reduceBookUpdates(invoiceItems);
+  const bookUpdates = await reduceBookUpdates(invoiceItems);
 
   return prisma.$transaction(
     async (tx) => {

@@ -165,13 +165,15 @@ export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
 /**
  * Reduces all book updates by book ID
  */
-export function reduceBookUpdates(
+export async function reduceBookUpdates(
   items: Array<{
     bookId: number | null;
     productType: ProductType;
     quantity: number;
   }>,
-): Array<{ decreasedQuantity: number; id: number; increasedQuantity: number }> {
+): Promise<
+  Array<{ decreasedQuantity: number; id: number; increasedQuantity: number }>
+> {
   return items.reduce(
     (acc, item) => {
       if (item.productType !== ProductType.BOOK || item.bookId === null) {

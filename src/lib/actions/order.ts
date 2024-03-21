@@ -93,7 +93,7 @@ export async function completeOrderOrThrow(
   const { orderItems } = order;
 
   // condense all the book updates by book ID
-  const bookUpdates = reduceBookUpdates(orderItems);
+  const bookUpdates = await reduceBookUpdates(orderItems);
 
   return prisma.$transaction(
     async (tx) => {
