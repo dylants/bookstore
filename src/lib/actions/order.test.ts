@@ -5,6 +5,8 @@ import {
   createOrder,
   deleteOrder,
   deleteOrderOrThrow,
+  getOrder,
+  getOrderState,
   getOrderWithItems,
   getOrders,
 } from '@/lib/actions/order';
@@ -497,6 +499,34 @@ describe('order action', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('getOrder', () => {
+    it('returns the order when it exists', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(order1);
+      const result = await getOrder('uid123');
+      expect(result).toEqual(order1);
+    });
+
+    it('returns null when order does not exist', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(null);
+      const result = await getOrder('uid123');
+      expect(result).toEqual(null);
+    });
+  });
+
+  describe('getOrderState', () => {
+    it('returns the order state when it exists', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(order1);
+      const result = await getOrderState('uid123');
+      expect(result).toEqual(order1.orderState);
+    });
+
+    it('returns null when order does not exist', async () => {
+      prismaMock.order.findUnique.mockResolvedValue(null);
+      const result = await getOrderState('uid123');
+      expect(result).toEqual(null);
     });
   });
 });

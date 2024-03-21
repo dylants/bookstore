@@ -332,3 +332,17 @@ export async function getOrderWithItems(
     orderItems: items,
   };
 }
+
+export async function getOrder(
+  orderUID: Order['orderUID'],
+): Promise<Order | null> {
+  const order = await prisma.order.findUnique({ where: { orderUID } });
+  return order || null;
+}
+
+export async function getOrderState(
+  orderUID: Order['orderUID'],
+): Promise<OrderState | null> {
+  const order = await prisma.order.findUnique({ where: { orderUID } });
+  return order?.orderState || null;
+}
