@@ -1,6 +1,5 @@
 'use client';
 
-import OpenOrderActions from '@/app/orders/[uid]/OpenOrderActions';
 import OrderDescription from '@/app/orders/[uid]/OrderDescription';
 import OrderTotal from '@/app/orders/[uid]/OrderTotal';
 import {
@@ -11,10 +10,12 @@ import {
   BreadcrumbsText,
 } from '@/components/Breadcrumbs';
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
+import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { deleteOrder, getOrderWithItems } from '@/lib/actions/order';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { OrderState } from '@prisma/client';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -42,10 +43,6 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
     }
   }, [orderUID, router]);
 
-  const onCheckout = useCallback(async () => {
-    router.push(`/checkout?orderUID=${orderUID}`);
-  }, [orderUID, router]);
-
   if (!order) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -68,7 +65,14 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
 
       {order.orderState === OrderState.OPEN && (
         <div className="mt-4">
-          <OpenOrderActions onCheckout={onCheckout} onDelete={onDelete} />
+          <div className="flex gap-4 justify-end">
+            <Link href={`/checkout?orderUID=${orderUID}`}>
+              <Button variant="secondary">Resume Checkout</Button>
+            </Link>
+            <Button variant="destructive" onClick={onDelete}>
+              Delete Order
+            </Button>
+          </div>
         </div>
       )}
 
