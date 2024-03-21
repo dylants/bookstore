@@ -142,7 +142,9 @@ export default function CheckoutPage() {
                 transition={{ delay: 0.2 }}
                 exit={{ opacity: 0 }}
               >
-                <Link href={`/checkout/${order.orderUID}/process-transaction`}>
+                <Link
+                  href={`/checkout/${order.orderUID}/transaction/processing`}
+                >
                   <Button>Complete Order</Button>
                 </Link>
               </motion.div>
