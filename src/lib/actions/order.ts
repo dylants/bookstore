@@ -1,6 +1,6 @@
 'use server';
 
-import { updateBookQuantity } from '@/lib/actions/book';
+import { reduceBookUpdates, updateBookQuantity } from '@/lib/actions/book';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import logger from '@/lib/logger';
@@ -93,29 +93,7 @@ export async function completeOrderOrThrow(
   const { orderItems } = order;
 
   // condense all the book updates by book ID
-  const bookUpdates = orderItems.reduce(
-    (acc, item) => {
-      if (item.productType !== ProductType.BOOK || item.bookId === null) {
-        logger.warn(
-          'non-book product type encountered, skipping order item: %j',
-          item,
-        );
-        return acc;
-      }
-
-      const match = acc.find((i) => i.id === item.bookId);
-      if (match) {
-        match.decreaseQuantity -= item.quantity;
-      } else {
-        acc.push({
-          decreaseQuantity: -item.quantity,
-          id: item.bookId,
-        });
-      }
-      return acc;
-    },
-    [] as Array<{ id: number; decreaseQuantity: number }>,
-  );
+  const bookUpdates = reduceBookUpdates(orderItems);
 
   return prisma.$transaction(
     async (tx) => {
@@ -124,7 +102,7 @@ export async function completeOrderOrThrow(
         bookUpdates.map((update) =>
           updateBookQuantity({
             bookId: update.id,
-            quantityChange: update.decreaseQuantity,
+            quantityChange: update.decreasedQuantity,
             tx,
           }),
         ),
