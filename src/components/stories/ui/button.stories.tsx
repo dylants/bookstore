@@ -4,6 +4,7 @@ import { Meta, StoryObj } from '@storybook/react';
 const meta: Meta<typeof Button> = {
   args: {
     children: 'Click me',
+    className: 'w-[100px]',
   },
   component: Button,
 };
@@ -33,4 +34,16 @@ export const outline: Story = {
 
 export const secondary: Story = {
   args: { variant: 'secondary' },
+};
+
+export const loadingDefault: Story = {
+  args: { isLoading: true },
+};
+
+export const loadingSecondary: Story = {
+  args: { isLoading: true, variant: 'secondary' },
+};
+
+export const loadingDestructive: Story = {
+  args: { isLoading: true, variant: 'destructive' },
 };
