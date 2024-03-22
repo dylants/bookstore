@@ -1,6 +1,7 @@
 import Dollars from '@/components/Dollars';
 import DataTable from '@/components/table/DataTable';
 import SortableHeader from '@/components/table/SortableHeader';
+import { getDisplayName } from '@/lib/order-state';
 import OrderHydrated from '@/types/OrderHydrated';
 import { OrderState } from '@prisma/client';
 import { ColumnDef } from '@tanstack/react-table';
@@ -14,11 +15,7 @@ const columns: ColumnDef<OrderHydrated>[] = [
   },
   {
     accessorKey: 'orderState',
-    cell: (props) => (
-      <div>
-        <>{props.getValue() === OrderState.OPEN ? 'Open' : 'Paid'}</>
-      </div>
-    ),
+    cell: (props) => <>{getDisplayName(props.getValue() as OrderState)}</>,
     header: ({ column }) => (
       <SortableHeader column={column} text="State" className="justify-start" />
     ),
