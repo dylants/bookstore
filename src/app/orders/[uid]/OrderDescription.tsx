@@ -1,3 +1,4 @@
+import { getDisplayName } from '@/lib/order-state';
 import { Order } from '@prisma/client';
 import { GiftIcon } from 'lucide-react';
 
@@ -20,7 +21,7 @@ export default function OrderDescription({ order }: { order: Order }) {
       <div>
         <div className="grid grid-cols-2">
           <div>State:</div>
-          <div className="text-right">{order.orderState}</div>
+          <div className="text-right">{getDisplayName(order.orderState)}</div>
           <div>Date:</div>
           <div className="text-right">
             {order.orderOpenedDate.toLocaleDateString()}
