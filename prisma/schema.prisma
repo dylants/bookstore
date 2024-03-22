@@ -138,6 +138,7 @@ model Order {
 enum OrderState {
   // "open" states
   OPEN
+  PENDING_TRANSACTION
 
   // "closed" states
   PAID
