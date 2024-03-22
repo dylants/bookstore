@@ -2,10 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import { LoadingCircle } from '@/components/ui/loading-circle';
+import { cancelPendingTransaction } from '@/lib/actions/order';
 import useSyncOrderState from '@/lib/hooks/useSyncOrderState';
 import { OrderState } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
 export default function CheckoutTransactionProcessingPage({
   params,
@@ -24,14 +25,30 @@ export default function CheckoutTransactionProcessingPage({
 
   const router = useRouter();
   const completeUrl = `/checkout/${orderUID}/transaction/complete`;
-  // prefetch this route for faster navigation
+  const cancelUrl = `/orders/${orderUID}`;
+
+  // prefetch routes for faster navigation
   router.prefetch(completeUrl);
+  router.prefetch(cancelUrl);
+
   useEffect(() => {
-    const isPaid = orderState === OrderState.PAID;
-    if (isPaid) {
-      router.push(completeUrl);
+    if (orderState === OrderState.PAID) {
+      return router.push(completeUrl);
     }
   }, [completeUrl, orderState, router]);
+
+  const [isCancelling, setIsCancelling] = useState(false);
+  const onCancel = useCallback(async () => {
+    setIsCancelling(true);
+    const response = await cancelPendingTransaction(orderUID);
+    if (response.status === 200) {
+      return router.push(cancelUrl);
+    } else {
+      // TODO handle errors
+      console.error(response.error);
+      setIsCancelling(false);
+    }
+  }, [cancelUrl, orderUID, router]);
 
   return (
     <>
@@ -42,7 +59,12 @@ export default function CheckoutTransactionProcessingPage({
         <p>Awaiting transaction...</p>
       </div>
       <div className="w-[180px]">
-        <Button className="w-full" variant="destructive">
+        <Button
+          className="w-full"
+          variant="destructive"
+          isLoading={isCancelling}
+          onClick={onCancel}
+        >
           Cancel transaction
         </Button>
       </div>

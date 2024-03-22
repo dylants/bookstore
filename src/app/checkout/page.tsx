@@ -12,13 +12,16 @@ import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
-import { createOrder, getOrderWithItems } from '@/lib/actions/order';
+import {
+  createOrder,
+  getOrderWithItems,
+  moveOrderToPendingTransaction,
+} from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -92,6 +95,29 @@ export default function CheckoutPage() {
     [order, pathname, router, searchParams],
   );
 
+  const [isMovingToTransaction, setIsMovingToTransaction] =
+    useState<boolean>(false);
+  const onMoveToTransaction = useCallback(async () => {
+    if (!orderUID) {
+      return;
+    }
+
+    const moveToProcessingTransactionUrl = `/checkout/${orderUID}/transaction/processing`;
+    // prefetch this route for faster navigation
+    router.prefetch(moveToProcessingTransactionUrl);
+
+    setIsMovingToTransaction(true);
+
+    const response = await moveOrderToPendingTransaction(orderUID);
+    if (response.status === 200) {
+      router.push(moveToProcessingTransactionUrl);
+    } else {
+      // TODO handle errors
+      console.error(response.error);
+      setIsMovingToTransaction(false);
+    }
+  }, [orderUID, router]);
+
   if (orderUID && !order) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -142,11 +168,13 @@ export default function CheckoutPage() {
                 transition={{ delay: 0.2 }}
                 exit={{ opacity: 0 }}
               >
-                <Link
-                  href={`/checkout/${order.orderUID}/transaction/processing`}
+                <Button
+                  isLoading={isMovingToTransaction}
+                  onClick={onMoveToTransaction}
+                  className="w-[100px]"
                 >
-                  <Button>Complete Order</Button>
-                </Link>
+                  Pay Now
+                </Button>
               </motion.div>
             )}
           </div>
