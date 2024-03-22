@@ -2,7 +2,9 @@
  * @jest-environment jsdom
  */
 
-import useSyncOrderState from '@/lib/hooks/useSyncOrderState';
+import useSyncOrderState, {
+  DEFAULT_DELAY,
+} from '@/lib/hooks/useSyncOrderState';
 import { OrderState } from '@prisma/client';
 import { act, renderHook } from '@testing-library/react';
 
@@ -38,7 +40,7 @@ describe('useSyncOrderState', () => {
     // we see the updated state
     mockGetOrderState.mockReturnValue(OrderState.OPEN);
     await act(async () => {
-      jest.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(DEFAULT_DELAY);
     });
     expect(result.current.getOrderState()).toEqual(OrderState.OPEN);
 
@@ -46,7 +48,7 @@ describe('useSyncOrderState', () => {
     // we see the updated state
     mockGetOrderState.mockReturnValue(OrderState.PAID);
     await act(async () => {
-      jest.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(DEFAULT_DELAY);
     });
     expect(result.current.getOrderState()).toEqual(OrderState.PAID);
 
@@ -55,7 +57,7 @@ describe('useSyncOrderState', () => {
     unsubscribe();
     mockGetOrderState.mockReturnValue(OrderState.OPEN);
     await act(async () => {
-      jest.advanceTimersByTime(2000);
+      jest.advanceTimersByTime(DEFAULT_DELAY);
     });
     expect(result.current.getOrderState()).toEqual(OrderState.PAID);
   });
