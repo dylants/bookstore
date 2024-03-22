@@ -4,18 +4,20 @@ import { getOrderState } from '@/lib/actions/order';
 import { OrderState } from '@prisma/client';
 import { useCallback, useState } from 'react';
 
-type UseSyncOrderStateProps = {
+export const DEFAULT_DELAY = 3000;
+
+export type UseSyncOrderStateProps = {
   delay?: number;
   orderUID: string;
 };
 
-type UseSyncOrderStateResult = {
+export type UseSyncOrderStateResult = {
   getOrderState: () => OrderState | null;
   subscribe: () => () => void;
 };
 
 export default function useSyncOrderState({
-  delay = 2000,
+  delay = DEFAULT_DELAY,
   orderUID,
 }: UseSyncOrderStateProps): UseSyncOrderStateResult {
   const [orderState, setOrderState] = useState<OrderState | null>(null);
