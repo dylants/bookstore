@@ -78,7 +78,7 @@ export async function recomputeOrderTotals({
   });
 }
 
-export async function completeOrderOrThrow(
+export async function moveOrderToPendingTransactionOrThrow(
   orderUID: Order['orderUID'],
 ): Promise<Order> {
   const order = await prisma.order.findFirstOrThrow({
@@ -87,7 +87,9 @@ export async function completeOrderOrThrow(
   });
 
   if (order.orderState !== OrderState.OPEN) {
-    throw new BadRequestError('Order state must be in OPEN state to complete');
+    throw new BadRequestError(
+      'Order state must be in OPEN state to move to PENDING_TRANSACTION',
+    );
   }
 
   const { orderItems } = order;
@@ -97,7 +99,10 @@ export async function completeOrderOrThrow(
 
   return prisma.$transaction(
     async (tx) => {
-      logger.trace('updating books for %d order items...', orderItems.length);
+      logger.trace(
+        'decreasing quantities for books for %d order items...',
+        orderItems.length,
+      );
       await Promise.all(
         bookUpdates.map((update) =>
           updateBookQuantity({
@@ -109,24 +114,18 @@ export async function completeOrderOrThrow(
       );
 
       logger.trace(
-        'book updates successful, performing transaction, orderUID: %s',
-        orderUID,
-      );
-      // TODO here we'd actually perform the transaction
-
-      logger.trace(
-        'transaction successful, marking order paid, orderUID: %s',
+        'book updates successful, marking order as pending transaction, orderUID: %s',
         orderUID,
       );
       const order = await tx.order.update({
         data: {
           orderClosedDate: new Date(),
-          orderState: OrderState.PAID,
+          orderState: OrderState.PENDING_TRANSACTION,
         },
         where: { orderUID },
       });
 
-      logger.trace('order marked as paid and closed!');
+      logger.trace('order successfully marked as pending transaction');
       return order;
     },
     {
@@ -135,13 +134,13 @@ export async function completeOrderOrThrow(
   );
 }
 
-export async function completeOrder(
+export async function moveOrderToPendingTransaction(
   orderUID: Order['orderUID'],
 ): Promise<
   HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
 > {
   try {
-    const order = await completeOrderOrThrow(orderUID);
+    const order = await moveOrderToPendingTransactionOrThrow(orderUID);
 
     return {
       data: order,
@@ -152,6 +151,94 @@ export async function completeOrder(
       err instanceof BadRequestError ||
       err instanceof NegativeBookQuantityError
     ) {
+      return {
+        data: null,
+        error: {
+          ...err,
+          message: err.message,
+          name: err.name,
+        },
+        status: 400,
+      };
+    }
+
+    return {
+      data: null,
+      status: 500,
+    };
+  }
+}
+
+export async function cancelPendingTransactionOrThrow(
+  orderUID: Order['orderUID'],
+): Promise<Order> {
+  const order = await prisma.order.findFirstOrThrow({
+    include: { orderItems: true },
+    where: { orderUID },
+  });
+
+  if (order.orderState !== OrderState.PENDING_TRANSACTION) {
+    throw new BadRequestError(
+      'Order state must be in PENDING_TRANSACTION state to cancel',
+    );
+  }
+
+  const { orderItems } = order;
+
+  // condense all the book updates by book ID
+  const bookUpdates = await reduceBookUpdates(orderItems);
+
+  return prisma.$transaction(
+    async (tx) => {
+      logger.trace(
+        'returning books to original quantities for %d order items...',
+        orderItems.length,
+      );
+      await Promise.all(
+        bookUpdates.map((update) =>
+          updateBookQuantity({
+            bookId: update.id,
+            quantityChange: update.increasedQuantity,
+            tx,
+          }),
+        ),
+      );
+
+      logger.trace(
+        'book updates successful, returning order to OPEN state, orderUID: %s',
+        orderUID,
+      );
+      const order = await tx.order.update({
+        data: {
+          orderClosedDate: new Date(),
+          orderState: OrderState.OPEN,
+        },
+        where: { orderUID },
+      });
+
+      logger.trace('order successfully returned to OPEN state');
+      return order;
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
+}
+
+export async function cancelPendingTransaction(
+  orderUID: Order['orderUID'],
+): Promise<
+  HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
+> {
+  try {
+    const order = await cancelPendingTransactionOrThrow(orderUID);
+
+    return {
+      data: order,
+      status: 200,
+    };
+  } catch (err: unknown) {
+    if (err instanceof BadRequestError) {
       return {
         data: null,
         error: {

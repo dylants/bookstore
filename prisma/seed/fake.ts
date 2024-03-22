@@ -18,7 +18,10 @@ import {
 import retry from 'async-retry';
 import _ from 'lodash';
 import generateCoreSeeds from './core';
-import { completeOrderOrThrow, createOrder } from '@/lib/actions/order';
+import {
+  createOrder,
+  moveOrderToPendingTransactionOrThrow,
+} from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 
 // ***********************************************************
@@ -234,7 +237,8 @@ async function generateOrder(props: GenerateOrderProps) {
   }
 
   if (completeOrder) {
-    await completeOrderOrThrow(order.orderUID);
+    // TODO we need to fully complete here once the code is available
+    await moveOrderToPendingTransactionOrThrow(order.orderUID);
   }
 }
 
