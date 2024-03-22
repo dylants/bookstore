@@ -1,7 +1,7 @@
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import {
-  completeOrder,
-  completeOrderOrThrow,
+  cancelPendingTransaction,
+  cancelPendingTransactionOrThrow,
   createOrder,
   deleteOrder,
   deleteOrderOrThrow,
@@ -9,6 +9,8 @@ import {
   getOrderState,
   getOrderWithItems,
   getOrders,
+  moveOrderToPendingTransaction,
+  moveOrderToPendingTransactionOrThrow,
 } from '@/lib/actions/order';
 import { Order, OrderState, ProductType } from '@prisma/client';
 import { fakeOrder } from '@/lib/fakes/order';
@@ -72,8 +74,8 @@ describe('order action', () => {
     });
   });
 
-  describe('completeOrderOrThrow', () => {
-    it('should complete the order', async () => {
+  describe('moveOrderToPendingTransactionOrThrow', () => {
+    it('should move the order to PENDING_TRANSACTION', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
       const book1 = fakeBook();
@@ -103,7 +105,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await completeOrderOrThrow(order.orderUID);
+      await moveOrderToPendingTransactionOrThrow(order.orderUID);
 
       expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
         include: { orderItems: true },
@@ -126,7 +128,7 @@ describe('order action', () => {
       expect(prismaMock.order.update).toHaveBeenCalledWith({
         data: {
           orderClosedDate: new Date('2021-02-03T12:13:14.000Z'),
-          orderState: OrderState.PAID,
+          orderState: OrderState.PENDING_TRANSACTION,
         },
         where: { orderUID: order.orderUID },
       });
@@ -154,13 +156,13 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await completeOrderOrThrow(order.orderUID);
+      await moveOrderToPendingTransactionOrThrow(order.orderUID);
 
       // 2 order items, but only 1 of type book
       expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw NegativeBookQuantityError when attempting to complete order with insufficient inventory', async () => {
+    it('should throw NegativeBookQuantityError when attempting to move order with insufficient inventory', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
       const book1 = fakeBook();
@@ -180,7 +182,7 @@ describe('order action', () => {
 
       expect.assertions(3);
       try {
-        await completeOrderOrThrow(order.orderUID);
+        await moveOrderToPendingTransactionOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof NegativeBookQuantityError).toBeTruthy();
         const error: NegativeBookQuantityError =
@@ -192,7 +194,7 @@ describe('order action', () => {
       }
     });
 
-    it('should throw BadRequestError when attempting to complete order not in OPEN state', async () => {
+    it('should throw BadRequestError when attempting to move order not in OPEN state', async () => {
       const order = {
         ...order1,
         orderState: OrderState.PAID,
@@ -201,18 +203,18 @@ describe('order action', () => {
 
       expect.assertions(2);
       try {
-        await completeOrderOrThrow(order.orderUID);
+        await moveOrderToPendingTransactionOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof BadRequestError).toBeTruthy();
         const error: BadRequestError = err as BadRequestError;
         expect(error.message).toEqual(
-          'Order state must be in OPEN state to complete',
+          'Order state must be in OPEN state to move to PENDING_TRANSACTION',
         );
       }
     });
   });
 
-  describe('completeOrder', () => {
+  describe('moveOrderToPendingTransaction', () => {
     it('should return the order when successful', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
       const order = {
@@ -222,19 +224,19 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      expect(await completeOrder('1')).toEqual({
+      expect(await moveOrderToPendingTransaction('1')).toEqual({
         data: order,
         status: 200,
       });
     });
 
-    it('should return error when completeOrderOrThrow throws BadRequestError', async () => {
+    it('should return error when moveOrderToPendingTransactionOrThrow throws BadRequestError', async () => {
       // kinda hacky, but mocking this function is the simplest solution
       prismaMock.order.findFirstOrThrow.mockRejectedValue(
         new BadRequestError('bad input'),
       );
 
-      expect(await completeOrder('1')).toEqual({
+      expect(await moveOrderToPendingTransaction('1')).toEqual({
         data: null,
         error: {
           message: 'bad input',
@@ -244,14 +246,14 @@ describe('order action', () => {
       });
     });
 
-    it('should return error when completeOrderOrThrow throws NegativeBookQuantityError', async () => {
+    it('should return error when moveOrderToPendingTransactionOrThrow throws NegativeBookQuantityError', async () => {
       const book = fakeBook();
       // kinda hacky, but mocking this function is the simplest solution
       prismaMock.order.findFirstOrThrow.mockRejectedValue(
         new NegativeBookQuantityError(book),
       );
 
-      expect(await completeOrder('1')).toEqual({
+      expect(await moveOrderToPendingTransaction('1')).toEqual({
         data: null,
         error: {
           book,
@@ -262,13 +264,169 @@ describe('order action', () => {
       });
     });
 
-    it('should return error when completeOrderOrThrow throws Error', async () => {
+    it('should return error when moveOrderToPendingTransactionOrThrow throws Error', async () => {
       // kinda hacky, but mocking this function is the simplest solution
       prismaMock.order.findFirstOrThrow.mockRejectedValue(
         new Error('unrecognized error'),
       );
 
-      expect(await completeOrder('1')).toEqual({
+      expect(await moveOrderToPendingTransaction('1')).toEqual({
+        data: null,
+        status: 500,
+      });
+    });
+  });
+
+  describe('cancelPendingTransactionOrThrow', () => {
+    it('should return the order to OPEN state', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
+      const book1 = fakeBook();
+      book1.quantity = 7;
+      const item1 = fakeOrderItem();
+      item1.bookId = book1.id;
+      item1.quantity = 5;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
+      const book2 = fakeBook();
+      book2.quantity = 3;
+      const item2 = fakeOrderItem();
+      item2.bookId = book2.id;
+      item2.quantity = 3;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book2);
+
+      const item3 = fakeOrderItem();
+      // item3 has same bookId as item1
+      item3.bookId = book1.id;
+      item3.quantity = 1;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
+      const order = {
+        ...order1,
+        orderItems: [item1, item2, item3],
+        orderState: OrderState.PENDING_TRANSACTION,
+      };
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      prismaMock.order.update.mockResolvedValue(order);
+
+      await cancelPendingTransactionOrThrow(order.orderUID);
+
+      expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
+        include: { orderItems: true },
+        where: { orderUID: order.orderUID },
+      });
+
+      // 3 order items, but only 2 books total
+      expect(prismaMock.book.update).toHaveBeenCalledTimes(2);
+      expect(prismaMock.book.update).toHaveBeenNthCalledWith(1, {
+        // book1 + item1 + item3
+        data: { quantity: 7 + 5 + 1 },
+        where: { id: item1.bookId },
+      });
+      expect(prismaMock.book.update).toHaveBeenNthCalledWith(2, {
+        // book2 + item2
+        data: { quantity: 3 + 3 },
+        where: { id: item2.bookId },
+      });
+
+      expect(prismaMock.order.update).toHaveBeenCalledWith({
+        data: {
+          orderClosedDate: new Date('2021-02-03T12:13:14.000Z'),
+          orderState: OrderState.OPEN,
+        },
+        where: { orderUID: order.orderUID },
+      });
+    });
+
+    it('should skip updating books for non-book product types', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
+      const book1 = fakeBook();
+      book1.quantity = 7;
+      const item1 = fakeOrderItem();
+      item1.bookId = book1.id;
+      item1.quantity = 5;
+      prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
+
+      const item2 = fakeOrderItem();
+      // item2 is not a BOOK product type
+      item2.productType = 'foo' as ProductType;
+      item2.bookId = null;
+
+      const order = {
+        ...order1,
+        orderItems: [item1, item2],
+        orderState: OrderState.PENDING_TRANSACTION,
+      };
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      prismaMock.order.update.mockResolvedValue(order);
+
+      await cancelPendingTransactionOrThrow(order.orderUID);
+
+      // 2 order items, but only 1 of type book
+      expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw BadRequestError when attempting to move order not in PENDING_TRANSACTION state', async () => {
+      const order = {
+        ...order1,
+        orderState: OrderState.PAID,
+      };
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+
+      expect.assertions(2);
+      try {
+        await cancelPendingTransactionOrThrow(order.orderUID);
+      } catch (err) {
+        expect(err instanceof BadRequestError).toBeTruthy();
+        const error: BadRequestError = err as BadRequestError;
+        expect(error.message).toEqual(
+          'Order state must be in PENDING_TRANSACTION state to cancel',
+        );
+      }
+    });
+  });
+
+  describe('cancelPendingTransaction', () => {
+    it('should return the order when successful', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+      const order = {
+        ...order1,
+        orderItems: [],
+        orderState: OrderState.PENDING_TRANSACTION,
+      };
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      prismaMock.order.update.mockResolvedValue(order);
+
+      expect(await cancelPendingTransaction('1')).toEqual({
+        data: order,
+        status: 200,
+      });
+    });
+
+    it('should return error when cancelPendingTransactionOrThrow throws BadRequestError', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new BadRequestError('bad input'),
+      );
+
+      expect(await cancelPendingTransaction('1')).toEqual({
+        data: null,
+        error: {
+          message: 'bad input',
+          name: BadRequestError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when cancelPendingTransactionOrThrow throws Error', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new Error('unrecognized error'),
+      );
+
+      expect(await cancelPendingTransaction('1')).toEqual({
         data: null,
         status: 500,
       });
