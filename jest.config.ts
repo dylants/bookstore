@@ -21,6 +21,7 @@ const config: Config = {
     'src/components/*',
     'src/lib/logger.ts',
     'src/lib/prisma.ts',
+    'src/lib/square.ts',
     'src/lib/tailwind-utils.ts',
   ],
   setupFilesAfterEnv: [
