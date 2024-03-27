@@ -1,7 +1,7 @@
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import {
-  cancelPendingTransaction,
-  cancelPendingTransactionOrThrow,
+  cancelOrderToPendingTransaction,
+  cancelOrderToPendingTransactionOrThrow,
   createOrder,
   deleteOrder,
   deleteOrderOrThrow,
@@ -20,6 +20,12 @@ import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import { buildPaginationRequest } from '@/lib/pagination';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
+
+const mockCreateTransactionOrThrow = jest.fn();
+jest.mock('./transaction', () => ({
+  createTransactionOrThrow: (...args: unknown[]) =>
+    mockCreateTransactionOrThrow(...args),
+}));
 
 describe('order action', () => {
   const order1 = fakeOrder();
@@ -125,9 +131,10 @@ describe('order action', () => {
         where: { id: item2.bookId },
       });
 
+      expect(mockCreateTransactionOrThrow).toHaveBeenCalledWith(order);
+
       expect(prismaMock.order.update).toHaveBeenCalledWith({
         data: {
-          orderClosedDate: new Date('2021-02-03T12:13:14.000Z'),
           orderState: OrderState.PENDING_TRANSACTION,
         },
         where: { orderUID: order.orderUID },
@@ -277,7 +284,7 @@ describe('order action', () => {
     });
   });
 
-  describe('cancelPendingTransactionOrThrow', () => {
+  describe('cancelOrderToPendingTransactionOrThrow', () => {
     it('should return the order to OPEN state', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
@@ -309,7 +316,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await cancelPendingTransactionOrThrow(order.orderUID);
+      await cancelOrderToPendingTransactionOrThrow(order.orderUID);
 
       expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
         include: { orderItems: true },
@@ -361,7 +368,7 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      await cancelPendingTransactionOrThrow(order.orderUID);
+      await cancelOrderToPendingTransactionOrThrow(order.orderUID);
 
       // 2 order items, but only 1 of type book
       expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
@@ -376,7 +383,7 @@ describe('order action', () => {
 
       expect.assertions(2);
       try {
-        await cancelPendingTransactionOrThrow(order.orderUID);
+        await cancelOrderToPendingTransactionOrThrow(order.orderUID);
       } catch (err) {
         expect(err instanceof BadRequestError).toBeTruthy();
         const error: BadRequestError = err as BadRequestError;
@@ -387,7 +394,7 @@ describe('order action', () => {
     });
   });
 
-  describe('cancelPendingTransaction', () => {
+  describe('cancelOrderToPendingTransaction', () => {
     it('should return the order when successful', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
       const order = {
@@ -398,19 +405,19 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      expect(await cancelPendingTransaction('1')).toEqual({
+      expect(await cancelOrderToPendingTransaction('1')).toEqual({
         data: order,
         status: 200,
       });
     });
 
-    it('should return error when cancelPendingTransactionOrThrow throws BadRequestError', async () => {
+    it('should return error when cancelOrderToPendingTransactionOrThrow throws BadRequestError', async () => {
       // kinda hacky, but mocking this function is the simplest solution
       prismaMock.order.findFirstOrThrow.mockRejectedValue(
         new BadRequestError('bad input'),
       );
 
-      expect(await cancelPendingTransaction('1')).toEqual({
+      expect(await cancelOrderToPendingTransaction('1')).toEqual({
         data: null,
         error: {
           message: 'bad input',
@@ -420,13 +427,13 @@ describe('order action', () => {
       });
     });
 
-    it('should return error when cancelPendingTransactionOrThrow throws Error', async () => {
+    it('should return error when cancelOrderToPendingTransactionOrThrow throws Error', async () => {
       // kinda hacky, but mocking this function is the simplest solution
       prismaMock.order.findFirstOrThrow.mockRejectedValue(
         new Error('unrecognized error'),
       );
 
-      expect(await cancelPendingTransaction('1')).toEqual({
+      expect(await cancelOrderToPendingTransaction('1')).toEqual({
         data: null,
         status: 500,
       });

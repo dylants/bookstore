@@ -112,21 +112,21 @@ export async function moveOrderToPendingTransactionOrThrow(
           }),
         ),
       );
+      logger.trace('book updates successful, orderUID: %s', orderUID);
 
       logger.trace(
-        'book updates successful, marking order as pending transaction, orderUID: %s',
+        'marking order as pending transaction, orderUID: %s',
         orderUID,
       );
-      const order = await tx.order.update({
+      const updatedOrder = await tx.order.update({
         data: {
-          orderClosedDate: new Date(),
           orderState: OrderState.PENDING_TRANSACTION,
         },
         where: { orderUID },
       });
 
       logger.trace('order successfully marked as pending transaction');
-      return order;
+      return updatedOrder;
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
@@ -147,6 +147,7 @@ export async function moveOrderToPendingTransaction(
       status: 200,
     };
   } catch (err: unknown) {
+    logger.error(err);
     if (
       err instanceof BadRequestError ||
       err instanceof NegativeBookQuantityError
@@ -169,7 +170,7 @@ export async function moveOrderToPendingTransaction(
   }
 }
 
-export async function cancelPendingTransactionOrThrow(
+export async function cancelOrderToPendingTransactionOrThrow(
   orderUID: Order['orderUID'],
 ): Promise<Order> {
   const order = await prisma.order.findFirstOrThrow({
@@ -225,13 +226,13 @@ export async function cancelPendingTransactionOrThrow(
   );
 }
 
-export async function cancelPendingTransaction(
+export async function cancelOrderToPendingTransaction(
   orderUID: Order['orderUID'],
 ): Promise<
   HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
 > {
   try {
-    const order = await cancelPendingTransactionOrThrow(orderUID);
+    const order = await cancelOrderToPendingTransactionOrThrow(orderUID);
 
     return {
       data: order,

@@ -13,7 +13,7 @@ import OrderItemsTable from '@/components/order-item/OrderItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import {
-  cancelPendingTransaction,
+  cancelOrderToPendingTransaction,
   deleteOrder,
   getOrderWithItems,
 } from '@/lib/actions/order';
@@ -54,7 +54,7 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
   const [isCancelling, setIsCancelling] = useState(false);
   const onCancel = useCallback(async () => {
     setIsCancelling(true);
-    const response = await cancelPendingTransaction(orderUID);
+    const response = await cancelOrderToPendingTransaction(orderUID);
     if (response.status === 200) {
       loadOrder();
     } else {
