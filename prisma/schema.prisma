@@ -133,6 +133,8 @@ model Order {
   totalInCents    Int
 
   orderItems OrderItem[]
+
+  transactions Transaction[]
 }
 
 enum OrderState {
@@ -160,4 +162,48 @@ model OrderItem {
 
   book   Book? @relation(fields: [bookId], references: [id])
   bookId Int?
+}
+
+model Transaction {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  order    Order  @relation(fields: [orderUID], references: [orderUID], onDelete: Cascade)
+  orderUID String
+
+  amountInCents  Int
+  transactionUID String @unique @default(uuid())
+
+  status TransactionStatus
+
+  transactionType TransactionType
+  squareCheckout  SquareCheckout?
+}
+
+enum TransactionStatus {
+  // initial state
+  PENDING
+
+  // terminal states
+  CANCELLED
+  COMPLETE
+}
+
+enum TransactionType {
+  SQUARE_CHECKOUT
+}
+
+model SquareCheckout {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime? @updatedAt @db.Timestamptz(3)
+
+  checkoutId    String
+  amountInCents Int
+  status        String
+  paymentType   String?
+
+  transaction    Transaction @relation(fields: [transactionUID], references: [transactionUID], onDelete: Cascade)
+  transactionUID String      @unique
 }
