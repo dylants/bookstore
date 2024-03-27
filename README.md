@@ -90,6 +90,17 @@ SEED_NUM_BOOKS
 
 For instance, to set the number of Books to create to 5, set the environment variable `SEED_NUM_BOOKS=5` prior to running the seed script.
 
+## Square
+
+This application makes use of the Square API and SDK, specifically Square Terminal Checkout as a Point of Sale solution. For more information, see: https://developer.squareup.com/reference/square/terminal-api.
+
+### Environment Variables
+
+The following environment variables are required when using Square:
+
+- `SQUARE_ACCESS_TOKEN`: The Square environment access token
+- `SQUARE_DEVICE_ID`: The unique ID of the device used for Square Terminal Checkout
+
 ## Logging
 
 [Pino](https://github.com/pinojs/pino) logger is setup to use within the app. Configuration can be found in the [logger.ts](src/lib/logger.ts) file.
