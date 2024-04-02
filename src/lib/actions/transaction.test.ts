@@ -35,6 +35,13 @@ jest.mock('../square-terminal-checkout', () => ({
     mockGetSquareTerminalCheckout(...args),
 }));
 
+const mockMoveOrderToPendingTransactionOrThrow = jest.fn();
+jest.mock('./order', () => ({
+  ...jest.requireActual('./order'),
+  moveOrderToPendingTransactionOrThrow: (...args: unknown[]) =>
+    mockMoveOrderToPendingTransactionOrThrow(...args),
+}));
+
 describe('transaction actions', () => {
   const order = fakeOrder();
   const transaction = fakeTransaction();
@@ -56,7 +63,7 @@ describe('transaction actions', () => {
 
   describe('createTransactionOrThrow', () => {
     it('should create the transaction', async () => {
-      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      mockMoveOrderToPendingTransactionOrThrow.mockResolvedValue(order);
       prismaMock.transaction.create.mockResolvedValue(transaction);
       mockCreateSquareTerminalCheckout.mockResolvedValue({ foo: 'bar' });
       prismaMock.transaction.update.mockResolvedValue(transaction);
@@ -91,7 +98,7 @@ describe('transaction actions', () => {
 
   describe('createTransaction', () => {
     it('should return the transaction when successful', async () => {
-      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      mockMoveOrderToPendingTransactionOrThrow.mockResolvedValue(order);
       prismaMock.transaction.create.mockResolvedValue(transaction);
       mockCreateSquareTerminalCheckout.mockResolvedValue({ foo: 'bar' });
       prismaMock.transaction.update.mockResolvedValue(transaction);
@@ -104,7 +111,7 @@ describe('transaction actions', () => {
 
     it('should return error when createTransactionOrThrow throws BadRequestError', async () => {
       // kinda hacky, but mocking this function is the simplest solution
-      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+      mockMoveOrderToPendingTransactionOrThrow.mockRejectedValue(
         new BadRequestError('bad input'),
       );
 
@@ -121,7 +128,7 @@ describe('transaction actions', () => {
     it('should return error when createTransactionOrThrow throws NegativeBookQuantityError', async () => {
       const book = fakeBook();
       // kinda hacky, but mocking this function is the simplest solution
-      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+      mockMoveOrderToPendingTransactionOrThrow.mockRejectedValue(
         new NegativeBookQuantityError(book),
       );
 
@@ -138,7 +145,7 @@ describe('transaction actions', () => {
 
     it('should return error when createTransactionOrThrow throws Error', async () => {
       // kinda hacky, but mocking this function is the simplest solution
-      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+      mockMoveOrderToPendingTransactionOrThrow.mockRejectedValue(
         new Error('unrecognized error'),
       );
 

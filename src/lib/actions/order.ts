@@ -78,10 +78,14 @@ export async function recomputeOrderTotals({
   });
 }
 
-export async function moveOrderToPendingTransactionOrThrow(
-  orderUID: Order['orderUID'],
-): Promise<Order> {
-  const order = await prisma.order.findFirstOrThrow({
+export async function moveOrderToPendingTransactionOrThrow({
+  orderUID,
+  tx,
+}: {
+  orderUID: Order['orderUID'];
+  tx: Prisma.TransactionClient;
+}): Promise<Order> {
+  const order = await tx.order.findFirstOrThrow({
     include: { orderItems: true },
     where: { orderUID },
   });
@@ -97,76 +101,31 @@ export async function moveOrderToPendingTransactionOrThrow(
   // condense all the book updates by book ID
   const bookUpdates = await reduceBookUpdates(orderItems);
 
-  return prisma.$transaction(
-    async (tx) => {
-      logger.trace(
-        'decreasing quantities for books for %d order items...',
-        orderItems.length,
-      );
-      await Promise.all(
-        bookUpdates.map((update) =>
-          updateBookQuantity({
-            bookId: update.id,
-            quantityChange: update.decreasedQuantity,
-            tx,
-          }),
-        ),
-      );
-
-      logger.trace(
-        'book updates successful, marking order as pending transaction, orderUID: %s',
-        orderUID,
-      );
-      const order = await tx.order.update({
-        data: {
-          orderClosedDate: new Date(),
-          orderState: OrderState.PENDING_TRANSACTION,
-        },
-        where: { orderUID },
-      });
-
-      logger.trace('order successfully marked as pending transaction');
-      return order;
-    },
-    {
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-    },
+  logger.trace(
+    'decreasing quantities for books for %d order items...',
+    orderItems.length,
   );
-}
+  await Promise.all(
+    bookUpdates.map((update) =>
+      updateBookQuantity({
+        bookId: update.id,
+        quantityChange: update.decreasedQuantity,
+        tx,
+      }),
+    ),
+  );
+  logger.trace('book updates successful, orderUID: %s', orderUID);
 
-export async function moveOrderToPendingTransaction(
-  orderUID: Order['orderUID'],
-): Promise<
-  HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
-> {
-  try {
-    const order = await moveOrderToPendingTransactionOrThrow(orderUID);
+  logger.trace('marking order as pending transaction, orderUID: %s', orderUID);
+  const updatedOrder = await tx.order.update({
+    data: {
+      orderState: OrderState.PENDING_TRANSACTION,
+    },
+    where: { orderUID },
+  });
 
-    return {
-      data: order,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (
-      err instanceof BadRequestError ||
-      err instanceof NegativeBookQuantityError
-    ) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    return {
-      data: null,
-      status: 500,
-    };
-  }
+  logger.trace('order successfully marked as pending transaction');
+  return updatedOrder;
 }
 
 export async function cancelPendingTransactionOrThrow(
