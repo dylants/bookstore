@@ -34,6 +34,7 @@ describe('transaction actions', () => {
   const transaction = fakeTransaction();
 
   beforeEach(() => {
+    mockCancelSquareTerminalCheckout.mockReset();
     mockCreateSquareTerminalCheckout.mockReset();
     mockGetSquareTerminalCheckout.mockReset();
 
