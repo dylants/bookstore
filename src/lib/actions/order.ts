@@ -85,6 +85,9 @@ export async function moveOrderToPendingTransactionOrThrow({
   orderUID: Order['orderUID'];
   tx: Prisma.TransactionClient;
 }): Promise<Order> {
+  logger.trace(
+    `request to move order to PENDING_TRANSACTION state for orderUID: ${orderUID}`,
+  );
   const order = await tx.order.findFirstOrThrow({
     include: { orderItems: true },
     where: { orderUID },
@@ -131,6 +134,7 @@ export async function moveOrderToPendingTransactionOrThrow({
 export async function cancelPendingTransactionOrThrow(
   orderUID: Order['orderUID'],
 ): Promise<Order> {
+  logger.trace(`request to move order to OPEN state for orderUID: ${orderUID}`);
   const order = await prisma.order.findFirstOrThrow({
     include: { orderItems: true },
     where: { orderUID },
@@ -217,6 +221,7 @@ export async function cancelPendingTransaction(
 }
 
 export async function deleteOrderOrThrow(orderUID: Order['orderUID']) {
+  logger.trace(`request to delete order for orderUID: ${orderUID}`);
   const order = await prisma.order.findFirstOrThrow({
     where: { orderUID },
   });

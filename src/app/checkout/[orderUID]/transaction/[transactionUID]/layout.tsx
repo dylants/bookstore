@@ -11,11 +11,11 @@ export default function CheckoutTransactionLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { uid: string };
+  params: { orderUID: string };
 }) {
   const [order, setOrder] = useState<Order | null>();
 
-  const orderUID = params.uid;
+  const { orderUID } = params;
 
   const loadOrder = useCallback(async () => {
     const order = await getOrder(orderUID);
