@@ -2,8 +2,11 @@ import { fakeOrder } from '@/lib/fakes/order';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { fakeTransaction } from '@/lib/fakes/transaction';
 import {
+  cancelTransaction,
   cancelTransactionOrThrow,
+  createTransaction,
   createTransactionOrThrow,
+  syncTransactionStatus,
   syncTransactionStatusOrThrow,
 } from '@/lib/actions/transaction';
 import {
@@ -15,6 +18,9 @@ import {
   SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
   SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED,
 } from '@/lib/square-terminal-checkout';
+import BadRequestError from '@/lib/errors/BadRequestError';
+import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
+import { fakeBook } from '@/lib/fakes/book';
 
 const mockCancelSquareTerminalCheckout = jest.fn();
 const mockCreateSquareTerminalCheckout = jest.fn();
@@ -32,6 +38,13 @@ jest.mock('../square-terminal-checkout', () => ({
 describe('transaction actions', () => {
   const order = fakeOrder();
   const transaction = fakeTransaction();
+  const checkoutId = 'checkoutId123';
+  const transactionWithCheckout: Transaction = {
+    ...transaction,
+    squareCheckout: {
+      checkoutId,
+    },
+  } as Transaction;
 
   beforeEach(() => {
     mockCancelSquareTerminalCheckout.mockReset();
@@ -76,15 +89,67 @@ describe('transaction actions', () => {
     });
   });
 
-  describe('syncTransactionStatusOrThrow', () => {
-    const checkoutId = 'checkoutId123';
-    const transactionWithCheckout: Transaction = {
-      ...transaction,
-      squareCheckout: {
-        checkoutId,
-      },
-    } as Transaction;
+  describe('createTransaction', () => {
+    it('should return the transaction when successful', async () => {
+      prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
+      prismaMock.transaction.create.mockResolvedValue(transaction);
+      mockCreateSquareTerminalCheckout.mockResolvedValue({ foo: 'bar' });
+      prismaMock.transaction.update.mockResolvedValue(transaction);
 
+      expect(await createTransaction('1')).toEqual({
+        data: transaction,
+        status: 200,
+      });
+    });
+
+    it('should return error when createTransactionOrThrow throws BadRequestError', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new BadRequestError('bad input'),
+      );
+
+      expect(await createTransaction('1')).toEqual({
+        data: null,
+        error: {
+          message: 'bad input',
+          name: BadRequestError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when createTransactionOrThrow throws NegativeBookQuantityError', async () => {
+      const book = fakeBook();
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new NegativeBookQuantityError(book),
+      );
+
+      expect(await createTransaction('1')).toEqual({
+        data: null,
+        error: {
+          book,
+          message: 'Attempting to set a negative quantity for Book',
+          name: NegativeBookQuantityError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when createTransactionOrThrow throws Error', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.order.findFirstOrThrow.mockRejectedValue(
+        new Error('unrecognized error'),
+      );
+
+      expect(await createTransaction('1')).toEqual({
+        data: null,
+        status: 500,
+      });
+    });
+  });
+
+  describe('syncTransactionStatusOrThrow', () => {
     it('should process correctly on completed', async () => {
       prismaMock.transaction.findUniqueOrThrow.mockResolvedValue(
         transactionWithCheckout,
@@ -211,15 +276,54 @@ describe('transaction actions', () => {
     });
   });
 
-  describe('cancelTransactionOrThrow', () => {
-    const checkoutId = 'checkoutId123';
-    const transactionWithCheckout: Transaction = {
-      ...transaction,
-      squareCheckout: {
+  describe('syncTransactionStatus', () => {
+    it('should return the transaction when successful', async () => {
+      prismaMock.transaction.findUniqueOrThrow.mockResolvedValue(
+        transactionWithCheckout,
+      );
+      mockGetSquareTerminalCheckout.mockResolvedValue({
         checkoutId,
-      },
-    } as Transaction;
+        paymentType: 'CARD_PRESENT',
+        status: SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED,
+      });
+      prismaMock.transaction.update.mockResolvedValue(transaction);
 
+      expect(await syncTransactionStatus('1')).toEqual({
+        data: transaction,
+        status: 200,
+      });
+    });
+
+    it('should return error when syncTransactionStatusOrThrow throws BadRequestError', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.transaction.findUniqueOrThrow.mockRejectedValue(
+        new BadRequestError('bad input'),
+      );
+
+      expect(await syncTransactionStatus('1')).toEqual({
+        data: null,
+        error: {
+          message: 'bad input',
+          name: BadRequestError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when syncTransactionStatusOrThrow throws Error', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.transaction.findUniqueOrThrow.mockRejectedValue(
+        new Error('unrecognized error'),
+      );
+
+      expect(await syncTransactionStatus('1')).toEqual({
+        data: null,
+        status: 500,
+      });
+    });
+  });
+
+  describe('cancelTransactionOrThrow', () => {
     it('should process correctly', async () => {
       prismaMock.transaction.findUniqueOrThrow.mockResolvedValue(
         transactionWithCheckout,
@@ -284,6 +388,52 @@ describe('transaction actions', () => {
         const error: Error = err as Error;
         expect(error.message).toEqual('Unsupported transactionType: foo');
       }
+    });
+  });
+
+  describe('cancelTransaction', () => {
+    it('should return the transaction when successful', async () => {
+      prismaMock.transaction.findUniqueOrThrow.mockResolvedValue(
+        transactionWithCheckout,
+      );
+      mockCancelSquareTerminalCheckout.mockResolvedValue({
+        checkoutId,
+        status: SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
+      });
+      prismaMock.transaction.update.mockResolvedValue(transaction);
+
+      expect(await cancelTransaction('1')).toEqual({
+        data: transaction,
+        status: 200,
+      });
+    });
+
+    it('should return error when cancelTransactionOrThrow throws BadRequestError', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.transaction.findUniqueOrThrow.mockRejectedValue(
+        new BadRequestError('bad input'),
+      );
+
+      expect(await cancelTransaction('1')).toEqual({
+        data: null,
+        error: {
+          message: 'bad input',
+          name: BadRequestError.name,
+        },
+        status: 400,
+      });
+    });
+
+    it('should return error when cancelTransactionOrThrow throws Error', async () => {
+      // kinda hacky, but mocking this function is the simplest solution
+      prismaMock.transaction.findUniqueOrThrow.mockRejectedValue(
+        new Error('unrecognized error'),
+      );
+
+      expect(await cancelTransaction('1')).toEqual({
+        data: null,
+        status: 500,
+      });
     });
   });
 });
