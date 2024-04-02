@@ -86,6 +86,7 @@ export async function createSquareTerminalCheckout({
 }
 
 export type GetSquareTerminalCheckoutResult = {
+  cancelReason: string | undefined;
   checkoutId: string;
   paymentType: string | undefined;
   status: string;
@@ -119,7 +120,7 @@ export async function getSquareTerminalCheckout({
     );
   }
 
-  const { paymentType, status } = checkout;
+  const { cancelReason, paymentType, status } = checkout;
 
   if (!status) {
     logger.error(
@@ -132,6 +133,7 @@ export async function getSquareTerminalCheckout({
   }
 
   return {
+    cancelReason,
     checkoutId,
     paymentType,
     status,
@@ -139,6 +141,7 @@ export async function getSquareTerminalCheckout({
 }
 
 export type CancelSquareTerminalCheckoutResult = {
+  cancelReason: string | undefined;
   checkoutId: string;
   status: string;
 };
@@ -167,7 +170,7 @@ export async function cancelSquareTerminalCheckout({
     );
   }
 
-  const { status } = checkout;
+  const { cancelReason, status } = checkout;
 
   if (!status) {
     logger.error(
@@ -180,6 +183,7 @@ export async function cancelSquareTerminalCheckout({
   }
 
   return {
+    cancelReason,
     checkoutId,
     status,
   };

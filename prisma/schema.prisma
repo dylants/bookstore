@@ -203,6 +203,7 @@ model SquareCheckout {
   amountInCents Int
   status        String
   paymentType   String?
+  cancelReason  String?
 
   transaction    Transaction @relation(fields: [transactionUID], references: [transactionUID], onDelete: Cascade)
   transactionUID String      @unique
