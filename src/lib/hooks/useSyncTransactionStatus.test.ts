@@ -1,0 +1,131 @@
+/**
+ * @jest-environment jsdom
+ */
+
+import useSyncTransactionStatus, {
+  DEFAULT_DELAY,
+} from '@/lib/hooks/useSyncTransactionStatus';
+import { TransactionStatus } from '@prisma/client';
+import { act, renderHook } from '@testing-library/react';
+
+const mockSyncTransactionStatus = jest.fn();
+jest.mock('../actions/transaction', () => ({
+  syncTransactionStatus: (...args: unknown[]) =>
+    mockSyncTransactionStatus(...args),
+}));
+
+describe('useSyncTransactionStatus', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    mockSyncTransactionStatus.mockReset();
+  });
+
+  it('should return perform correctly', async () => {
+    const { result } = renderHook(() =>
+      useSyncTransactionStatus({ transactionUID: 'abc123' }),
+    );
+
+    expect(result.current.getTransactionStatus()).toEqual(null);
+
+    const unsubscribe = result.current.subscribe();
+    expect(unsubscribe).toBeDefined();
+
+    // verify that when the status is PENDING, and we advance time,
+    // we see the updated state
+    mockSyncTransactionStatus.mockReturnValue({
+      data: { status: TransactionStatus.PENDING },
+      status: 200,
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(DEFAULT_DELAY);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(
+      TransactionStatus.PENDING,
+    );
+
+    // verify that when the state changes, and we advance time,
+    // we see the updated state
+    mockSyncTransactionStatus.mockReturnValue({
+      data: { status: TransactionStatus.COMPLETE },
+      status: 200,
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(DEFAULT_DELAY);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(
+      TransactionStatus.COMPLETE,
+    );
+
+    // verify that when the state changes, but we have unsubscribed,
+    // we do NOT see the updated state
+    unsubscribe();
+    mockSyncTransactionStatus.mockReturnValue({
+      data: { status: TransactionStatus.CANCELLED },
+      status: 200,
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(DEFAULT_DELAY);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(
+      TransactionStatus.COMPLETE,
+    );
+  });
+
+  it('should honor the delay parameter', async () => {
+    const { result } = renderHook(() =>
+      useSyncTransactionStatus({ delay: 5000, transactionUID: 'abc123' }),
+    );
+
+    expect(result.current.getTransactionStatus()).toEqual(null);
+
+    result.current.subscribe();
+
+    mockSyncTransactionStatus.mockReturnValue({
+      data: { status: TransactionStatus.COMPLETE },
+      status: 200,
+    });
+
+    // advance by an amount less than the delay
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(null);
+
+    // advance by more, totaling more than the delay
+    await act(async () => {
+      jest.advanceTimersByTime(4000);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(
+      TransactionStatus.COMPLETE,
+    );
+  });
+
+  it('should skip updates on error', async () => {
+    const { result } = renderHook(() =>
+      useSyncTransactionStatus({ transactionUID: 'abc123' }),
+    );
+
+    expect(result.current.getTransactionStatus()).toEqual(null);
+
+    result.current.subscribe();
+
+    mockSyncTransactionStatus.mockReturnValue({
+      data: { status: TransactionStatus.COMPLETE },
+      error: 'bad things!',
+      status: 500,
+    });
+
+    // advance by more, totaling more than the delay
+    await act(async () => {
+      jest.advanceTimersByTime(DEFAULT_DELAY);
+    });
+    expect(result.current.getTransactionStatus()).toEqual(null);
+  });
+});

@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { LoadingCircle } from '@/components/ui/loading-circle';
 import { cancelTransaction } from '@/lib/actions/transaction';
-import useSyncOrderState from '@/lib/hooks/useSyncOrderState';
-import { OrderState } from '@prisma/client';
+import useSyncTransactionStatus from '@/lib/hooks/useSyncTransactionStatus';
+import { TransactionStatus } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 
@@ -15,12 +15,12 @@ export default function CheckoutTransactionProcessingPage({
 }) {
   const { orderUID, transactionUID } = params;
 
-  const { getOrderState, subscribe } = useSyncOrderState({
-    orderUID,
+  const { getTransactionStatus, subscribe } = useSyncTransactionStatus({
+    transactionUID,
   });
-  const orderState = useSyncExternalStore<OrderState | null>(
+  const transactionStatus = useSyncExternalStore<TransactionStatus | null>(
     subscribe,
-    getOrderState,
+    getTransactionStatus,
   );
   const [isCancelling, setIsCancelling] = useState(false);
   const [hasBeenCancelled, setHasBeenCancelled] = useState(false);
@@ -34,14 +34,13 @@ export default function CheckoutTransactionProcessingPage({
   router.prefetch(cancelUrl);
 
   useEffect(() => {
-    if (orderState === OrderState.PAID) {
+    if (transactionStatus === TransactionStatus.COMPLETE) {
       return router.push(completeUrl);
-    } else if (orderState === OrderState.OPEN) {
-      // if the order state changes to OPEN, assume it's been cancelled
+    } else if (transactionStatus === TransactionStatus.CANCELLED) {
       setHasBeenCancelled(true);
       return router.push(cancelUrl);
     }
-  }, [cancelUrl, completeUrl, orderState, router]);
+  }, [cancelUrl, completeUrl, router, transactionStatus]);
 
   const onCancel = useCallback(async () => {
     setIsCancelling(true);
@@ -62,8 +61,8 @@ export default function CheckoutTransactionProcessingPage({
       </div>
       <div>
         {!hasBeenCancelled && !isCancelling && <p>Awaiting transaction...</p>}
+        {!hasBeenCancelled && isCancelling && <p>Cancelling transaction...</p>}
         {hasBeenCancelled && <p>Transaction has been cancelled</p>}
-        {isCancelling && <p>Cancelling transaction...</p>}
       </div>
       <div className="w-[180px]">
         <Button
