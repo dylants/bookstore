@@ -261,7 +261,7 @@ describe('transaction actions', () => {
         transactionWithCheckout.transactionUID,
       );
 
-      expect(mockGetSquareTerminalCheckout).not.toHaveBeenCalled();
+      expect(mockCancelSquareTerminalCheckout).not.toHaveBeenCalled();
       expect(prismaMock.transaction.update).not.toHaveBeenCalledWith();
       expect(cancelledTransaction).toEqual({
         ...transactionWithCheckout,
