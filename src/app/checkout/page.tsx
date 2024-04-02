@@ -12,12 +12,9 @@ import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
-import {
-  createOrder,
-  getOrderWithItems,
-  moveOrderToPendingTransaction,
-} from '@/lib/actions/order';
+import { createOrder, getOrderWithItems } from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
+import { createTransaction } from '@/lib/actions/transaction';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
@@ -95,26 +92,25 @@ export default function CheckoutPage() {
     [order, pathname, router, searchParams],
   );
 
-  const [isMovingToTransaction, setIsMovingToTransaction] =
+  const [isCreatingTransaction, setIsCreatingTransaction] =
     useState<boolean>(false);
-  const onMoveToTransaction = useCallback(async () => {
+  const onCreateTransaction = useCallback(async () => {
     if (!orderUID) {
       return;
     }
 
-    const moveToProcessingTransactionUrl = `/checkout/${orderUID}/transaction/processing`;
-    // prefetch this route for faster navigation
-    router.prefetch(moveToProcessingTransactionUrl);
+    setIsCreatingTransaction(true);
 
-    setIsMovingToTransaction(true);
-
-    const response = await moveOrderToPendingTransaction(orderUID);
-    if (response.status === 200) {
-      router.push(moveToProcessingTransactionUrl);
+    const { data, error, status } = await createTransaction(orderUID);
+    if (status === 200 && data) {
+      const { transactionUID } = data;
+      router.push(
+        `/checkout/${orderUID}/transaction/${transactionUID}/processing`,
+      );
     } else {
       // TODO handle errors
-      console.error(response.error);
-      setIsMovingToTransaction(false);
+      console.error(error);
+      setIsCreatingTransaction(false);
     }
   }, [orderUID, router]);
 
@@ -169,8 +165,8 @@ export default function CheckoutPage() {
                 exit={{ opacity: 0 }}
               >
                 <Button
-                  isLoading={isMovingToTransaction}
-                  onClick={onMoveToTransaction}
+                  isLoading={isCreatingTransaction}
+                  onClick={onCreateTransaction}
                   className="w-[100px]"
                 >
                   Pay Now

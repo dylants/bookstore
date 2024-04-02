@@ -18,16 +18,16 @@ import {
 import { HttpResponse } from '@/types/HttpResponse';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
+import { moveOrderToPendingTransactionOrThrow } from '@/lib/actions/order';
 
 export async function createTransactionOrThrow(
   orderUID: Order['orderUID'],
 ): Promise<Transaction> {
   return prisma.$transaction(
     async (tx) => {
-      // TODO update the order to PENDING_TRANSACTION
-
-      const order = await tx.order.findFirstOrThrow({
-        where: { orderUID },
+      const order = await moveOrderToPendingTransactionOrThrow({
+        orderUID,
+        tx,
       });
 
       logger.trace('creating new Transaction for orderUID: %s', orderUID);
