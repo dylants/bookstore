@@ -11,9 +11,9 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 export default function CheckoutTransactionProcessingPage({
   params,
 }: {
-  params: { uid: string };
+  params: { orderUID: string };
 }) {
-  const orderUID = params.uid;
+  const { orderUID } = params;
 
   const { getOrderState, subscribe } = useSyncOrderState({
     orderUID,

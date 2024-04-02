@@ -1,3 +1,5 @@
+'use server';
+
 import {
   SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
   SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED,
@@ -25,6 +27,8 @@ export async function createTransactionOrThrow(
 ): Promise<Transaction> {
   return prisma.$transaction(
     async (tx) => {
+      logger.trace(`request to create transaction for orderUID: ${orderUID}`);
+
       const order = await moveOrderToPendingTransactionOrThrow({
         orderUID,
         tx,
