@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { LoadingCircle } from '@/components/ui/loading-circle';
-import { cancelPendingTransaction } from '@/lib/actions/order';
+import { cancelTransaction } from '@/lib/actions/transaction';
 import useSyncOrderState from '@/lib/hooks/useSyncOrderState';
 import { OrderState } from '@prisma/client';
 import { useRouter } from 'next/navigation';
@@ -11,9 +11,9 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 export default function CheckoutTransactionProcessingPage({
   params,
 }: {
-  params: { orderUID: string };
+  params: { orderUID: string; transactionUID: string };
 }) {
-  const { orderUID } = params;
+  const { orderUID, transactionUID } = params;
 
   const { getOrderState, subscribe } = useSyncOrderState({
     orderUID,
@@ -22,9 +22,11 @@ export default function CheckoutTransactionProcessingPage({
     subscribe,
     getOrderState,
   );
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [hasBeenCancelled, setHasBeenCancelled] = useState(false);
 
   const router = useRouter();
-  const completeUrl = `/checkout/${orderUID}/transaction/complete`;
+  const completeUrl = `/checkout/${orderUID}/transaction/${transactionUID}/complete`;
   const cancelUrl = `/orders/${orderUID}`;
 
   // prefetch routes for faster navigation
@@ -34,13 +36,16 @@ export default function CheckoutTransactionProcessingPage({
   useEffect(() => {
     if (orderState === OrderState.PAID) {
       return router.push(completeUrl);
+    } else if (orderState === OrderState.OPEN) {
+      // if the order state changes to OPEN, assume it's been cancelled
+      setHasBeenCancelled(true);
+      return router.push(cancelUrl);
     }
-  }, [completeUrl, orderState, router]);
+  }, [cancelUrl, completeUrl, orderState, router]);
 
-  const [isCancelling, setIsCancelling] = useState(false);
   const onCancel = useCallback(async () => {
     setIsCancelling(true);
-    const response = await cancelPendingTransaction(orderUID);
+    const response = await cancelTransaction(transactionUID);
     if (response.status === 200) {
       return router.push(cancelUrl);
     } else {
@@ -48,7 +53,7 @@ export default function CheckoutTransactionProcessingPage({
       console.error(response.error);
       setIsCancelling(false);
     }
-  }, [cancelUrl, orderUID, router]);
+  }, [cancelUrl, router, transactionUID]);
 
   return (
     <>
@@ -56,7 +61,9 @@ export default function CheckoutTransactionProcessingPage({
         <LoadingCircle size="xLarge" />
       </div>
       <div>
-        <p>Awaiting transaction...</p>
+        {!hasBeenCancelled && !isCancelling && <p>Awaiting transaction...</p>}
+        {hasBeenCancelled && <p>Transaction has been cancelled</p>}
+        {isCancelling && <p>Cancelling transaction...</p>}
       </div>
       <div className="w-[180px]">
         <Button

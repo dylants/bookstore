@@ -12,11 +12,7 @@ import {
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import {
-  cancelPendingTransaction,
-  deleteOrder,
-  getOrderWithItems,
-} from '@/lib/actions/order';
+import { deleteOrder, getOrderWithItems } from '@/lib/actions/order';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { OrderState } from '@prisma/client';
 import Link from 'next/link';
@@ -50,19 +46,6 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
       setIsDeleting(false);
     }
   }, [orderUID, router]);
-
-  const [isCancelling, setIsCancelling] = useState(false);
-  const onCancel = useCallback(async () => {
-    setIsCancelling(true);
-    const response = await cancelPendingTransaction(orderUID);
-    if (response.status === 200) {
-      loadOrder();
-    } else {
-      // TODO handle errors
-      console.error(response.error);
-      setIsCancelling(false);
-    }
-  }, [loadOrder, orderUID]);
 
   if (!order) {
     return (
@@ -98,18 +81,6 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
               Delete Order
             </Button>
           </div>
-        </div>
-      )}
-      {order.orderState === OrderState.PENDING_TRANSACTION && (
-        <div className="mt-4 flex justify-end">
-          <Button
-            variant="destructive"
-            isLoading={isCancelling}
-            onClick={onCancel}
-            className="w-[150px]"
-          >
-            Cancel Transaction
-          </Button>
         </div>
       )}
 

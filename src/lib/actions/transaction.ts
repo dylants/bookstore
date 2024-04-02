@@ -20,14 +20,18 @@ import {
 import { HttpResponse } from '@/types/HttpResponse';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
-import { moveOrderToPendingTransactionOrThrow } from '@/lib/actions/order';
+import {
+  moveOrderToOpenOrThrow,
+  moveOrderToPaidOrThrow,
+  moveOrderToPendingTransactionOrThrow,
+} from '@/lib/actions/order';
 
 export async function createTransactionOrThrow(
   orderUID: Order['orderUID'],
 ): Promise<Transaction> {
   return prisma.$transaction(
     async (tx) => {
-      logger.trace(`request to create transaction for orderUID: ${orderUID}`);
+      logger.trace('request to create transaction, orderUID: %s', orderUID);
 
       const order = await moveOrderToPendingTransactionOrThrow({
         orderUID,
@@ -168,7 +172,7 @@ async function processCompletedCheckout({
     where: { transactionUID },
   });
 
-  // TODO update the order to PAID
+  await moveOrderToPaidOrThrow({ orderUID, tx });
 
   return updatedTransaction;
 }
@@ -199,7 +203,7 @@ async function processCancelledCheckout({
     where: { transactionUID },
   });
 
-  // TODO update the order to OPEN
+  await moveOrderToOpenOrThrow({ orderUID, tx });
 
   return updatedTransaction;
 }
