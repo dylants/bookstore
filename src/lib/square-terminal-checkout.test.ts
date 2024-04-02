@@ -1,14 +1,18 @@
 import SquareError from '@/lib/errors/SquareError';
 import { fakeTransaction } from '@/lib/fakes/transaction';
 import {
+  cancelSquareTerminalCheckout,
   createSquareTerminalCheckout,
   getSquareTerminalCheckout,
 } from '@/lib/square-terminal-checkout';
 
+const mockCancelTerminalCheckout = jest.fn();
 const mockCreateTerminalCheckout = jest.fn();
 const mockGetTerminalCheckout = jest.fn();
 jest.mock('./square', () => ({
   terminalApi: {
+    cancelTerminalCheckout: (...args: unknown[]) =>
+      mockCancelTerminalCheckout(...args),
     createTerminalCheckout: (...args: unknown[]) =>
       mockCreateTerminalCheckout(...args),
     getTerminalCheckout: (...args: unknown[]) =>
@@ -137,7 +141,9 @@ describe('square-terminal-checkout', () => {
       } catch (err) {
         expect(err instanceof SquareError).toBeTruthy();
         const error: SquareError = err as SquareError;
-        expect(error.message).toEqual('Invalid Terminal Checkout response');
+        expect(error.message).toEqual(
+          'Invalid Terminal Checkout response for create checkout',
+        );
       }
     });
   });
@@ -218,7 +224,90 @@ describe('square-terminal-checkout', () => {
       } catch (err) {
         expect(err instanceof SquareError).toBeTruthy();
         const error: SquareError = err as SquareError;
-        expect(error.message).toEqual('Invalid Terminal Checkout response');
+        expect(error.message).toEqual(
+          `Invalid Terminal Checkout response for get checkout, checkoutId: ${checkoutId}`,
+        );
+      }
+    });
+  });
+
+  describe('cancelSquareTerminalCheckout', () => {
+    const checkoutId = 'checkoutId987';
+
+    it('should cancel the terminal checkout', async () => {
+      mockCancelTerminalCheckout.mockResolvedValue({
+        result: {
+          checkout: {
+            id: checkoutId,
+            status: 'CANCELED',
+          },
+        },
+        statusCode: 200,
+      });
+
+      const checkout = await cancelSquareTerminalCheckout({ checkoutId });
+
+      expect(mockCancelTerminalCheckout).toHaveBeenCalledWith(checkoutId);
+
+      expect(checkout).toEqual({
+        checkoutId,
+        status: 'CANCELED',
+      });
+    });
+
+    it('should throw error when square response is failing status code', async () => {
+      mockCancelTerminalCheckout.mockResolvedValue({
+        result: {},
+        statusCode: 500,
+      });
+
+      expect.assertions(2);
+      try {
+        await cancelSquareTerminalCheckout({ checkoutId });
+      } catch (err) {
+        expect(err instanceof SquareError).toBeTruthy();
+        const error: SquareError = err as SquareError;
+        expect(error.message).toEqual(
+          `Failed to cancel Terminal Checkout for checkoutId: ${checkoutId}`,
+        );
+      }
+    });
+
+    it('should throw error when square response is missing', async () => {
+      mockCancelTerminalCheckout.mockResolvedValue({
+        result: {},
+        statusCode: 200,
+      });
+
+      expect.assertions(2);
+      try {
+        await cancelSquareTerminalCheckout({ checkoutId });
+      } catch (err) {
+        expect(err instanceof SquareError).toBeTruthy();
+        const error: SquareError = err as SquareError;
+        expect(error.message).toEqual(
+          `Failed to cancel Terminal Checkout for checkoutId: ${checkoutId}`,
+        );
+      }
+    });
+
+    it('should throw error when square response is missing checkout', async () => {
+      mockCancelTerminalCheckout.mockResolvedValue({
+        result: {
+          checkout: {},
+        },
+        statusCode: 200,
+      });
+
+      expect.assertions(2);
+      try {
+        await cancelSquareTerminalCheckout({ checkoutId });
+      } catch (err) {
+        expect(err instanceof SquareError).toBeTruthy();
+        const error: SquareError = err as SquareError;
+        expect(error.message).toEqual(
+          `Invalid Terminal Checkout response for cancel checkout, checkoutId: ${checkoutId}`,
+        );
       }
     });
   });

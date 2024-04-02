@@ -3,6 +3,10 @@ import logger from '@/lib/logger';
 import squareClient from '@/lib/square';
 import { Transaction } from '@prisma/client';
 
+// https://developer.squareup.com/reference/square/objects/TerminalCheckout#definition__property-status
+export const SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED = 'CANCELED';
+export const SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED = 'COMPLETED';
+
 export type CreateSquareTerminalCheckoutResult = {
   amountInCents: number;
   checkoutId: string;
@@ -64,10 +68,12 @@ export async function createSquareTerminalCheckout({
 
   if (!amount || !checkoutId || !status) {
     logger.error(
-      'checkout response does not include required fields %j',
+      'create checkout response does not include required fields %j',
       checkout,
     );
-    throw new SquareError('Invalid Terminal Checkout response');
+    throw new SquareError(
+      'Invalid Terminal Checkout response for create checkout',
+    );
   }
 
   logger.info('Square Terminal Checkout created, checkoutId: %s', checkoutId);
@@ -84,10 +90,6 @@ export type GetSquareTerminalCheckoutResult = {
   paymentType: string | undefined;
   status: string;
 };
-
-// https://developer.squareup.com/reference/square/objects/TerminalCheckout#definition__property-status
-export const SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED = 'CANCELED';
-export const SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED = 'COMPLETED';
 
 /**
  * Gets the Terminal Checkout on Square, using the Get Terminal Checkout API:
@@ -121,15 +123,64 @@ export async function getSquareTerminalCheckout({
 
   if (!status) {
     logger.error(
-      'checkout response does not include required fields %j',
+      'get checkout response does not include required fields %j',
       checkout,
     );
-    throw new SquareError('Invalid Terminal Checkout response');
+    throw new SquareError(
+      `Invalid Terminal Checkout response for get checkout, checkoutId: ${checkoutId}`,
+    );
   }
 
   return {
     checkoutId,
     paymentType,
+    status,
+  };
+}
+
+export type CancelSquareTerminalCheckoutResult = {
+  checkoutId: string;
+  status: string;
+};
+
+export async function cancelSquareTerminalCheckout({
+  checkoutId,
+}: {
+  checkoutId: string;
+}): Promise<CancelSquareTerminalCheckoutResult> {
+  const response =
+    await squareClient.terminalApi.cancelTerminalCheckout(checkoutId);
+
+  const {
+    result: { checkout, errors },
+    statusCode,
+  } = response;
+
+  if (statusCode !== 200 || !checkout) {
+    logger.error(
+      'square cancel terminal checkout call failed for checkoutId %s',
+      checkoutId,
+    );
+    logger.error(errors);
+    throw new SquareError(
+      `Failed to cancel Terminal Checkout for checkoutId: ${checkoutId}`,
+    );
+  }
+
+  const { status } = checkout;
+
+  if (!status) {
+    logger.error(
+      'cancel checkout response does not include required fields %j',
+      checkout,
+    );
+    throw new SquareError(
+      `Invalid Terminal Checkout response for cancel checkout, checkoutId: ${checkoutId}`,
+    );
+  }
+
+  return {
+    checkoutId,
     status,
   };
 }
