@@ -1,6 +1,7 @@
 import {
   SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
   SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED,
+  cancelSquareTerminalCheckout,
   createSquareTerminalCheckout,
   getSquareTerminalCheckout,
 } from '@/lib/square-terminal-checkout';
@@ -64,6 +65,27 @@ export async function createTransactionOrThrow(
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     },
   );
+}
+
+function verifyTransactionTypeSquareCheckoutOrThrow({
+  transaction,
+}: {
+  transaction: Transaction & {
+    squareCheckout: SquareCheckout | null;
+  };
+}): SquareCheckout {
+  const { squareCheckout, transactionType, transactionUID } = transaction;
+
+  if (transactionType !== TransactionType.SQUARE_CHECKOUT || !squareCheckout) {
+    logger.error(
+      'Unsupported transactionType %s for transactionUID: %s',
+      transactionType,
+      transactionUID,
+    );
+    throw new Error('Unsupported transactionType: ' + transactionType);
+  }
+
+  return squareCheckout;
 }
 
 function isTransactionStatusTerminal(transactionStatus: TransactionStatus) {
@@ -151,12 +173,7 @@ export async function syncTransactionStatusOrThrow(
         where: { transactionUID },
       });
 
-      const {
-        orderUID,
-        squareCheckout,
-        status: previousTransactionStatus,
-        transactionType,
-      } = transaction;
+      const { orderUID, status: previousTransactionStatus } = transaction;
 
       if (isTransactionStatusTerminal(previousTransactionStatus)) {
         logger.info(
@@ -166,18 +183,9 @@ export async function syncTransactionStatusOrThrow(
         return transaction;
       }
 
-      // we only support Square checkout at this time
-      if (
-        transactionType !== TransactionType.SQUARE_CHECKOUT ||
-        !squareCheckout
-      ) {
-        logger.error(
-          'Unsupported transactionType %s for transactionUID: %s',
-          transactionType,
-          transactionUID,
-        );
-        throw new Error('Unsupported transactionType: ' + transactionType);
-      }
+      const squareCheckout = verifyTransactionTypeSquareCheckoutOrThrow({
+        transaction,
+      });
 
       const { checkoutId } = squareCheckout;
       const checkout = await getSquareTerminalCheckout({ checkoutId });
@@ -207,6 +215,50 @@ export async function syncTransactionStatusOrThrow(
         );
         return transaction;
       }
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
+}
+
+export async function cancelTransactionOrThrow(
+  transactionUID: Transaction['transactionUID'],
+): Promise<Transaction> {
+  return prisma.$transaction(
+    async (tx) => {
+      logger.trace(
+        'cancelling transaction, transactionUID: %s',
+        transactionUID,
+      );
+      const transaction = await tx.transaction.findUniqueOrThrow({
+        include: { squareCheckout: true },
+        where: { transactionUID },
+      });
+
+      const { orderUID, status: previousTransactionStatus } = transaction;
+
+      if (isTransactionStatusTerminal(previousTransactionStatus)) {
+        logger.info(
+          'requested to cancel transaction for transaction in terminal state, no action taken for transactionUID: %s',
+          transactionUID,
+        );
+        return transaction;
+      }
+
+      const squareCheckout = verifyTransactionTypeSquareCheckoutOrThrow({
+        transaction,
+      });
+
+      const { checkoutId } = squareCheckout;
+      const checkout = await cancelSquareTerminalCheckout({ checkoutId });
+
+      return processCancelledCheckout({
+        checkout,
+        orderUID,
+        transactionUID,
+        tx,
+      });
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,

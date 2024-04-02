@@ -2,6 +2,7 @@ import { fakeOrder } from '@/lib/fakes/order';
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { fakeTransaction } from '@/lib/fakes/transaction';
 import {
+  cancelTransactionOrThrow,
   createTransactionOrThrow,
   syncTransactionStatusOrThrow,
 } from '@/lib/actions/transaction';
@@ -15,10 +16,13 @@ import {
   SQUARE_TERMINAL_CHECKOUT_STATUS_COMPLETED,
 } from '@/lib/square-terminal-checkout';
 
+const mockCancelSquareTerminalCheckout = jest.fn();
 const mockCreateSquareTerminalCheckout = jest.fn();
 const mockGetSquareTerminalCheckout = jest.fn();
 jest.mock('../square-terminal-checkout', () => ({
   ...jest.requireActual('../square-terminal-checkout'),
+  cancelSquareTerminalCheckout: (...args: unknown[]) =>
+    mockCancelSquareTerminalCheckout(...args),
   createSquareTerminalCheckout: (...args: unknown[]) =>
     mockCreateSquareTerminalCheckout(...args),
   getSquareTerminalCheckout: (...args: unknown[]) =>
@@ -30,6 +34,7 @@ describe('transaction actions', () => {
   const transaction = fakeTransaction();
 
   beforeEach(() => {
+    mockCancelSquareTerminalCheckout.mockReset();
     mockCreateSquareTerminalCheckout.mockReset();
     mockGetSquareTerminalCheckout.mockReset();
 
@@ -198,6 +203,82 @@ describe('transaction actions', () => {
         await syncTransactionStatusOrThrow(
           transactionWithCheckout.transactionUID,
         );
+      } catch (err) {
+        expect(err instanceof Error).toBeTruthy();
+        const error: Error = err as Error;
+        expect(error.message).toEqual('Unsupported transactionType: foo');
+      }
+    });
+  });
+
+  describe('cancelTransactionOrThrow', () => {
+    const checkoutId = 'checkoutId123';
+    const transactionWithCheckout: Transaction = {
+      ...transaction,
+      squareCheckout: {
+        checkoutId,
+      },
+    } as Transaction;
+
+    it('should process correctly', async () => {
+      prismaMock.transaction.findUniqueOrThrow.mockResolvedValue(
+        transactionWithCheckout,
+      );
+      mockCancelSquareTerminalCheckout.mockResolvedValue({
+        checkoutId,
+        status: SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
+      });
+      prismaMock.transaction.update.mockResolvedValue(transaction);
+
+      const cancelledTransaction = await cancelTransactionOrThrow(
+        transactionWithCheckout.transactionUID,
+      );
+
+      expect(mockCancelSquareTerminalCheckout).toHaveBeenCalledWith({
+        checkoutId,
+      });
+      expect(prismaMock.transaction.update).toHaveBeenCalledWith({
+        data: {
+          squareCheckout: {
+            update: {
+              checkoutId,
+              status: SQUARE_TERMINAL_CHECKOUT_STATUS_CANCELLED,
+            },
+          },
+          status: TransactionStatus.CANCELLED,
+        },
+        where: { transactionUID: transactionWithCheckout.transactionUID },
+      });
+      expect(cancelledTransaction).toEqual(transaction);
+    });
+
+    it('should return transaction when transaction status is terminal', async () => {
+      prismaMock.transaction.findUniqueOrThrow.mockResolvedValue({
+        ...transactionWithCheckout,
+        status: TransactionStatus.CANCELLED,
+      });
+
+      const cancelledTransaction = await cancelTransactionOrThrow(
+        transactionWithCheckout.transactionUID,
+      );
+
+      expect(mockCancelSquareTerminalCheckout).not.toHaveBeenCalled();
+      expect(prismaMock.transaction.update).not.toHaveBeenCalledWith();
+      expect(cancelledTransaction).toEqual({
+        ...transactionWithCheckout,
+        status: TransactionStatus.CANCELLED,
+      });
+    });
+
+    it('should throw error when transactionType is not Square checkout', async () => {
+      prismaMock.transaction.findUniqueOrThrow.mockResolvedValue({
+        ...transactionWithCheckout,
+        transactionType: 'foo' as TransactionType,
+      });
+
+      expect.assertions(2);
+      try {
+        await cancelTransactionOrThrow(transactionWithCheckout.transactionUID);
       } catch (err) {
         expect(err instanceof Error).toBeTruthy();
         const error: Error = err as Error;
