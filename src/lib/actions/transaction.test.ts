@@ -35,9 +35,15 @@ jest.mock('../square-terminal-checkout', () => ({
     mockGetSquareTerminalCheckout(...args),
 }));
 
+const mockMoveOrderToOpenOrThrow = jest.fn();
+const mockMoveOrderToPaidOrThrow = jest.fn();
 const mockMoveOrderToPendingTransactionOrThrow = jest.fn();
 jest.mock('./order', () => ({
   ...jest.requireActual('./order'),
+  moveOrderToOpenOrThrow: (...args: unknown[]) =>
+    mockMoveOrderToOpenOrThrow(...args),
+  moveOrderToPaidOrThrow: (...args: unknown[]) =>
+    mockMoveOrderToPaidOrThrow(...args),
   moveOrderToPendingTransactionOrThrow: (...args: unknown[]) =>
     mockMoveOrderToPendingTransactionOrThrow(...args),
 }));
@@ -57,6 +63,10 @@ describe('transaction actions', () => {
     mockCancelSquareTerminalCheckout.mockReset();
     mockCreateSquareTerminalCheckout.mockReset();
     mockGetSquareTerminalCheckout.mockReset();
+
+    mockMoveOrderToOpenOrThrow.mockReset();
+    mockMoveOrderToPaidOrThrow.mockReset();
+    mockMoveOrderToPendingTransactionOrThrow.mockReset();
 
     prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
   });
@@ -188,6 +198,8 @@ describe('transaction actions', () => {
         },
         where: { transactionUID: transactionWithCheckout.transactionUID },
       });
+      expect(mockMoveOrderToPaidOrThrow).toHaveBeenCalled();
+      expect(mockMoveOrderToOpenOrThrow).not.toHaveBeenCalled();
       expect(syncedTransaction).toEqual(transaction);
     });
 
@@ -222,6 +234,8 @@ describe('transaction actions', () => {
         },
         where: { transactionUID: transactionWithCheckout.transactionUID },
       });
+      expect(mockMoveOrderToPaidOrThrow).not.toHaveBeenCalled();
+      expect(mockMoveOrderToOpenOrThrow).toHaveBeenCalled();
       expect(syncedTransaction).toEqual(transaction);
     });
 

@@ -2,7 +2,6 @@
 
 import { reduceBookUpdates, updateBookQuantity } from '@/lib/actions/book';
 import BadRequestError from '@/lib/errors/BadRequestError';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import logger from '@/lib/logger';
 import { computeTax } from '@/lib/money';
 import {
@@ -86,7 +85,8 @@ export async function moveOrderToPendingTransactionOrThrow({
   tx: Prisma.TransactionClient;
 }): Promise<Order> {
   logger.trace(
-    `request to move order to PENDING_TRANSACTION state for orderUID: ${orderUID}`,
+    'request to move order to PENDING_TRANSACTION state, orderUID: %s',
+    orderUID,
   );
   const order = await tx.order.findFirstOrThrow({
     include: { orderItems: true },
@@ -127,22 +127,65 @@ export async function moveOrderToPendingTransactionOrThrow({
     where: { orderUID },
   });
 
-  logger.trace('order successfully marked as pending transaction');
+  logger.trace(
+    'order successfully marked as pending transaction, orderUID: %s',
+    orderUID,
+  );
   return updatedOrder;
 }
 
-export async function cancelPendingTransactionOrThrow(
-  orderUID: Order['orderUID'],
-): Promise<Order> {
-  logger.trace(`request to move order to OPEN state for orderUID: ${orderUID}`);
-  const order = await prisma.order.findFirstOrThrow({
+export async function moveOrderToPaidOrThrow({
+  orderUID,
+  tx,
+}: {
+  orderUID: Order['orderUID'];
+  tx: Prisma.TransactionClient;
+}): Promise<Order> {
+  logger.trace('request to move order to PAID state, orderUID: %s', orderUID);
+  const order = await tx.order.findFirstOrThrow({
+    where: { orderUID },
+  });
+
+  if (order.orderState !== OrderState.PENDING_TRANSACTION) {
+    throw new BadRequestError(
+      'Order state must be in PENDING_TRANSACTION state to move to PAID',
+    );
+  }
+
+  const updatedOrder = await tx.order.update({
+    data: {
+      orderClosedDate: new Date(),
+      orderState: OrderState.PAID,
+    },
+    where: { orderUID },
+  });
+
+  logger.trace(
+    'order successfully moved to PAID state, orderUID: %s',
+    orderUID,
+  );
+  return updatedOrder;
+}
+
+export async function moveOrderToOpenOrThrow({
+  orderUID,
+  tx,
+}: {
+  orderUID: Order['orderUID'];
+  tx: Prisma.TransactionClient;
+}): Promise<Order> {
+  logger.trace(
+    'request to move order back to OPEN state, orderUID: %s',
+    orderUID,
+  );
+  const order = await tx.order.findFirstOrThrow({
     include: { orderItems: true },
     where: { orderUID },
   });
 
   if (order.orderState !== OrderState.PENDING_TRANSACTION) {
     throw new BadRequestError(
-      'Order state must be in PENDING_TRANSACTION state to cancel',
+      'Order state must be in PENDING_TRANSACTION state to move to OPEN',
     );
   }
 
@@ -151,77 +194,40 @@ export async function cancelPendingTransactionOrThrow(
   // condense all the book updates by book ID
   const bookUpdates = await reduceBookUpdates(orderItems);
 
-  return prisma.$transaction(
-    async (tx) => {
-      logger.trace(
-        'returning books to original quantities for %d order items...',
-        orderItems.length,
-      );
-      await Promise.all(
-        bookUpdates.map((update) =>
-          updateBookQuantity({
-            bookId: update.id,
-            quantityChange: update.increasedQuantity,
-            tx,
-          }),
-        ),
-      );
-
-      logger.trace(
-        'book updates successful, returning order to OPEN state, orderUID: %s',
-        orderUID,
-      );
-      const order = await tx.order.update({
-        data: {
-          orderClosedDate: new Date(),
-          orderState: OrderState.OPEN,
-        },
-        where: { orderUID },
-      });
-
-      logger.trace('order successfully returned to OPEN state');
-      return order;
-    },
-    {
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-    },
+  logger.trace(
+    'returning books to original quantities for %d order items...',
+    orderItems.length,
   );
-}
+  await Promise.all(
+    bookUpdates.map((update) =>
+      updateBookQuantity({
+        bookId: update.id,
+        quantityChange: update.increasedQuantity,
+        tx,
+      }),
+    ),
+  );
 
-export async function cancelPendingTransaction(
-  orderUID: Order['orderUID'],
-): Promise<
-  HttpResponse<Order | null, BadRequestError | NegativeBookQuantityError>
-> {
-  try {
-    const order = await cancelPendingTransactionOrThrow(orderUID);
+  logger.trace(
+    'book updates successful, returning order to OPEN state, orderUID: %s',
+    orderUID,
+  );
+  const updatedOrder = await tx.order.update({
+    data: {
+      orderState: OrderState.OPEN,
+    },
+    where: { orderUID },
+  });
 
-    return {
-      data: order,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (err instanceof BadRequestError) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    return {
-      data: null,
-      status: 500,
-    };
-  }
+  logger.trace(
+    'order successfully returned to OPEN state, orderUID: %s',
+    orderUID,
+  );
+  return updatedOrder;
 }
 
 export async function deleteOrderOrThrow(orderUID: Order['orderUID']) {
-  logger.trace(`request to delete order for orderUID: ${orderUID}`);
+  logger.trace('request to delete order, orderUID: %s', orderUID);
   const order = await prisma.order.findFirstOrThrow({
     where: { orderUID },
   });
