@@ -174,6 +174,31 @@ describe('square-terminal-checkout', () => {
       });
     });
 
+    it('should get the cancelled terminal checkout', async () => {
+      mockGetTerminalCheckout.mockResolvedValue({
+        result: {
+          checkout: {
+            cancelReason: 'TIMED_OUT',
+            id: checkoutId,
+            paymentType: 'CARD_PRESENT',
+            status: 'CANCELED',
+          },
+        },
+        statusCode: 200,
+      });
+
+      const checkout = await getSquareTerminalCheckout({ checkoutId });
+
+      expect(mockGetTerminalCheckout).toHaveBeenCalledWith(checkoutId);
+
+      expect(checkout).toEqual({
+        cancelReason: 'TIMED_OUT',
+        checkoutId,
+        paymentType: 'CARD_PRESENT',
+        status: 'CANCELED',
+      });
+    });
+
     it('should throw error when square response is failing status code', async () => {
       mockGetTerminalCheckout.mockResolvedValue({
         result: {},
@@ -238,6 +263,7 @@ describe('square-terminal-checkout', () => {
       mockCancelTerminalCheckout.mockResolvedValue({
         result: {
           checkout: {
+            cancelReason: 'BUYER_CANCELED',
             id: checkoutId,
             status: 'CANCELED',
           },
@@ -250,6 +276,7 @@ describe('square-terminal-checkout', () => {
       expect(mockCancelTerminalCheckout).toHaveBeenCalledWith(checkoutId);
 
       expect(checkout).toEqual({
+        cancelReason: 'BUYER_CANCELED',
         checkoutId,
         status: 'CANCELED',
       });
