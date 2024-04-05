@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { LoadingCircle } from '@/components/ui/loading-circle';
-import { cancelTransaction } from '@/lib/actions/transaction';
+import { cancelTransactionSafe } from '@/lib/actions/transaction-safe';
 import useSyncTransactionStatus from '@/lib/hooks/useSyncTransactionStatus';
 import { TransactionStatus } from '@prisma/client';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,7 @@ export default function CheckoutTransactionProcessingPage({
 
   const onCancel = useCallback(async () => {
     setIsCancelling(true);
-    const response = await cancelTransaction(transactionUID);
+    const response = await cancelTransactionSafe(transactionUID);
     if (response.status === 200) {
       return router.push(cancelUrl);
     } else {

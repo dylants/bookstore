@@ -17,16 +17,13 @@ import {
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
-import { HttpResponse } from '@/types/HttpResponse';
-import BadRequestError from '@/lib/errors/BadRequestError';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import {
   moveOrderToOpenOrThrow,
   moveOrderToPaidOrThrow,
   moveOrderToPendingTransactionOrThrow,
 } from '@/lib/actions/order';
 
-export async function createTransactionOrThrow(
+export async function createTransaction(
   orderUID: Order['orderUID'],
 ): Promise<Transaction> {
   return prisma.$transaction(
@@ -77,43 +74,6 @@ export async function createTransactionOrThrow(
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     },
   );
-}
-
-export async function createTransaction(
-  orderUID: Order['orderUID'],
-): Promise<
-  HttpResponse<Transaction | null, BadRequestError | NegativeBookQuantityError>
-> {
-  try {
-    const transaction = await createTransactionOrThrow(orderUID);
-
-    return {
-      data: transaction,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (
-      err instanceof BadRequestError ||
-      err instanceof NegativeBookQuantityError
-    ) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    logger.error('Unknown error occurred in createTransaction');
-    logger.error(err);
-    return {
-      data: null,
-      status: 500,
-    };
-  }
 }
 
 function verifyTransactionTypeSquareCheckoutOrThrow({
@@ -208,7 +168,7 @@ async function processCancelledCheckout({
   return updatedTransaction;
 }
 
-export async function syncTransactionStatusOrThrow(
+export async function syncTransactionStatus(
   transactionUID: Transaction['transactionUID'],
 ): Promise<Transaction> {
   return prisma.$transaction(
@@ -271,39 +231,7 @@ export async function syncTransactionStatusOrThrow(
   );
 }
 
-export async function syncTransactionStatus(
-  transactionUID: Transaction['transactionUID'],
-): Promise<HttpResponse<Transaction | null, BadRequestError>> {
-  try {
-    const transaction = await syncTransactionStatusOrThrow(transactionUID);
-
-    return {
-      data: transaction,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (err instanceof BadRequestError) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    logger.error('Unknown error occurred in syncTransactionStatus');
-    logger.error(err);
-    return {
-      data: null,
-      status: 500,
-    };
-  }
-}
-
-export async function cancelTransactionOrThrow(
+export async function cancelTransaction(
   transactionUID: Transaction['transactionUID'],
 ): Promise<Transaction> {
   return prisma.$transaction(
@@ -345,36 +273,4 @@ export async function cancelTransactionOrThrow(
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     },
   );
-}
-
-export async function cancelTransaction(
-  transactionUID: Transaction['transactionUID'],
-): Promise<HttpResponse<Transaction | null, BadRequestError>> {
-  try {
-    const transaction = await cancelTransactionOrThrow(transactionUID);
-
-    return {
-      data: transaction,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (err instanceof BadRequestError) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    logger.error('Unknown error occurred in cancelTransaction');
-    logger.error(err);
-    return {
-      data: null,
-      status: 500,
-    };
-  }
 }
