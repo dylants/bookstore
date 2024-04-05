@@ -10,7 +10,6 @@ import {
 } from '@/lib/pagination';
 import prisma from '@/lib/prisma';
 import { serializeBookSource } from '@/lib/serializers/book-source';
-import { HttpResponse } from '@/types/HttpResponse';
 import OrderHydrated from '@/types/OrderHydrated';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import PageInfo from '@/types/PageInfo';
@@ -226,7 +225,7 @@ export async function moveOrderToOpenOrThrow({
   return updatedOrder;
 }
 
-export async function deleteOrderOrThrow(orderUID: Order['orderUID']) {
+export async function deleteOrder(orderUID: Order['orderUID']) {
   logger.trace('request to delete order, orderUID: %s', orderUID);
   const order = await prisma.order.findFirstOrThrow({
     where: { orderUID },
@@ -239,36 +238,6 @@ export async function deleteOrderOrThrow(orderUID: Order['orderUID']) {
   await prisma.order.delete({
     where: { orderUID },
   });
-}
-
-export async function deleteOrder(
-  orderUID: Order['orderUID'],
-): Promise<HttpResponse<null, BadRequestError>> {
-  try {
-    await deleteOrderOrThrow(orderUID);
-
-    return {
-      data: null,
-      status: 200,
-    };
-  } catch (err: unknown) {
-    if (err instanceof BadRequestError) {
-      return {
-        data: null,
-        error: {
-          ...err,
-          message: err.message,
-          name: err.name,
-        },
-        status: 400,
-      };
-    }
-
-    return {
-      data: null,
-      status: 500,
-    };
-  }
 }
 
 export interface GetOrdersParams {
@@ -373,11 +342,4 @@ export async function getOrder(
 ): Promise<Order | null> {
   const order = await prisma.order.findUnique({ where: { orderUID } });
   return order || null;
-}
-
-export async function getOrderState(
-  orderUID: Order['orderUID'],
-): Promise<OrderState | null> {
-  const order = await prisma.order.findUnique({ where: { orderUID } });
-  return order?.orderState || null;
 }

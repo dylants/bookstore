@@ -2,9 +2,7 @@ import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import {
   createOrder,
   deleteOrder,
-  deleteOrderOrThrow,
   getOrder,
-  getOrderState,
   getOrderWithItems,
   getOrders,
   moveOrderToOpenOrThrow,
@@ -394,12 +392,12 @@ describe('order action', () => {
     });
   });
 
-  describe('deleteOrderOrThrow', () => {
+  describe('deleteOrder', () => {
     it('should delete the order', async () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
       prismaMock.order.delete.mockResolvedValue(order1);
 
-      await deleteOrderOrThrow(order1.orderUID);
+      await deleteOrder(order1.orderUID);
 
       expect(prismaMock.order.findFirstOrThrow).toHaveBeenCalledWith({
         where: { orderUID: order1.orderUID },
@@ -419,7 +417,7 @@ describe('order action', () => {
 
       expect.assertions(2);
       try {
-        await deleteOrderOrThrow(order.orderUID);
+        await deleteOrder(order.orderUID);
       } catch (err) {
         expect(err instanceof BadRequestError).toBeTruthy();
         const error: BadRequestError = err as BadRequestError;
@@ -430,45 +428,6 @@ describe('order action', () => {
     });
   });
 
-  describe('deleteOrder', () => {
-    it('should return 200 when successful', async () => {
-      prismaMock.order.findFirstOrThrow.mockResolvedValue(order1);
-      prismaMock.order.delete.mockResolvedValue(order1);
-
-      expect(await deleteOrder('1')).toEqual({
-        data: null,
-        status: 200,
-      });
-    });
-
-    it('should return error when deleteOrderOrThrow throws BadRequestError', async () => {
-      // kinda hacky, but mocking this function is the simplest solution
-      prismaMock.order.findFirstOrThrow.mockRejectedValue(
-        new BadRequestError('bad input'),
-      );
-
-      expect(await deleteOrder('1')).toEqual({
-        data: null,
-        error: {
-          message: 'bad input',
-          name: BadRequestError.name,
-        },
-        status: 400,
-      });
-    });
-
-    it('should return error when deleteOrderOrThrow throws Error', async () => {
-      // kinda hacky, but mocking this function is the simplest solution
-      prismaMock.order.findFirstOrThrow.mockRejectedValue(
-        new Error('unrecognized error'),
-      );
-
-      expect(await deleteOrder('1')).toEqual({
-        data: null,
-        status: 500,
-      });
-    });
-  });
   describe('getOrders', () => {
     it('should get orders when provided with default input', async () => {
       prismaMock.order.findMany.mockResolvedValue([
@@ -631,20 +590,6 @@ describe('order action', () => {
     it('returns null when order does not exist', async () => {
       prismaMock.order.findUnique.mockResolvedValue(null);
       const result = await getOrder('uid123');
-      expect(result).toEqual(null);
-    });
-  });
-
-  describe('getOrderState', () => {
-    it('returns the order state when it exists', async () => {
-      prismaMock.order.findUnique.mockResolvedValue(order1);
-      const result = await getOrderState('uid123');
-      expect(result).toEqual(order1.orderState);
-    });
-
-    it('returns null when order does not exist', async () => {
-      prismaMock.order.findUnique.mockResolvedValue(null);
-      const result = await getOrderState('uid123');
       expect(result).toEqual(null);
     });
   });
