@@ -12,7 +12,8 @@ import {
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { deleteOrder, getOrderWithItems } from '@/lib/actions/order';
+import { getOrderWithItems } from '@/lib/actions/order';
+import { deleteOrderSafe } from '@/lib/actions/order-safe';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { OrderState } from '@prisma/client';
 import Link from 'next/link';
@@ -37,7 +38,7 @@ export default function OrderPage({ params }: { params: { uid: string } }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const onDelete = useCallback(async () => {
     setIsDeleting(true);
-    const response = await deleteOrder(orderUID);
+    const response = await deleteOrderSafe(orderUID);
     if (response.status === 200) {
       router.push('/orders');
     } else {
