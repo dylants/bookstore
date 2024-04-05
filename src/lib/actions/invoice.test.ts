@@ -3,16 +3,19 @@ import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import {
   completeInvoice,
   createInvoice,
-  getInvoice,
+  getInvoiceWithItems,
   getInvoices,
 } from '@/lib/actions/invoice';
-import { fakeInvoiceItem } from '@/lib/fakes/invoice-item';
+import {
+  fakeInvoiceItem,
+  fakeInvoiceItemHydrated,
+} from '@/lib/fakes/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
 import { Invoice, ProductType } from '@prisma/client';
 import { buildPaginationRequest } from '@/lib/pagination';
 
 jest.mock('../serializers/book-source', () => ({
-  serializeBookSource: (vendor: unknown) => vendor,
+  serializeBookSource: () => undefined,
 }));
 
 describe('invoice actions', () => {
@@ -232,30 +235,67 @@ describe('invoice actions', () => {
     });
   });
 
-  describe('getInvoice', () => {
+  describe('getInvoiceWithItems', () => {
     it('should provide the correct input to prisma', async () => {
-      prismaMock.invoice.findUnique.mockResolvedValue(resolvedInvoice1);
+      const invoice = fakeInvoice(false);
+      const invoiceItemHydrated1 = fakeInvoiceItemHydrated();
+      const invoiceItemHydrated2 = fakeInvoiceItemHydrated();
 
-      const result = await getInvoice(1);
+      prismaMock.invoice.findUnique.mockResolvedValue({
+        ...invoice,
+        _count: { invoiceItems: 2 },
+        invoiceItems: [
+          invoiceItemHydrated1,
+          {
+            ...invoiceItemHydrated2,
+            productType: 'foo',
+          },
+        ],
+      } as Invoice);
+
+      const result = await getInvoiceWithItems(1);
 
       expect(prismaMock.invoice.findUnique).toHaveBeenCalledWith({
         include: {
           _count: {
             select: { invoiceItems: true },
           },
+          invoiceItems: {
+            include: {
+              book: {
+                include: {
+                  authors: true,
+                  format: true,
+                  genre: true,
+                  publisher: true,
+                },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+          },
           vendor: true,
         },
         where: { id: 1 },
       });
       expect(result).toEqual({
-        ...resolvedInvoice1,
-        numInvoiceItems: 3,
+        ...invoice,
+        _count: { invoiceItems: 2 },
+        invoiceItems: [
+          invoiceItemHydrated1,
+          {
+            ...invoiceItemHydrated2,
+            book: undefined,
+            bookId: null,
+            productType: 'foo',
+          },
+        ],
+        numInvoiceItems: 2,
       });
     });
 
     it('should return null when no invoice exists', async () => {
       prismaMock.invoice.findUnique.mockResolvedValue(null);
-      const result = await getInvoice(1);
+      const result = await getInvoiceWithItems(1);
       expect(result).toEqual(null);
     });
   });

@@ -10,9 +10,10 @@ import prisma from '@/lib/prisma';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import InvoiceCreateInput from '@/types/InvoiceCreateInput';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
+import InvoiceHydratedWithItemsHydrated from '@/types/InvoiceHydratedWithItemsHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
-import { Invoice, Prisma } from '@prisma/client';
+import { Invoice, Prisma, ProductType } from '@prisma/client';
 
 export async function createInvoice(
   invoice: InvoiceCreateInput,
@@ -136,26 +137,65 @@ export async function getInvoices({
   };
 }
 
-export async function getInvoice(
+export async function getInvoiceWithItems(
   id: Invoice['id'],
-): Promise<InvoiceHydrated | null> {
+): Promise<InvoiceHydratedWithItemsHydrated | null> {
   const invoice = await prisma.invoice.findUnique({
     include: {
       _count: {
         select: { invoiceItems: true },
+      },
+      // We're not paginating the invoice items, which assumes the list is
+      // not long. But at this point we can assume that safely.
+      invoiceItems: {
+        include: {
+          book: {
+            include: {
+              authors: true,
+              format: true,
+              genre: true,
+              publisher: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
       },
       vendor: true,
     },
     where: { id },
   });
 
-  if (invoice) {
-    return {
-      ...invoice,
-      numInvoiceItems: invoice._count.invoiceItems,
-      vendor: serializeBookSource(invoice.vendor),
-    };
-  } else {
+  if (!invoice) {
     return null;
   }
+
+  const items = invoice.invoiceItems.map((item) => {
+    if (item.productType !== ProductType.BOOK) {
+      // we have no other product types at this time, so this should not happen
+      logger.warn('non-book product type encountered: %j', item);
+      return {
+        ...item,
+        book: undefined,
+        bookId: null,
+      };
+    }
+
+    // we can assume the book is available based on code above
+    const itemBook = item.book!;
+
+    return {
+      ...item,
+      book: {
+        ...itemBook,
+        publisher: serializeBookSource(itemBook.publisher),
+      },
+    };
+  });
+
+  return {
+    ...invoice,
+    invoiceItems: items,
+    numInvoiceItems: invoice._count.invoiceItems,
+    vendor: serializeBookSource(invoice.vendor),
+  };
 }
