@@ -1,6 +1,6 @@
 'use client';
 
-import { syncTransactionStatus } from '@/lib/actions/transaction';
+import { syncTransactionStatusSafe } from '@/lib/actions/transaction-safe';
 import { TransactionStatus } from '@prisma/client';
 import { useCallback, useState } from 'react';
 
@@ -25,7 +25,7 @@ export default function useSyncTransactionStatus({
   const subscribe = useCallback(() => {
     const intervalId = setInterval(async () => {
       const { data, error, status } =
-        await syncTransactionStatus(transactionUID);
+        await syncTransactionStatusSafe(transactionUID);
       if (status === 200 && data) {
         const { status: updatedStatus } = data;
         setTransactionStatus(updatedStatus);

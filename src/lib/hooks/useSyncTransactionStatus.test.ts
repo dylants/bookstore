@@ -8,10 +8,10 @@ import useSyncTransactionStatus, {
 import { TransactionStatus } from '@prisma/client';
 import { act, renderHook } from '@testing-library/react';
 
-const mockSyncTransactionStatus = jest.fn();
-jest.mock('../actions/transaction', () => ({
-  syncTransactionStatus: (...args: unknown[]) =>
-    mockSyncTransactionStatus(...args),
+const mockSyncTransactionStatusSafe = jest.fn();
+jest.mock('../actions/transaction-safe', () => ({
+  syncTransactionStatusSafe: (...args: unknown[]) =>
+    mockSyncTransactionStatusSafe(...args),
 }));
 
 describe('useSyncTransactionStatus', () => {
@@ -24,7 +24,7 @@ describe('useSyncTransactionStatus', () => {
   });
 
   beforeEach(() => {
-    mockSyncTransactionStatus.mockReset();
+    mockSyncTransactionStatusSafe.mockReset();
   });
 
   it('should return perform correctly', async () => {
@@ -39,7 +39,7 @@ describe('useSyncTransactionStatus', () => {
 
     // verify that when the status is PENDING, and we advance time,
     // we see the updated state
-    mockSyncTransactionStatus.mockReturnValue({
+    mockSyncTransactionStatusSafe.mockReturnValue({
       data: { status: TransactionStatus.PENDING },
       status: 200,
     });
@@ -52,7 +52,7 @@ describe('useSyncTransactionStatus', () => {
 
     // verify that when the state changes, and we advance time,
     // we see the updated state
-    mockSyncTransactionStatus.mockReturnValue({
+    mockSyncTransactionStatusSafe.mockReturnValue({
       data: { status: TransactionStatus.COMPLETE },
       status: 200,
     });
@@ -66,7 +66,7 @@ describe('useSyncTransactionStatus', () => {
     // verify that when the state changes, but we have unsubscribed,
     // we do NOT see the updated state
     unsubscribe();
-    mockSyncTransactionStatus.mockReturnValue({
+    mockSyncTransactionStatusSafe.mockReturnValue({
       data: { status: TransactionStatus.CANCELLED },
       status: 200,
     });
@@ -87,7 +87,7 @@ describe('useSyncTransactionStatus', () => {
 
     result.current.subscribe();
 
-    mockSyncTransactionStatus.mockReturnValue({
+    mockSyncTransactionStatusSafe.mockReturnValue({
       data: { status: TransactionStatus.COMPLETE },
       status: 200,
     });
@@ -116,7 +116,7 @@ describe('useSyncTransactionStatus', () => {
 
     result.current.subscribe();
 
-    mockSyncTransactionStatus.mockReturnValue({
+    mockSyncTransactionStatusSafe.mockReturnValue({
       data: { status: TransactionStatus.COMPLETE },
       error: 'bad things!',
       status: 500,

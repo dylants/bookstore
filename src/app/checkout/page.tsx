@@ -14,7 +14,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getBook } from '@/lib/actions/book';
 import { createOrder, getOrderWithItems } from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
-import { createTransaction } from '@/lib/actions/transaction';
+import { createTransactionSafe } from '@/lib/actions/transaction-safe';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import clsx from 'clsx';
@@ -101,7 +101,7 @@ export default function CheckoutPage() {
 
     setIsCreatingTransaction(true);
 
-    const { data, error, status } = await createTransaction(orderUID);
+    const { data, error, status } = await createTransactionSafe(orderUID);
     if (status === 200 && data) {
       const { transactionUID } = data;
       router.push(
