@@ -14,23 +14,19 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { getFormats } from '@/lib/actions/format';
 import { getGenres } from '@/lib/actions/genre';
-import { completeInvoice, getInvoice } from '@/lib/actions/invoice';
-import { getInvoiceItems } from '@/lib/actions/invoice-item';
-import InvoiceHydrated from '@/types/InvoiceHydrated';
-import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
+import { completeInvoice, getInvoiceWithItems } from '@/lib/actions/invoice';
+import InvoiceHydratedWithItemsHydrated from '@/types/InvoiceHydratedWithItemsHydrated';
 import { Format, Genre } from '@prisma/client';
 import _ from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function InvoicePage({ params }: { params: { id: string } }) {
-  const [invoice, setInvoice] = useState<InvoiceHydrated | null>();
-  const [invoiceItems, setInvoiceItems] =
-    useState<Array<InvoiceItemHydrated> | null>();
+  const [invoice, setInvoice] =
+    useState<InvoiceHydratedWithItemsHydrated | null>();
   const [formats, setFormats] = useState<Array<Format>>();
   const [genres, setGenres] = useState<Array<Genre>>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // TODO we should validate this input
   const invoiceId = _.toNumber(params.id);
 
   // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
@@ -44,21 +40,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
   const loadInvoice = useCallback(async () => {
     const doneLoading = setDelayedLoading();
-    const invoice = await getInvoice(invoiceId);
+    const invoice = await getInvoiceWithItems(invoiceId);
     setInvoice(invoice);
-    doneLoading();
-  }, [invoiceId, setDelayedLoading]);
-
-  const loadInvoiceItems = useCallback(async () => {
-    const doneLoading = setDelayedLoading();
-    // TODO handle pagination
-    const { invoiceItems } = await getInvoiceItems({
-      invoiceId,
-      paginationQuery: {
-        first: 100,
-      },
-    });
-    setInvoiceItems(invoiceItems);
     doneLoading();
   }, [invoiceId, setDelayedLoading]);
 
@@ -85,10 +68,9 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   // on initial render, load all the things
   useEffect(() => {
     loadInvoice();
-    loadInvoiceItems();
     loadFormats();
     loadGenres();
-  }, [loadFormats, loadGenres, loadInvoice, loadInvoiceItems]);
+  }, [loadFormats, loadGenres, loadInvoice]);
 
   if (!invoice || !formats || !genres) {
     return (
@@ -132,7 +114,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
           genres={genres}
           invoice={invoice}
           onCreateInvoiceItem={() => {
-            loadInvoiceItems();
+            loadInvoice();
             // TODO add success
           }}
         />
@@ -140,8 +122,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
       <div className="mt-4">
         <InvoiceItemsTable
-          invoiceItems={invoiceItems || []}
-          isLoading={!invoiceItems || isLoading}
+          invoiceItems={invoice.invoiceItems || []}
+          isLoading={!invoice.invoiceItems || isLoading}
         />
       </div>
     </>

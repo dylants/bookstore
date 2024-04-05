@@ -1,6 +1,5 @@
-import { fakeVendor } from '@/lib/fakes/book-source';
+import { fakeVendorSerialized } from '@/lib/fakes/book-source';
 import { fakeCreatedAtUpdatedAt } from '@/lib/fakes/created-at-updated-at';
-import { serializeBookSource } from '@/lib/serializers/book-source';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
 import { faker } from '@faker-js/faker';
 import { Invoice } from '@prisma/client';
@@ -27,11 +26,11 @@ export function fakeInvoiceHydrated(
   isCompleted: boolean = false,
 ): InvoiceHydrated {
   const invoice = fakeInvoice(isCompleted);
-  const vendor = fakeVendor();
+  const vendor = fakeVendorSerialized();
 
   return {
     ...invoice,
     numInvoiceItems: faker.number.int(50),
-    vendor: serializeBookSource(vendor),
+    vendor,
   };
 }
