@@ -50,7 +50,11 @@ const Search = React.forwardRef<
     <form className="w-full" onSubmit={handleSubmit(internalOnSubmit)}>
       <div className="flex gap-4 items-end">
         <div className="flex flex-col flex-1">
-          {labelText && <label className="text-sm">{labelText}</label>}
+          {labelText && (
+            <label className="text-sm" htmlFor={labelText}>
+              {labelText}
+            </label>
+          )}
           <InputIcon
             Icon={
               isSearching ? (
@@ -62,6 +66,7 @@ const Search = React.forwardRef<
             asButton
             hasError={hasError}
             onClick={handleSubmit(internalOnSubmit)}
+            id={labelText}
             // https://www.react-hook-form.com/faqs/#Howtosharerefusage
             {...formRest}
             ref={(e) => {

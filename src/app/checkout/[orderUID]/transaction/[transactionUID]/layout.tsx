@@ -37,7 +37,9 @@ export default function CheckoutTransactionLayout({
   return (
     <div className="flex flex-col items-center gap-4 mt-[150px] text-xl text-center">
       <div>
-        <p>Order {order.orderUID}</p>
+        <p>
+          Order <span data-testid="order-uid">{order.orderUID}</span>
+        </p>
         <p>
           Total:{' '}
           <span className="font-bold">

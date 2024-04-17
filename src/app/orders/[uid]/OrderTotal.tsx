@@ -3,7 +3,7 @@ import { Order } from '@prisma/client';
 
 export default function OrderTotal({ order }: { order: Order }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-2" data-testid="order-total">
       <div>Subtotal:</div>
       <div className="text-right">
         <Dollars amountInCents={order.subTotalInCents} />
