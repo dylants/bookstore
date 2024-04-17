@@ -6,6 +6,7 @@ import SearchCommand, {
 import { findBooksBySearchString } from '@/lib/actions/book';
 import BookHydrated from '@/types/BookHydrated';
 import { useDebounceCallback } from '@react-hook/debounce';
+import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
 function buildSearchResult(book: BookHydrated): SearchCommandResult {
@@ -13,7 +14,7 @@ function buildSearchResult(book: BookHydrated): SearchCommandResult {
   const text = `${book.title} by ${authors}`;
 
   return {
-    id: book.id.toString(),
+    id: book.isbn13.toString(),
     imageUrl: book.imageUrl,
     text,
   };
@@ -23,6 +24,7 @@ export default function SearchCommandContainer() {
   const [searchValue, setSearchValue] = useState<string>('');
   const [results, setResults] = useState<Array<BookHydrated> | null>(null);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const router = useRouter();
 
   const onClose = useCallback(() => {
     setResults(null);
@@ -53,11 +55,10 @@ export default function SearchCommandContainer() {
 
   const onSelect = useCallback(
     (result: SearchCommandResult) => {
-      // TODO navigation
-      console.log(result);
+      router.push(`/books/${result.id}`);
       onClose();
     },
-    [onClose],
+    [onClose, router],
   );
 
   return (
