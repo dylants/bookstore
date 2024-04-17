@@ -1,11 +1,11 @@
 'use client';
 
+import SearchCommandContainer from '@/app/search/SearchCommandContainer';
 import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import {
   GiftIcon,
   NotepadTextIcon,
-  SearchIcon,
   ShoppingCartIcon,
   UserIcon,
 } from 'lucide-react';
@@ -39,18 +39,14 @@ function NavLink({
 
 export default function Nav() {
   return (
-    <nav className="flex justify-between items-center w-full px-4 bg-customPalette-400 text-customPalette-100">
+    <nav className="flex justify-between items-center w-full h-[50px] px-4 bg-customPalette-400 text-customPalette-100">
       <div className="text-xl">
         <Link href="/">bookstore</Link>
       </div>
-      <div className="flex gap-4 text-xl">
+      <div className="absolute m-auto left-0 right-0 w-fit flex gap-4 text-xl">
         <NavLink path="/checkout">
           <ShoppingCartIcon size={14} />
           Checkout
-        </NavLink>
-        <NavLink path="/search">
-          <SearchIcon size={14} />
-          Search
         </NavLink>
         <NavLink path="/orders">
           <GiftIcon size={14} />
@@ -61,7 +57,8 @@ export default function Nav() {
           Invoices
         </NavLink>
       </div>
-      <div>
+      <div className="flex gap-4 items-center">
+        <SearchCommandContainer />
         <UserIcon size={18} />
       </div>
     </nav>
