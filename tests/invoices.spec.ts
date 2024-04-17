@@ -281,10 +281,9 @@ test.describe('invoices', () => {
 
     // verify the books via search
     await page.getByRole('navigation').getByText('Search').click();
-    await expect(page.getByRole('heading')).toHaveText('Search');
-
-    await page.getByRole('textbox').fill(book1.title);
-    await page.getByRole('textbox').press('Enter');
+    await page.getByTestId('search-command-input').fill(book1.title);
+    await page.getByTestId('search-command-input').press('Enter');
+    await page.getByText(`${book1.title} by ${book1.authors}`).click();
     await verifyBookDetails({
       book: book1,
       page,
@@ -293,8 +292,10 @@ test.describe('invoices', () => {
       ).toString(),
     });
 
-    await page.getByRole('textbox').fill(book2.title);
-    await page.getByRole('textbox').press('Enter');
+    await page.getByRole('navigation').getByText('Search').click();
+    await page.getByTestId('search-command-input').fill(book2.title);
+    await page.getByTestId('search-command-input').press('Enter');
+    await page.getByText(`${book2.title} by ${book2.authors}`).click();
     await verifyBookDetails({
       book: book2,
       page,
