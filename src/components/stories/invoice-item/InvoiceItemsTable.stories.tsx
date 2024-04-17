@@ -13,7 +13,7 @@ type Story = StoryObj<typeof InvoiceItemsTable>;
 
 function getInvoiceItems() {
   return _.times(9, (): InvoiceItemHydrated => {
-    const invoiceItem = fakeInvoiceItemHydrated();
+    const invoiceItem = fakeInvoiceItemHydrated({});
     return Math.random() > 0.2
       ? invoiceItem
       : {

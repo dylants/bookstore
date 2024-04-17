@@ -13,7 +13,7 @@ import InvoiceHydrated from '@/types/InvoiceHydrated';
 import InvoiceHydratedWithItemsHydrated from '@/types/InvoiceHydratedWithItemsHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
-import { Invoice, Prisma, ProductType } from '@prisma/client';
+import { Invoice, InvoiceItem, Prisma, ProductType } from '@prisma/client';
 
 export async function createInvoice(
   invoice: InvoiceCreateInput,
@@ -39,6 +39,10 @@ export async function createInvoice(
     numInvoiceItems: 0,
     vendor: serializeBookSource(createdInvoice.vendor),
   };
+}
+
+function sumInvoiceItems(invoiceItems: Array<InvoiceItem>): number {
+  return invoiceItems.reduce((acc, item) => acc + item.quantity, 0);
 }
 
 export async function completeInvoice(
@@ -74,9 +78,7 @@ export async function completeInvoice(
           isCompleted: true,
         },
         include: {
-          _count: {
-            select: { invoiceItems: true },
-          },
+          invoiceItems: true,
           vendor: true,
         },
         where: { id: invoiceId },
@@ -84,7 +86,8 @@ export async function completeInvoice(
 
       return {
         ...invoice,
-        numInvoiceItems: invoice._count.invoiceItems,
+        invoiceItems: undefined,
+        numInvoiceItems: sumInvoiceItems(invoice.invoiceItems),
         vendor: serializeBookSource(invoice.vendor),
       };
     },
@@ -111,9 +114,7 @@ export async function getInvoices({
   const rawItems = await prisma.invoice.findMany({
     ...paginationRequest,
     include: {
-      _count: {
-        select: { invoiceItems: true },
-      },
+      invoiceItems: true,
       vendor: true,
     },
     orderBy: { createdAt: 'desc' },
@@ -121,7 +122,8 @@ export async function getInvoices({
 
   const items = rawItems.map((item) => ({
     ...item,
-    numInvoiceItems: item._count.invoiceItems,
+    invoiceItems: undefined,
+    numInvoiceItems: sumInvoiceItems(item.invoiceItems),
     vendor: serializeBookSource(item.vendor),
   }));
 
@@ -142,9 +144,6 @@ export async function getInvoiceWithItems(
 ): Promise<InvoiceHydratedWithItemsHydrated | null> {
   const invoice = await prisma.invoice.findUnique({
     include: {
-      _count: {
-        select: { invoiceItems: true },
-      },
       // We're not paginating the invoice items, which assumes the list is
       // not long. But at this point we can assume that safely.
       invoiceItems: {
@@ -195,7 +194,7 @@ export async function getInvoiceWithItems(
   return {
     ...invoice,
     invoiceItems: items,
-    numInvoiceItems: invoice._count.invoiceItems,
+    numInvoiceItems: sumInvoiceItems(invoice.invoiceItems),
     vendor: serializeBookSource(invoice.vendor),
   };
 }

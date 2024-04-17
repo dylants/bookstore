@@ -94,7 +94,7 @@ const columns: ColumnDef<InvoiceItemHydrated>[] = [
         <>{props.getValue()}</>
       </div>
     ),
-    header: ({ column }) => <SortableHeader column={column} text="#" />,
+    header: ({ column }) => <SortableHeader column={column} text="Qty" />,
   },
   {
     accessorKey: 'totalCostInCents',
