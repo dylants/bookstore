@@ -1,5 +1,8 @@
 import prisma from '@/lib/prisma';
 import generateCoreSeeds from './core';
+import { upsertBook } from '@/lib/actions/book';
+import { findFormatOrThrow } from '@/lib/actions/format';
+import { findGenreOrThrow } from '@/lib/actions/genre';
 
 async function createVendor(name: string) {
   // TODO replace with create vendor once it exists
@@ -14,8 +17,28 @@ async function createVendor(name: string) {
   });
 }
 
+async function addBookInventory() {
+  const { id: formatId } = await findFormatOrThrow('Trade Paperback');
+  const { id: genreId } = await findGenreOrThrow('Fantasy');
+
+  return await upsertBook({
+    authors: 'Sarah J. Maas',
+    formatId,
+    genreId,
+    imageUrl:
+      'https://books.google.com/books/content?id=N_haEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+    isbn13: BigInt('9781635575583'),
+    priceInCents: 1999,
+    publishedDate: new Date('2020-06-02T05:00:00.000Z'),
+    publisher: 'Bloomsbury Publishing USA',
+    quantity: 5,
+    title: 'A Court of Mist and Fury',
+  });
+}
+
 export default async function generateCiSeeds() {
   await generateCoreSeeds();
 
   await createVendor('Vendor One');
+  await addBookInventory();
 }

@@ -101,6 +101,13 @@ The following environment variables are required when using Square:
 - `SQUARE_ACCESS_TOKEN`: The Square environment access token
 - `SQUARE_DEVICE_ID`: The unique ID of the device used for Square Terminal Checkout
 
+### Square Sandbox
+
+Testing is available for Square via the Sandbox environment. In this environment, device IDs are used to simulate scenarios.
+
+For Terminal API Checkout see:
+https://developer.squareup.com/docs/devtools/sandbox/testing#terminal-api-checkouts
+
 ## Logging
 
 [Pino](https://github.com/pinojs/pino) logger is setup to use within the app. Configuration can be found in the [logger.ts](src/lib/logger.ts) file.
@@ -125,7 +132,9 @@ $ bun run test:watch
 
 ### Playwright e2e Tests
 
-Playwright tests are stored in [tests](tests/).
+Playwright tests are stored in [tests](tests/). Some tests require the app to be setup in a specific manner (such as Square sandbox with a specific device ID). See the tests for more details.
+
+Note that these e2e tests are not run via the GitHub CI actions, since they require specific setup. They can be run locally, manually:
 
 To run the tests:
 
