@@ -38,7 +38,7 @@ const columns: ColumnDef<InvoiceHydrated>[] = [
         <>{props.getValue()}</>
       </div>
     ),
-    header: ({ column }) => <SortableHeader column={column} text="Items" />,
+    header: ({ column }) => <SortableHeader column={column} text="Qty" />,
   },
   {
     accessorKey: 'isCompleted',

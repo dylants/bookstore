@@ -22,17 +22,17 @@ describe('invoice actions', () => {
   const invoice1 = fakeInvoice(false);
   const resolvedInvoice1 = {
     ...invoice1,
-    _count: { invoiceItems: 3 },
+    invoiceItems: [fakeInvoiceItem({ quantity: 3 })],
   } as Invoice;
   const invoice2 = fakeInvoice(true);
   const resolvedInvoice2 = {
     ...invoice2,
-    _count: { invoiceItems: 8 },
+    invoiceItems: [fakeInvoiceItem({ quantity: 8 })],
   } as Invoice;
   const invoice3 = fakeInvoice(false);
   const resolvedInvoice3 = {
     ...invoice3,
-    _count: { invoiceItems: 0 },
+    invoiceItems: [fakeInvoiceItem({ quantity: 0 })],
   } as Invoice;
 
   beforeAll(() => {
@@ -73,19 +73,17 @@ describe('invoice actions', () => {
 
       const book1 = fakeBook();
       book1.quantity = 7;
-      const item1 = fakeInvoiceItem();
+      const item1 = fakeInvoiceItem({ quantity: 5 });
       item1.bookId = book1.id;
-      item1.quantity = 5;
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
 
       const book2 = fakeBook();
       book2.quantity = 0;
-      const item2 = fakeInvoiceItem();
+      const item2 = fakeInvoiceItem({ quantity: 3 });
       item2.bookId = book2.id;
-      item2.quantity = 3;
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book2);
 
-      const item3 = fakeInvoiceItem();
+      const item3 = fakeInvoiceItem({ quantity: 1 });
       // item3 has same bookId as item1
       item3.bookId = book1.id;
       item3.quantity = 1;
@@ -119,9 +117,7 @@ describe('invoice actions', () => {
           isCompleted: true,
         },
         include: {
-          _count: {
-            select: { invoiceItems: true },
-          },
+          invoiceItems: true,
           vendor: true,
         },
         where: { id: invoice1.id },
@@ -129,7 +125,6 @@ describe('invoice actions', () => {
 
       expect(result).toEqual({
         ...invoice1,
-        _count: { invoiceItems: 3 },
         numInvoiceItems: 3,
       });
     });
@@ -138,11 +133,11 @@ describe('invoice actions', () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
       const book1 = fakeBook();
-      const item1 = fakeInvoiceItem();
+      const item1 = fakeInvoiceItem({});
       item1.bookId = book1.id;
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
 
-      const item2 = fakeInvoiceItem();
+      const item2 = fakeInvoiceItem({});
       // item2 is not a BOOK product type
       item2.productType = 'foo' as ProductType;
       item2.bookId = null;
@@ -170,9 +165,7 @@ describe('invoice actions', () => {
       expect(prismaMock.invoice.findMany).toHaveBeenCalledWith({
         ...buildPaginationRequest({}),
         include: {
-          _count: {
-            select: { invoiceItems: true },
-          },
+          invoiceItems: true,
           vendor: true,
         },
         orderBy: { createdAt: 'desc' },
@@ -180,15 +173,15 @@ describe('invoice actions', () => {
       expect(result).toEqual({
         invoices: [
           {
-            ...resolvedInvoice1,
+            ...invoice1,
             numInvoiceItems: 3,
           },
           {
-            ...resolvedInvoice2,
+            ...invoice2,
             numInvoiceItems: 8,
           },
           {
-            ...resolvedInvoice3,
+            ...invoice3,
             numInvoiceItems: 0,
           },
         ],
@@ -217,11 +210,11 @@ describe('invoice actions', () => {
       expect(result).toEqual({
         invoices: [
           {
-            ...resolvedInvoice2,
+            ...invoice2,
             numInvoiceItems: 8,
           },
           {
-            ...resolvedInvoice3,
+            ...invoice3,
             numInvoiceItems: 0,
           },
         ],
@@ -238,12 +231,11 @@ describe('invoice actions', () => {
   describe('getInvoiceWithItems', () => {
     it('should provide the correct input to prisma', async () => {
       const invoice = fakeInvoice(false);
-      const invoiceItemHydrated1 = fakeInvoiceItemHydrated();
-      const invoiceItemHydrated2 = fakeInvoiceItemHydrated();
+      const invoiceItemHydrated1 = fakeInvoiceItemHydrated({ quantity: 2 });
+      const invoiceItemHydrated2 = fakeInvoiceItemHydrated({ quantity: 3 });
 
       prismaMock.invoice.findUnique.mockResolvedValue({
         ...invoice,
-        _count: { invoiceItems: 2 },
         invoiceItems: [
           invoiceItemHydrated1,
           {
@@ -257,9 +249,6 @@ describe('invoice actions', () => {
 
       expect(prismaMock.invoice.findUnique).toHaveBeenCalledWith({
         include: {
-          _count: {
-            select: { invoiceItems: true },
-          },
           invoiceItems: {
             include: {
               book: {
@@ -279,7 +268,6 @@ describe('invoice actions', () => {
       });
       expect(result).toEqual({
         ...invoice,
-        _count: { invoiceItems: 2 },
         invoiceItems: [
           invoiceItemHydrated1,
           {
@@ -289,7 +277,7 @@ describe('invoice actions', () => {
             productType: 'foo',
           },
         ],
-        numInvoiceItems: 2,
+        numInvoiceItems: 5,
       });
     });
 

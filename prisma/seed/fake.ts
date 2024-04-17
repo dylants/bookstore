@@ -119,7 +119,7 @@ async function generateInvoiceItem(props: GenerateInvoiceItemProps) {
   const book = buildBookCreateInput(baseProps);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, bookId, createdAt, updatedAt, ...data } = fakeInvoiceItem();
+  const { id, bookId, createdAt, updatedAt, ...data } = fakeInvoiceItem({});
 
   return await createInvoiceItem({
     ...data,

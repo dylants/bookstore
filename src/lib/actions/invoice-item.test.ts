@@ -13,8 +13,8 @@ jest.mock('./book', () => ({
 
 describe('invoice-item actions', () => {
   const book = fakeBook();
-  const invoiceItem1 = fakeInvoiceItem();
-  const invoiceItemHydrated1 = fakeInvoiceItemHydrated();
+  const invoiceItem1 = fakeInvoiceItem({});
+  const invoiceItemHydrated1 = fakeInvoiceItemHydrated({});
   beforeEach(() => {
     mockUpsertBook.mockReset();
   });
