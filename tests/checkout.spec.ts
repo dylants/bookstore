@@ -137,7 +137,7 @@ test.describe('checkout', () => {
     const QUANTITY_REMAINING = 4;
 
     await page.goto('/');
-    await expect(page.getByRole('main')).toHaveText('Welcome');
+    await expect(page.getByRole('heading')).toHaveText('Bookstore');
 
     // navigate to the checkout page
     await page.getByRole('navigation').getByText('Checkout').click();
