@@ -86,7 +86,6 @@ describe('invoice actions', () => {
       const item3 = fakeInvoiceItem({ quantity: 1 });
       // item3 has same bookId as item1
       item3.bookId = book1.id;
-      item3.quantity = 1;
       prismaMock.book.findUniqueOrThrow.mockResolvedValueOnce(book1);
 
       prismaMock.invoiceItem.findMany.mockResolvedValue([item1, item2, item3]);
