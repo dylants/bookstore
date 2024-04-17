@@ -84,6 +84,7 @@ export default function SearchCommand(props: SearchCommandProps) {
           placeholder={placeholder}
           onValueChange={(value) => onSearchValueChange(value)}
           value={searchValue}
+          data-testid="search-command-input"
         />
         <CommandList>
           {isSearching ? (
