@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import {
   GiftIcon,
-  NotepadTextIcon,
+  PackageOpenIcon,
   ShoppingCartIcon,
   UserIcon,
 } from 'lucide-react';
@@ -53,7 +53,7 @@ export default function Nav() {
           Orders
         </NavLink>
         <NavLink path="/invoices">
-          <NotepadTextIcon size={14} />
+          <PackageOpenIcon size={14} />
           Invoices
         </NavLink>
       </div>

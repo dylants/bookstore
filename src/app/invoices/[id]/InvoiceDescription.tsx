@@ -1,6 +1,6 @@
 import { discountPercentageToDisplayString } from '@/lib/money';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
-import { NotepadTextIcon } from 'lucide-react';
+import { PackageOpenIcon } from 'lucide-react';
 
 export default function InvoiceDescription({
   invoice,
@@ -15,7 +15,7 @@ export default function InvoiceDescription({
     >
       <div className="flex flex-col">
         <div className="font-bold flex gap-2 items-center">
-          <NotepadTextIcon /> Invoice Details
+          <PackageOpenIcon /> Invoice Details
         </div>
         <div data-testid="vendor-name">{vendor.name}</div>
         <div className="grid grid-cols-2">

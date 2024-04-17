@@ -25,7 +25,11 @@ const BreadcrumbsLink = React.forwardRef<
     href: string;
   }
 >(({ children, className, href }, ref) => (
-  <Link ref={ref} href={href} className={className}>
+  <Link
+    ref={ref}
+    href={href}
+    className={cn('flex items-center gap-2', className)}
+  >
     {children}
   </Link>
 ));
@@ -35,7 +39,7 @@ const BreadcrumbsText = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ children, className }, ref) => (
-  <div ref={ref} className={className}>
+  <div ref={ref} className={cn('flex items-center gap-2', className)}>
     {children}
   </div>
 ));
