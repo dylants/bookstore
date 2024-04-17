@@ -4,7 +4,7 @@ test.describe('app', () => {
   test('functions properly', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('main')).toHaveText('Welcome');
+    await expect(page.getByRole('heading')).toHaveText('Bookstore');
 
     await page.getByRole('navigation').getByText('Orders').click();
 

@@ -228,21 +228,13 @@ test.describe('invoices', () => {
     const book2Cost = '11.40';
 
     await page.goto('/');
-    await expect(page.getByRole('main')).toHaveText('Welcome');
+    await expect(page.getByRole('heading')).toHaveText('Bookstore');
 
     // navigate to the invoices page
     await page.getByRole('navigation').getByText('Invoices').click();
     await expect(page.getByRole('heading')).toHaveText('Invoices');
 
     await createInvoice({ invoice, page });
-
-    // find the newly created invoice in the table
-    await expect(
-      page.getByRole('cell', { name: invoice.invoiceNumber }),
-    ).toBeVisible();
-
-    // navigate to the invoice item page
-    await page.getByRole('cell', { name: invoice.invoiceNumber }).click();
 
     await verifyInvoiceDetails({ invoice, isComplete: false, page });
 
