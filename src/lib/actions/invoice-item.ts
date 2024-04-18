@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma';
 import { serializeBookSource } from '@/lib/serializers/book-source';
 import InvoiceItemCreateInput from '@/types/InvoiceItemCreateInput';
 import InvoiceItemHydrated from '@/types/InvoiceItemHydrated';
-import { ProductType } from '@prisma/client';
+import { Prisma, ProductType } from '@prisma/client';
 
 export async function createInvoiceItem(
   invoiceItem: InvoiceItemCreateInput,
@@ -26,45 +26,52 @@ export async function createInvoiceItem(
     throw new Error('Book required as input at this time');
   }
 
-  const book = await upsertBook(bookInput);
+  return prisma.$transaction(
+    async (tx) => {
+      const book = await upsertBook({ book: bookInput, tx });
 
-  const rawInvoiceItem = await prisma.invoiceItem.create({
-    data: {
-      book: {
-        connect: { id: book.id },
-      },
-      invoice: {
-        connect: { id: invoiceId },
-      },
-      itemCostInCents,
-      productType,
-      quantity,
-      totalCostInCents,
-    },
-    include: {
-      book: {
-        include: {
-          authors: true,
-          format: true,
-          genre: true,
-          publisher: true,
+      const rawInvoiceItem = await tx.invoiceItem.create({
+        data: {
+          book: {
+            connect: { id: book.id },
+          },
+          invoice: {
+            connect: { id: invoiceId },
+          },
+          itemCostInCents,
+          productType,
+          quantity,
+          totalCostInCents,
         },
-      },
+        include: {
+          book: {
+            include: {
+              authors: true,
+              format: true,
+              genre: true,
+              publisher: true,
+            },
+          },
+        },
+      });
+
+      // we can assume the book is available based on code above
+      const rawInvoiceItemBook = rawInvoiceItem.book!;
+
+      const invoiceItemCreated = {
+        ...rawInvoiceItem,
+        book: {
+          ...rawInvoiceItemBook,
+          publisher: serializeBookSource(rawInvoiceItemBook.publisher),
+        },
+      };
+
+      logger.trace('created invoice item in DB: %j', invoiceItemCreated);
+
+      return invoiceItemCreated;
     },
-  });
-
-  // we can assume the book is available based on code above
-  const rawInvoiceItemBook = rawInvoiceItem.book!;
-
-  const invoiceItemCreated = {
-    ...rawInvoiceItem,
-    book: {
-      ...rawInvoiceItemBook,
-      publisher: serializeBookSource(rawInvoiceItemBook.publisher),
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     },
-  };
-
-  logger.trace('created invoice item in DB: %j', invoiceItemCreated);
-
-  return invoiceItemCreated;
+  );
 }

@@ -3,6 +3,7 @@ import generateCoreSeeds from './core';
 import { upsertBook } from '@/lib/actions/book';
 import { findFormatOrThrow } from '@/lib/actions/format';
 import { findGenreOrThrow } from '@/lib/actions/genre';
+import { Prisma } from '@prisma/client';
 
 async function createVendor(name: string) {
   // TODO replace with create vendor once it exists
@@ -17,23 +18,37 @@ async function createVendor(name: string) {
   });
 }
 
+/**
+ * Adds book inventory without an invoice or invoice items, which is "okay"
+ * for seed data but probably should be improved at some point.
+ */
 async function addBookInventory() {
   const { id: formatId } = await findFormatOrThrow('Trade Paperback');
   const { id: genreId } = await findGenreOrThrow('Fantasy');
 
-  return await upsertBook({
-    authors: 'Sarah J. Maas',
-    formatId,
-    genreId,
-    imageUrl:
-      'https://books.google.com/books/content?id=N_haEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
-    isbn13: BigInt('9781635575583'),
-    priceInCents: 1999,
-    publishedDate: new Date('2020-06-02T05:00:00.000Z'),
-    publisher: 'Bloomsbury Publishing USA',
-    quantity: 5,
-    title: 'A Court of Mist and Fury',
-  });
+  return prisma.$transaction(
+    async (tx) => {
+      return await upsertBook({
+        book: {
+          authors: 'Sarah J. Maas',
+          formatId,
+          genreId,
+          imageUrl:
+            'https://books.google.com/books/content?id=N_haEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+          isbn13: BigInt('9781635575583'),
+          priceInCents: 1999,
+          publishedDate: new Date('2020-06-02T05:00:00.000Z'),
+          publisher: 'Bloomsbury Publishing USA',
+          quantity: 5,
+          title: 'A Court of Mist and Fury',
+        },
+        tx,
+      });
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
 }
 
 export default async function generateCiSeeds() {
