@@ -1,4 +1,9 @@
 import { InvoiceCreateFormInput } from '@/components/invoice/InvoiceCreate';
+import {
+  computeTax,
+  convertCentsToDollars,
+  convertDollarsToCents,
+} from '@/lib/money';
 import BookFormInput from '@/types/BookFormInput';
 import { faker } from '@faker-js/faker';
 import { test, expect, Page } from '@playwright/test';
@@ -167,6 +172,24 @@ async function enterInExistingBook({
   );
 }
 
+async function verifyInvoiceTotals({
+  page,
+  subTotal,
+}: {
+  page: Page;
+  subTotal: number;
+}) {
+  const tax: number = convertCentsToDollars(
+    computeTax(convertDollarsToCents(subTotal)),
+  );
+  const total: number = subTotal + tax;
+
+  const invoiceTotals = page.getByTestId('invoice-total');
+  await expect(invoiceTotals).toHaveText(
+    `Subtotal:$${subTotal.toFixed(2)}Tax:$${tax.toFixed(2)}Total:$${total.toFixed(2)}`,
+  );
+}
+
 async function verifyBookDetails({
   book,
   page,
@@ -247,6 +270,12 @@ test.describe('invoices', () => {
       totalCost: book1Cost,
     });
 
+    let subTotal: number = +book1Cost;
+    await verifyInvoiceTotals({
+      page,
+      subTotal,
+    });
+
     // create second invoice item for book1
     await enterInExistingBook({
       additionalQuantity: book1AdditionalQuantity,
@@ -256,6 +285,11 @@ test.describe('invoices', () => {
       page,
       totalCost: book1AdditionalQuantityTotalCost,
     });
+    subTotal = subTotal + +book1AdditionalQuantityTotalCost;
+    await verifyInvoiceTotals({
+      page,
+      subTotal,
+    });
 
     // create invoice item for book2
     await enterInNewBook({
@@ -264,6 +298,11 @@ test.describe('invoices', () => {
       itemCost: book2Cost,
       page,
       totalCost: book2Cost,
+    });
+    subTotal = subTotal + +book2Cost;
+    await verifyInvoiceTotals({
+      page,
+      subTotal,
     });
 
     // complete invoice
