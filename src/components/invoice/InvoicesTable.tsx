@@ -1,3 +1,4 @@
+import Dollars from '@/components/Dollars';
 import DataTable from '@/components/table/DataTable';
 import SortableHeader from '@/components/table/SortableHeader';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
@@ -39,6 +40,33 @@ const columns: ColumnDef<InvoiceHydrated>[] = [
       </div>
     ),
     header: ({ column }) => <SortableHeader column={column} text="Qty" />,
+  },
+  {
+    accessorKey: 'subTotalInCents',
+    cell: (props) => (
+      <div className="text-right">
+        <Dollars amountInCents={props.getValue() as number} />
+      </div>
+    ),
+    header: ({ column }) => <SortableHeader column={column} text="Subtotal" />,
+  },
+  {
+    accessorKey: 'taxInCents',
+    cell: (props) => (
+      <div className="text-right">
+        <Dollars amountInCents={props.getValue() as number} />
+      </div>
+    ),
+    header: ({ column }) => <SortableHeader column={column} text="Tax" />,
+  },
+  {
+    accessorKey: 'totalInCents',
+    cell: (props) => (
+      <div className="text-right">
+        <Dollars amountInCents={props.getValue() as number} />
+      </div>
+    ),
+    header: ({ column }) => <SortableHeader column={column} text="Total" />,
   },
   {
     accessorKey: 'isCompleted',
