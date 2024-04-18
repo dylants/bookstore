@@ -82,13 +82,16 @@ model Genre {
 }
 
 model Invoice {
-  id            Int       @id @default(autoincrement())
-  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
-  updatedAt     DateTime? @updatedAt @db.Timestamptz(3)
-  invoiceNumber String
-  invoiceDate   DateTime  @db.Timestamptz(1)
-  dateReceived  DateTime? @db.Timestamptz(1)
-  isCompleted   Boolean   @default(false)
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime? @updatedAt @db.Timestamptz(3)
+  invoiceNumber   String
+  invoiceDate     DateTime  @db.Timestamptz(1)
+  dateReceived    DateTime? @db.Timestamptz(1)
+  isCompleted     Boolean   @default(false)
+  subTotalInCents Int
+  taxInCents      Int
+  totalInCents    Int
 
   vendor   BookSource @relation(fields: [vendorId], references: [id])
   vendorId Int

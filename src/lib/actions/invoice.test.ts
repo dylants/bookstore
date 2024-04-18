@@ -53,6 +53,9 @@ describe('invoice actions', () => {
         data: {
           invoiceDate: invoice1.invoiceDate,
           invoiceNumber: invoice1.invoiceNumber,
+          subTotalInCents: 0,
+          taxInCents: 0,
+          totalInCents: 0,
           vendorId: invoice1.vendorId,
         },
         include: {
