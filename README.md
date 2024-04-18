@@ -2,6 +2,8 @@
 
 An application to help run a book store.
 
+![bookstore](https://github.com/dylants/bookstore/assets/1596740/29a06c8f-f8ba-43d1-9101-840be931ef23)
+
 ## Getting Started
 
 _This app uses [bun](https://bun.sh/) for dependency management and script execution._

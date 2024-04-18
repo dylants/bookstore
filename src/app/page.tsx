@@ -20,7 +20,7 @@ function NavLink({
   const buttonContent = (
     <Button
       variant="outline"
-      className="flex items-center gap-2 py-0 h-8 w-[150px]"
+      className="flex items-center gap-2 py-0 h-[60px] w-[200px] text-lg"
       disabled={disabled}
     >
       {children}
@@ -28,15 +28,13 @@ function NavLink({
   );
 
   return (
-    <>
+    <div className="flex items-center">
       {disabled ? (
-        <div className="h-[50px] flex items-center">{buttonContent}</div>
+        <>{buttonContent}</>
       ) : (
-        <Link href={path} className="h-[50px] flex items-center">
-          {buttonContent}
-        </Link>
+        <Link href={path}>{buttonContent}</Link>
       )}
-    </>
+    </div>
   );
 }
 
@@ -45,21 +43,21 @@ export default function HomePage() {
     <div className="flex flex-col w-full items-center mt-[80px] gap-4">
       <h1>Bookstore</h1>
       <Separator className="bg-customPalette-200 my-4" />
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+      <div className="grid grid-cols-2 gap-8">
         <NavLink path="/checkout">
-          <ShoppingCartIcon size={14} />
+          <ShoppingCartIcon size={18} />
           Checkout
         </NavLink>
         <NavLink path="/invoices">
-          <PackageOpenIcon size={14} />
+          <PackageOpenIcon size={18} />
           Invoices
         </NavLink>
         <NavLink path="/orders">
-          <GiftIcon size={14} />
+          <GiftIcon size={18} />
           Orders
         </NavLink>
         <NavLink path="#" disabled>
-          <ClipboardListIcon size={14} />
+          <ClipboardListIcon size={18} />
           Reports
         </NavLink>
       </div>
