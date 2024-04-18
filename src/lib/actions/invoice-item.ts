@@ -1,6 +1,7 @@
 'use server';
 
 import { upsertBook } from '@/lib/actions/book';
+import { recomputeInvoiceTotals } from '@/lib/actions/invoice';
 import logger from '@/lib/logger';
 import prisma from '@/lib/prisma';
 import { serializeBookSource } from '@/lib/serializers/book-source';
@@ -67,6 +68,8 @@ export async function createInvoiceItem(
       };
 
       logger.trace('created invoice item in DB: %j', invoiceItemCreated);
+
+      await recomputeInvoiceTotals({ invoiceItem: rawInvoiceItem, tx });
 
       return invoiceItemCreated;
     },

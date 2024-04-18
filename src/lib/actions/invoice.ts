@@ -2,6 +2,7 @@
 
 import { reduceBookUpdates, updateBookQuantity } from '@/lib/actions/book';
 import logger from '@/lib/logger';
+import { computeTax } from '@/lib/money';
 import {
   buildPaginationRequest,
   buildPaginationResponse,
@@ -42,6 +43,35 @@ export async function createInvoice(
     numInvoiceItems: 0,
     vendor: serializeBookSource(createdInvoice.vendor),
   };
+}
+
+export async function recomputeInvoiceTotals({
+  invoiceItem,
+  tx,
+}: {
+  invoiceItem: InvoiceItem;
+  tx: Prisma.TransactionClient;
+}): Promise<void> {
+  const { invoiceId } = invoiceItem;
+  logger.trace('re-computing invoice totals for invoiceId: %s', invoiceId);
+
+  const invoice = await tx.invoice.findUniqueOrThrow({
+    where: { id: invoiceId },
+  });
+
+  const subTotalInCents =
+    invoice.subTotalInCents + invoiceItem.totalCostInCents;
+  const taxInCents = computeTax(subTotalInCents);
+  const totalInCents = subTotalInCents + taxInCents;
+
+  await tx.invoice.update({
+    data: {
+      subTotalInCents,
+      taxInCents,
+      totalInCents,
+    },
+    where: { id: invoiceId },
+  });
 }
 
 function sumInvoiceItems(invoiceItems: Array<InvoiceItem>): number {
