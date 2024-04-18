@@ -1,7 +1,6 @@
 import {
   buildAuthorsInput,
   buildPublisherInput,
-  createBook,
   findBooksBySearchString,
   getBook,
   getBooks,
@@ -83,66 +82,6 @@ describe('book actions', () => {
           name: 'publisher one',
         },
       });
-    });
-  });
-
-  describe('createBook', () => {
-    it('should create a new book', async () => {
-      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
-
-      prismaMock.author.findFirst.mockResolvedValue(null);
-      prismaMock.bookSource.findFirst.mockResolvedValue(null);
-      prismaMock.book.create.mockResolvedValue(book1);
-
-      const result = await createBook({
-        ...book1,
-        authors: 'author1',
-        publisher: 'publisher2',
-      });
-
-      expect(prismaMock.author.findFirst).toHaveBeenCalledWith({
-        where: { name: 'author1' },
-      });
-
-      expect(prismaMock.bookSource.findFirst).toHaveBeenCalledWith({
-        where: { name: 'publisher2' },
-      });
-
-      expect(prismaMock.book.create).toHaveBeenCalledWith({
-        data: {
-          authors: {
-            connect: [],
-            create: [
-              {
-                name: 'author1',
-              },
-            ],
-          },
-          format: { connect: { id: book1.formatId } },
-          genre: { connect: { id: book1.genreId } },
-          imageUrl: book1.imageUrl,
-          isbn13: book1.isbn13,
-          priceInCents: book1.priceInCents,
-          publishedDate: book1.publishedDate,
-          publisher: {
-            create: {
-              isPublisher: true,
-              isVendor: false,
-              name: 'publisher2',
-            },
-          },
-          quantity: book1.quantity,
-          title: book1.title,
-        },
-        include: {
-          authors: true,
-          format: true,
-          genre: true,
-          publisher: true,
-        },
-      });
-
-      expect(result).toEqual(book1);
     });
   });
 
