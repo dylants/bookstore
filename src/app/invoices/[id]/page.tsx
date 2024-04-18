@@ -2,6 +2,7 @@
 
 import BookForm from '@/app/invoices/[id]/BookForm';
 import InvoiceDescription from '@/app/invoices/[id]/InvoiceDescription';
+import InvoiceTotal from '@/app/invoices/[id]/InvoiceTotal';
 import {
   Breadcrumbs,
   BreadcrumbsHome,
@@ -25,25 +26,13 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     useState<InvoiceHydratedWithItemsHydrated | null>();
   const [formats, setFormats] = useState<Array<Format>>();
   const [genres, setGenres] = useState<Array<Genre>>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const invoiceId = _.toNumber(params.id);
 
-  // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
-  const setDelayedLoading = useCallback(() => {
-    const timeout = setTimeout(() => setIsLoading(true), 100);
-    return () => {
-      setIsLoading(false);
-      clearTimeout(timeout);
-    };
-  }, []);
-
   const loadInvoice = useCallback(async () => {
-    const doneLoading = setDelayedLoading();
     const invoice = await getInvoiceWithItems(invoiceId);
     setInvoice(invoice);
-    doneLoading();
-  }, [invoiceId, setDelayedLoading]);
+  }, [invoiceId]);
 
   const loadFormats = useCallback(async () => {
     // TODO handle pagination
@@ -121,10 +110,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       )}
 
       <div className="mt-4">
-        <InvoiceItemsTable
-          invoiceItems={invoice.invoiceItems || []}
-          isLoading={!invoice.invoiceItems || isLoading}
-        />
+        <InvoiceItemsTable invoiceItems={invoice.invoiceItems} />
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <InvoiceTotal invoice={invoice} />
       </div>
     </>
   );
