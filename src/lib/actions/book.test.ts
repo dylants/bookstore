@@ -94,9 +94,12 @@ describe('book actions', () => {
       prismaMock.book.upsert.mockResolvedValue(book1);
 
       const result = await upsertBook({
-        ...book1,
-        authors: 'author1',
-        publisher: 'publisher2',
+        book: {
+          ...book1,
+          authors: 'author1',
+          publisher: 'publisher2',
+        },
+        tx: prismaMock,
       });
 
       expect(prismaMock.book.upsert).toHaveBeenCalledWith({

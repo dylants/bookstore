@@ -96,38 +96,37 @@ async function buildCreateUpdateBookData(
   };
 }
 
-export async function upsertBook(book: BookCreateInput): Promise<BookHydrated> {
+export async function upsertBook({
+  book,
+  tx,
+}: {
+  book: BookCreateInput;
+  tx: Prisma.TransactionClient;
+}): Promise<BookHydrated> {
+  // when we create a book, we create authors and publisher if they do not exist
+  // so this entire operation needs to be executed in a serial transaction
   logger.trace('upsertBook, book: %j', book);
 
-  return prisma.$transaction(
-    async (tx) => {
-      const data = await buildCreateUpdateBookData(tx, book);
+  const data = await buildCreateUpdateBookData(tx, book);
 
-      const upsertedBook = await tx.book.upsert({
-        create: data as Prisma.BookCreateInput,
-        include: {
-          authors: true,
-          format: true,
-          genre: true,
-          publisher: true,
-        },
-        update: data as Prisma.BookUpdateInput,
-        where: { isbn13: book.isbn13 },
-      });
-
-      logger.trace('upsertedBook in DB: %j', upsertedBook);
-
-      return {
-        ...upsertedBook,
-        publisher: serializeBookSource(upsertedBook.publisher),
-      };
+  const upsertedBook = await tx.book.upsert({
+    create: data as Prisma.BookCreateInput,
+    include: {
+      authors: true,
+      format: true,
+      genre: true,
+      publisher: true,
     },
-    {
-      // when we create a book, we create authors and publisher if they do not exist
-      // so this entire operation needs to be executed in serial
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-    },
-  );
+    update: data as Prisma.BookUpdateInput,
+    where: { isbn13: book.isbn13 },
+  });
+
+  logger.trace('upsertedBook in DB: %j', upsertedBook);
+
+  return {
+    ...upsertedBook,
+    publisher: serializeBookSource(upsertedBook.publisher),
+  };
 }
 
 /**

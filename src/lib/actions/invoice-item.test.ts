@@ -25,6 +25,8 @@ describe('invoice-item actions', () => {
     });
 
     it('should create a new invoice item', async () => {
+      prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
+
       prismaMock.invoiceItem.create.mockResolvedValue(invoiceItemHydrated1);
 
       const result = await createInvoiceItem({
