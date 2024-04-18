@@ -24,6 +24,9 @@ export async function createInvoice(
     data: {
       invoiceDate,
       invoiceNumber,
+      subTotalInCents: 0,
+      taxInCents: 0,
+      totalInCents: 0,
       vendorId,
     },
     include: {
