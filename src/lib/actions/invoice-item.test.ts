@@ -1,10 +1,12 @@
 import { prismaMock } from '../../../test-setup/prisma-mock.setup';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import { fakeBook } from '@/lib/fakes/book';
+import { fakeInvoice } from '@/lib/fakes/invoice';
 import {
   fakeInvoiceItem,
   fakeInvoiceItemHydrated,
 } from '@/lib/fakes/invoice-item';
+import { computeTax } from '@/lib/money';
 
 const mockUpsertBook = jest.fn();
 jest.mock('./book', () => ({
@@ -13,6 +15,7 @@ jest.mock('./book', () => ({
 
 describe('invoice-item actions', () => {
   const book = fakeBook();
+  const invoice1 = fakeInvoice();
   const invoiceItem1 = fakeInvoiceItem({});
   const invoiceItemHydrated1 = fakeInvoiceItemHydrated({});
   beforeEach(() => {
@@ -27,6 +30,9 @@ describe('invoice-item actions', () => {
     it('should create a new invoice item', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
+      prismaMock.invoice.findUniqueOrThrow.mockResolvedValue(invoice1);
+      prismaMock.invoice.update.mockResolvedValue(invoice1);
+      invoiceItemHydrated1.invoiceId = invoice1.id;
       prismaMock.invoiceItem.create.mockResolvedValue(invoiceItemHydrated1);
 
       const result = await createInvoiceItem({
@@ -61,6 +67,19 @@ describe('invoice-item actions', () => {
             },
           },
         },
+      });
+
+      const subTotalInCents =
+        invoice1.subTotalInCents + invoiceItemHydrated1.totalCostInCents;
+      const taxInCents = computeTax(subTotalInCents);
+      const totalInCents = subTotalInCents + taxInCents;
+      expect(prismaMock.invoice.update).toHaveBeenCalledWith({
+        data: {
+          subTotalInCents,
+          taxInCents,
+          totalInCents,
+        },
+        where: { id: invoice1.id },
       });
 
       expect(result).toEqual(invoiceItemHydrated1);

@@ -21,7 +21,7 @@ describe('order item actions', () => {
       orderItem1.bookId = book1.id;
       prismaMock.orderItem.create.mockResolvedValue(orderItem1);
 
-      await createOrderItem({
+      const result = await createOrderItem({
         ...orderItem1,
         orderUID: order1.orderUID,
       });
@@ -53,6 +53,8 @@ describe('order item actions', () => {
         },
         where: { id: order1.id },
       });
+
+      expect(result).toEqual(orderItem1);
     });
 
     it('should throw error without book', async () => {
