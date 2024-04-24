@@ -113,7 +113,7 @@ export default function DataTable<TData, TValue>({
   );
 
   return (
-    <div>
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -157,6 +157,6 @@ export default function DataTable<TData, TValue>({
           </Pagination>
         </div>
       )}
-    </div>
+    </>
   );
 }
