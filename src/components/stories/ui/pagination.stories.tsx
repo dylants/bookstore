@@ -24,10 +24,10 @@ export const BothEnabled: Story = {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" />
+            <PaginationPrevious />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext href="#" />
+            <PaginationNext />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -41,10 +41,10 @@ export const PreviousDisabled: Story = {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" isDisabled />
+            <PaginationPrevious isDisabled />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext href="#" />
+            <PaginationNext />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -58,10 +58,10 @@ export const NextDisabled: Story = {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" />
+            <PaginationPrevious />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext href="#" isDisabled />
+            <PaginationNext isDisabled />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -75,10 +75,10 @@ export const BothDisabled: Story = {
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" isDisabled />
+            <PaginationPrevious isDisabled />
           </PaginationItem>
           <PaginationItem>
-            <PaginationNext href="#" isDisabled />
+            <PaginationNext isDisabled />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

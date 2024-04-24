@@ -72,10 +72,14 @@ export default function OrdersTable({
   orders,
   isLoading,
   linkPathname,
+  onNext,
+  onPrevious,
 }: {
   orders: OrderHydrated[];
   isLoading?: boolean;
   linkPathname: string;
+  onNext?: () => Promise<void>;
+  onPrevious?: () => Promise<void>;
 }) {
   return (
     <DataTable
@@ -85,6 +89,8 @@ export default function OrdersTable({
       isLoading={isLoading}
       linkPathname={linkPathname}
       noDataText="No Orders found"
+      onNext={onNext}
+      onPrevious={onPrevious}
     />
   );
 }

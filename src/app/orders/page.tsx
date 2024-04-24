@@ -8,14 +8,31 @@ import {
 } from '@/components/Breadcrumbs';
 import OrdersTable from '@/components/order/OrdersTable';
 import { getOrders } from '@/lib/actions/order';
+import { DEFAULT_LIMIT } from '@/lib/pagination';
 import OrderHydrated from '@/types/OrderHydrated';
+import PageInfo from '@/types/PageInfo';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Array<OrderHydrated> | null>();
+  const [pageInfo, setPageInfo] = useState<PageInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const pathname = usePathname();
+
+  const initialLoad = useCallback(async () => {
+    const { orders, pageInfo } = await getOrders({
+      paginationQuery: {
+        first: DEFAULT_LIMIT,
+      },
+    });
+    setOrders(orders);
+    setPageInfo(pageInfo);
+  }, []);
+
+  useEffect(() => {
+    initialLoad();
+  }, [initialLoad]);
 
   // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
   const setDelayedLoading = useCallback(() => {
@@ -26,21 +43,31 @@ export default function OrdersPage() {
     };
   }, []);
 
-  const loadOrders = useCallback(async () => {
+  const onNext = useCallback(async () => {
     const doneLoading = setDelayedLoading();
-    // TODO handle pagination
-    const { orders } = await getOrders({
+    const { orders: newOrders, pageInfo: newPageInfo } = await getOrders({
       paginationQuery: {
-        first: 100,
+        after: pageInfo?.endCursor,
+        first: DEFAULT_LIMIT,
       },
     });
-    setOrders(orders);
+    setOrders(newOrders);
+    setPageInfo(newPageInfo);
     doneLoading();
-  }, [setDelayedLoading]);
+  }, [pageInfo, setDelayedLoading]);
 
-  useEffect(() => {
-    loadOrders();
-  }, [loadOrders]);
+  const onPrevious = useCallback(async () => {
+    const doneLoading = setDelayedLoading();
+    const { orders: newOrders, pageInfo: newPageInfo } = await getOrders({
+      paginationQuery: {
+        before: pageInfo?.startCursor,
+        last: DEFAULT_LIMIT,
+      },
+    });
+    setOrders(newOrders);
+    setPageInfo(newPageInfo);
+    doneLoading();
+  }, [pageInfo, setDelayedLoading]);
 
   return (
     <>
@@ -57,6 +84,8 @@ export default function OrdersPage() {
           orders={orders || []}
           isLoading={!orders || isLoading}
           linkPathname={pathname}
+          onNext={pageInfo?.hasNextPage ? onNext : undefined}
+          onPrevious={pageInfo?.hasPreviousPage ? onPrevious : undefined}
         />
       </div>
     </>

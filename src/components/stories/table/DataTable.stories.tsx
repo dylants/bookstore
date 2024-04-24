@@ -118,6 +118,31 @@ export const ClickableWithIdFieldName: Story = {
 };
 ClickableWithIdFieldName.storyName = 'Clckable w/idFieldName';
 
+export const WithPagination: Story = {
+  render: () => {
+    return (
+      <div>
+        <DataTable
+          columns={columns}
+          data={data}
+          onNext={async () => {}}
+          onPrevious={async () => {}}
+        />
+      </div>
+    );
+  },
+};
+
+export const WithPaginationDisabled: Story = {
+  render: () => {
+    return (
+      <div>
+        <DataTable columns={columns} data={data} showPagination />
+      </div>
+    );
+  },
+};
+
 export const Loading: Story = {
   render: () => {
     return (

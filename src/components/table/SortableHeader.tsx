@@ -29,7 +29,10 @@ export default function SortableHeader<T>({
   return (
     <Button
       variant="ghost"
-      className={clsx('flex justify-end w-full px-0', className)}
+      className={clsx(
+        'flex justify-end w-full px-0 hover:bg-inherit',
+        className,
+      )}
       onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
     >
       {text}

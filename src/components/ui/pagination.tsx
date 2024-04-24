@@ -6,8 +6,7 @@ import {
 } from '@radix-ui/react-icons';
 
 import { cn } from 'lib/tailwind-utils';
-import { ButtonProps, buttonVariants } from 'components/ui/button';
-import Link from 'next/link';
+import { Button, ButtonProps } from 'components/ui/button';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
@@ -43,37 +42,35 @@ type PaginationLinkProps = {
   isActive?: boolean;
   isDisabled?: boolean;
 } & Pick<ButtonProps, 'size'> &
-  React.ComponentProps<typeof Link>;
+  React.ComponentProps<typeof Button>;
 
-const PaginationLink = ({
+const PaginationButton = ({
   className,
   isActive,
   isDisabled,
   size = 'icon',
   ...props
 }: PaginationLinkProps) => (
-  <Link
+  <Button
     aria-current={isActive ? 'page' : undefined}
     aria-disabled={isDisabled}
     className={cn(
-      buttonVariants({
-        size,
-        variant: isActive ? 'outline' : 'ghost',
-      }),
-      isDisabled &&
-        'text-customPalette-500/50 hover:text-customPalette-500/50 cursor-not-allowed',
+      isDisabled && 'text-customPalette-500/50 hover:text-customPalette-500/50',
       className,
     )}
+    disabled={isDisabled}
+    size={size}
+    variant="ghost"
     {...props}
   />
 );
-PaginationLink.displayName = 'PaginationLink';
+PaginationButton.displayName = 'PaginationButton';
 
 const PaginationPrevious = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
+}: React.ComponentProps<typeof PaginationButton>) => (
+  <PaginationButton
     aria-label="Go to previous page"
     size="default"
     className={cn('gap-1 pl-2.5', className)}
@@ -81,15 +78,15 @@ const PaginationPrevious = ({
   >
     <ChevronLeftIcon className="h-4 w-4" />
     <span>Previous</span>
-  </PaginationLink>
+  </PaginationButton>
 );
 PaginationPrevious.displayName = 'PaginationPrevious';
 
 const PaginationNext = ({
   className,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
-  <PaginationLink
+}: React.ComponentProps<typeof PaginationButton>) => (
+  <PaginationButton
     aria-label="Go to next page"
     size="default"
     className={cn('gap-1 pr-2.5', className)}
@@ -97,7 +94,7 @@ const PaginationNext = ({
   >
     <span>Next</span>
     <ChevronRightIcon className="h-4 w-4" />
-  </PaginationLink>
+  </PaginationButton>
 );
 PaginationNext.displayName = 'PaginationNext';
 
@@ -119,7 +116,7 @@ PaginationEllipsis.displayName = 'PaginationEllipsis';
 export {
   Pagination,
   PaginationContent,
-  PaginationLink,
+  PaginationButton,
   PaginationItem,
   PaginationPrevious,
   PaginationNext,
