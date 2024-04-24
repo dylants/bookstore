@@ -10,28 +10,46 @@ import InvoiceCreate from '@/components/invoice/InvoiceCreate';
 import InvoicesTable from '@/components/invoice/InvoicesTable';
 import { getBookSources } from '@/lib/actions/book-source';
 import { createInvoice, getInvoices } from '@/lib/actions/invoice';
+import { DEFAULT_LIMIT } from '@/lib/pagination';
 import BookSourceSerialized from '@/types/BookSourceSerialized';
 import InvoiceHydrated from '@/types/InvoiceHydrated';
+import PageInfo from '@/types/PageInfo';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Array<InvoiceHydrated> | null>();
   const [vendors, setVendors] = useState<Array<BookSourceSerialized>>([]);
+  const [invoices, setInvoices] = useState<Array<InvoiceHydrated> | null>();
+  const [pageInfo, setPageInfo] = useState<PageInfo>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const loadVendors = useCallback(async () => {
-    // TODO handle pagination
     const { bookSources: vendors } = await getBookSources({
       isVendor: true,
       paginationQuery: {
-        first: 100,
+        first: 100, // TODO handle pagination
       },
     });
     setVendors(vendors);
   }, []);
+
+  const loadInvoices = useCallback(async () => {
+    const { invoices, pageInfo } = await getInvoices({
+      paginationQuery: {
+        first: DEFAULT_LIMIT,
+      },
+    });
+    setInvoices(invoices);
+    setPageInfo(pageInfo);
+  }, []);
+
+  // on initial render, load all the things
+  useEffect(() => {
+    loadInvoices();
+    loadVendors();
+  }, [loadInvoices, loadVendors]);
 
   // Delay the loading animation a tiny amount to avoid screen flicker for quick connections (localhost)
   const setDelayedLoading = useCallback(() => {
@@ -42,23 +60,31 @@ export default function InvoicesPage() {
     };
   }, []);
 
-  const loadInvoices = useCallback(async () => {
+  const onNext = useCallback(async () => {
     const doneLoading = setDelayedLoading();
-    // TODO handle pagination
-    const { invoices } = await getInvoices({
+    const { invoices: newInvoices, pageInfo: newPageInfo } = await getInvoices({
       paginationQuery: {
-        first: 100,
+        after: pageInfo?.endCursor,
+        first: DEFAULT_LIMIT,
       },
     });
-    setInvoices(invoices);
+    setInvoices(newInvoices);
+    setPageInfo(newPageInfo);
     doneLoading();
-  }, [setDelayedLoading]);
+  }, [pageInfo, setDelayedLoading]);
 
-  // on initial render, load all the things
-  useEffect(() => {
-    loadInvoices();
-    loadVendors();
-  }, [loadInvoices, loadVendors]);
+  const onPrevious = useCallback(async () => {
+    const doneLoading = setDelayedLoading();
+    const { invoices: newInvoices, pageInfo: newPageInfo } = await getInvoices({
+      paginationQuery: {
+        before: pageInfo?.startCursor,
+        last: DEFAULT_LIMIT,
+      },
+    });
+    setInvoices(newInvoices);
+    setPageInfo(newPageInfo);
+    doneLoading();
+  }, [pageInfo, setDelayedLoading]);
 
   return (
     <>
@@ -84,6 +110,8 @@ export default function InvoicesPage() {
         invoices={invoices || []}
         isLoading={!invoices || isLoading}
         linkPathname={pathname}
+        onNext={pageInfo?.hasNextPage ? onNext : undefined}
+        onPrevious={pageInfo?.hasPreviousPage ? onPrevious : undefined}
       />
     </>
   );
