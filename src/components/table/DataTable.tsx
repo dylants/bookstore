@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -28,6 +35,9 @@ export type DataTableProps<TData, TValue> = {
   isLoading?: boolean;
   linkPathname?: string;
   noDataText?: string;
+  onNext?: () => Promise<void>;
+  onPrevious?: () => Promise<void>;
+  showPagination?: boolean;
 };
 
 export default function DataTable<TData, TValue>({
@@ -37,6 +47,9 @@ export default function DataTable<TData, TValue>({
   isLoading,
   linkPathname,
   noDataText = 'No items',
+  onNext,
+  onPrevious,
+  showPagination = !!onNext || !!onPrevious,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
@@ -100,28 +113,50 @@ export default function DataTable<TData, TValue>({
   );
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>{tableBody}</TableBody>
-      </Table>
+    <div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>{tableBody}</TableBody>
+        </Table>
+      </div>
+      {!isLoading && showPagination && (
+        <div className="mt-2">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={onPrevious ? onPrevious : undefined}
+                  isDisabled={!onPrevious || isLoading}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  onClick={onNext ? onNext : undefined}
+                  isDisabled={!onNext || isLoading}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

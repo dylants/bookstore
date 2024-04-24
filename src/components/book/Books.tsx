@@ -44,14 +44,12 @@ export default function Books({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                href="#"
                 onClick={onPrevious ? onPrevious : undefined}
                 isDisabled={!onPrevious || isLoading}
               />
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
-                href="#"
                 onClick={onNext ? onNext : undefined}
                 isDisabled={!onNext || isLoading}
               />
