@@ -86,10 +86,14 @@ export default function InvoicesTable({
   invoices,
   isLoading,
   linkPathname,
+  onNext,
+  onPrevious,
 }: {
   invoices: InvoiceHydrated[];
   isLoading?: boolean;
   linkPathname: string;
+  onNext?: () => Promise<void>;
+  onPrevious?: () => Promise<void>;
 }) {
   return (
     <DataTable
@@ -98,6 +102,8 @@ export default function InvoicesTable({
       isLoading={isLoading}
       linkPathname={linkPathname}
       noDataText="No Invoices found"
+      onNext={onNext}
+      onPrevious={onPrevious}
     />
   );
 }
