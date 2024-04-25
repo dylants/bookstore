@@ -15,38 +15,9 @@ describe('format actions', () => {
     it('should get books when provided with default input', async () => {
       prismaMock.format.findMany.mockResolvedValue([format1, format2, format3]);
 
-      const result = await getFormats({});
+      const result = await getFormats();
 
-      expect(result).toEqual({
-        formats: [format1, format2, format3],
-        pageInfo: {
-          endCursor: format3.id.toString(),
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startCursor: format1.id.toString(),
-        },
-      });
-    });
-
-    it('should get books when provided with pagination query input', async () => {
-      prismaMock.format.findMany.mockResolvedValue([format2, format3]);
-
-      const result = await getFormats({
-        paginationQuery: {
-          after: '1',
-          first: 2,
-        },
-      });
-
-      expect(result).toEqual({
-        formats: [format2, format3],
-        pageInfo: {
-          endCursor: format3.id.toString(),
-          hasNextPage: false,
-          hasPreviousPage: true,
-          startCursor: format2.id.toString(),
-        },
-      });
+      expect(result).toEqual([format1, format2, format3]);
     });
   });
 

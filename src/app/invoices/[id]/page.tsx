@@ -35,22 +35,12 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   }, [invoiceId]);
 
   const loadFormats = useCallback(async () => {
-    // TODO handle pagination
-    const { formats } = await getFormats({
-      paginationQuery: {
-        first: 100,
-      },
-    });
+    const formats = await getFormats();
     setFormats(formats);
   }, []);
 
   const loadGenres = useCallback(async () => {
-    // TODO handle pagination
-    const { genres } = await getGenres({
-      paginationQuery: {
-        first: 100,
-      },
-    });
+    const genres = await getGenres();
     setGenres(genres);
   }, []);
 
