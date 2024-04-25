@@ -1,9 +1,5 @@
 'use server';
 
-import {
-  buildPaginationRequest,
-  buildPaginationResponse,
-} from '@/lib/pagination';
 import prisma from '@/lib/prisma';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
@@ -18,24 +14,10 @@ export interface GetGenresResult {
   pageInfo: PageInfo;
 }
 
-export async function getGenres({
-  paginationQuery,
-}: GetGenresParams): Promise<GetGenresResult> {
-  const paginationRequest = buildPaginationRequest({ paginationQuery });
+export async function getGenres(): Promise<Array<Genre>> {
+  const genres = await prisma.genre.findMany();
 
-  const items = await prisma.genre.findMany({
-    ...paginationRequest,
-  });
-
-  const { items: genres, pageInfo } = buildPaginationResponse<Genre>({
-    items,
-    paginationQuery,
-  });
-
-  return {
-    genres,
-    pageInfo,
-  };
+  return genres;
 }
 
 export async function findGenre(displayName: string): Promise<Genre | null> {

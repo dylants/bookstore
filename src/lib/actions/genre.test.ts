@@ -11,38 +11,9 @@ describe('genre actions', () => {
     it('should get books when provided with default input', async () => {
       prismaMock.genre.findMany.mockResolvedValue([genre1, genre2, genre3]);
 
-      const result = await getGenres({});
+      const result = await getGenres();
 
-      expect(result).toEqual({
-        genres: [genre1, genre2, genre3],
-        pageInfo: {
-          endCursor: genre3.id.toString(),
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startCursor: genre1.id.toString(),
-        },
-      });
-    });
-
-    it('should get books when provided with pagination query input', async () => {
-      prismaMock.genre.findMany.mockResolvedValue([genre2, genre3]);
-
-      const result = await getGenres({
-        paginationQuery: {
-          after: '1',
-          first: 2,
-        },
-      });
-
-      expect(result).toEqual({
-        genres: [genre2, genre3],
-        pageInfo: {
-          endCursor: genre3.id.toString(),
-          hasNextPage: false,
-          hasPreviousPage: true,
-          startCursor: genre2.id.toString(),
-        },
-      });
+      expect(result).toEqual([genre1, genre2, genre3]);
     });
   });
 
