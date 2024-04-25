@@ -3,6 +3,7 @@
 import BookForm from '@/app/invoices/[id]/BookForm';
 import InvoiceDescription from '@/app/invoices/[id]/InvoiceDescription';
 import InvoiceTotal from '@/app/invoices/[id]/InvoiceTotal';
+import useAppContext from '@/lib/hooks/useAppContext';
 import {
   Breadcrumbs,
   BreadcrumbsHome,
@@ -13,19 +14,15 @@ import {
 import InvoiceItemsTable from '@/components/invoice-item/InvoiceItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { getFormats } from '@/lib/actions/format';
-import { getGenres } from '@/lib/actions/genre';
 import { completeInvoice, getInvoiceWithItems } from '@/lib/actions/invoice';
 import InvoiceHydratedWithItemsHydrated from '@/types/InvoiceHydratedWithItemsHydrated';
-import { Format, Genre } from '@prisma/client';
 import _ from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 
 export default function InvoicePage({ params }: { params: { id: string } }) {
+  const { formats, genres } = useAppContext();
   const [invoice, setInvoice] =
     useState<InvoiceHydratedWithItemsHydrated | null>();
-  const [formats, setFormats] = useState<Array<Format>>();
-  const [genres, setGenres] = useState<Array<Genre>>();
 
   const invoiceId = _.toNumber(params.id);
 
@@ -34,24 +31,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     setInvoice(invoice);
   }, [invoiceId]);
 
-  const loadFormats = useCallback(async () => {
-    const formats = await getFormats();
-    setFormats(formats);
-  }, []);
-
-  const loadGenres = useCallback(async () => {
-    const genres = await getGenres();
-    setGenres(genres);
-  }, []);
-
-  // on initial render, load all the things
   useEffect(() => {
     loadInvoice();
-    loadFormats();
-    loadGenres();
-  }, [loadFormats, loadGenres, loadInvoice]);
+  }, [loadInvoice]);
 
-  if (!invoice || !formats || !genres) {
+  if (!invoice) {
     return (
       <div className="flex h-full items-center justify-center">
         <LoadingSpinner />
