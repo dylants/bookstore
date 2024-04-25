@@ -27,7 +27,7 @@ describe('useSyncTransactionStatus', () => {
     mockSyncTransactionStatusSafe.mockReset();
   });
 
-  it('should return perform correctly', async () => {
+  it('should update sync status correctly', async () => {
     const { result } = renderHook(() =>
       useSyncTransactionStatus({ transactionUID: 'abc123' }),
     );
@@ -108,6 +108,8 @@ describe('useSyncTransactionStatus', () => {
   });
 
   it('should skip updates on error', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const { result } = renderHook(() =>
       useSyncTransactionStatus({ transactionUID: 'abc123' }),
     );
