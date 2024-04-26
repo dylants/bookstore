@@ -3,7 +3,7 @@
 import SearchCommand, {
   SearchCommandResult,
 } from '@/components/search/SearchCommand';
-import { findBooksBySearchString } from '@/lib/actions/book';
+import { findBooksBySearchString } from '@/lib/search/book';
 import BookHydrated from '@/types/BookHydrated';
 import { useDebounceCallback } from '@react-hook/debounce';
 import { useRouter } from 'next/navigation';
