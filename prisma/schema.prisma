@@ -34,7 +34,7 @@ model Book {
   priceInCents Int
   quantity     Int           @default(0)
   invoiceItems InvoiceItem[]
-  OrderItem    OrderItem[]
+  orderItem    OrderItem[]
 }
 
 model Author {
