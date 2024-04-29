@@ -28,7 +28,7 @@ async function addBookInventory() {
 
   return prisma.$transaction(
     async (tx) => {
-      return await upsertBook({
+      await upsertBook({
         book: {
           authors: 'Sarah J. Maas',
           formatId,
@@ -41,6 +41,23 @@ async function addBookInventory() {
           publisher: 'Bloomsbury Publishing USA',
           quantity: 5,
           title: 'A Court of Mist and Fury',
+        },
+        tx,
+      });
+
+      await upsertBook({
+        book: {
+          authors: 'Brandon Sanderson',
+          formatId,
+          genreId,
+          imageUrl:
+            'https://books.google.com/books/content?id=jbJtEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api',
+          isbn13: BigInt('9781250868282'),
+          priceInCents: 2199,
+          publishedDate: new Date('2023-02-14T05:00:00.000Z'),
+          publisher: 'Tor Books',
+          quantity: 2,
+          title: 'Mistborn',
         },
         tx,
       });
