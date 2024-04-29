@@ -8,7 +8,7 @@ describe('genre actions', () => {
   const genre3 = fakeGenre();
 
   describe('getGenres', () => {
-    it('should get books when provided with default input', async () => {
+    it('should get genres when provided with default input', async () => {
       prismaMock.genre.findMany.mockResolvedValue([genre1, genre2, genre3]);
 
       const result = await getGenres();
