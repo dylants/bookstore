@@ -12,7 +12,6 @@ import BookCreateInput from '@/types/BookCreateInput';
 import BookHydrated from '@/types/BookHydrated';
 import { Book, Prisma, ProductType } from '@prisma/client';
 import { serializeBookSource } from '@/lib/serializers/book-source';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 
 export async function buildAuthorsInput(
   tx: Prisma.TransactionClient,
@@ -172,9 +171,7 @@ export async function reduceBookUpdates(
 }
 
 /**
- * Attempts to update the Book by the quantityChange.
- *
- * @throws NegativeBookQuantityError if quantity change results in negative quantity
+ * Updates the quantity for a Book by the quantityChange.
  */
 export async function updateBookQuantity({
   bookId,
@@ -197,13 +194,6 @@ export async function updateBookQuantity({
     quantityChange,
     updatedQuantity,
   );
-
-  if (updatedQuantity < 0) {
-    logger.error(
-      'Unable to process update, attempting to set a negative quantity',
-    );
-    throw new NegativeBookQuantityError(book);
-  }
 
   await tx.book.update({
     data: { quantity: updatedQuantity },

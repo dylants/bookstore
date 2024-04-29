@@ -13,7 +13,6 @@ import { Order, OrderState, ProductType } from '@prisma/client';
 import { fakeOrder } from '@/lib/fakes/order';
 import { fakeOrderItem, fakeOrderItemHydrated } from '@/lib/fakes/order-item';
 import { fakeBook } from '@/lib/fakes/book';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import BadRequestError from '@/lib/errors/BadRequestError';
 import { buildPaginationRequest } from '@/lib/pagination';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
@@ -164,7 +163,7 @@ describe('order action', () => {
       expect(prismaMock.book.update).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw NegativeBookQuantityError when attempting to move order with insufficient inventory', async () => {
+    it('should allow for negative inventory quantity', async () => {
       prismaMock.$transaction.mockImplementation((cb) => cb(prismaMock));
 
       const book1 = fakeBook();
@@ -182,21 +181,22 @@ describe('order action', () => {
       prismaMock.order.findFirstOrThrow.mockResolvedValue(order);
       prismaMock.order.update.mockResolvedValue(order);
 
-      expect.assertions(3);
-      try {
-        await moveOrderToPendingTransactionOrThrow({
-          orderUID: order.orderUID,
-          tx: prismaMock,
-        });
-      } catch (err) {
-        expect(err instanceof NegativeBookQuantityError).toBeTruthy();
-        const error: NegativeBookQuantityError =
-          err as NegativeBookQuantityError;
-        expect(error.book).toEqual(book1);
-        expect(error.message).toEqual(
-          'Attempting to set a negative quantity for Book',
-        );
-      }
+      await moveOrderToPendingTransactionOrThrow({
+        orderUID: order.orderUID,
+        tx: prismaMock,
+      });
+
+      expect(prismaMock.book.update).toHaveBeenCalledWith({
+        data: { quantity: -1 },
+        where: { id: item1.bookId },
+      });
+
+      expect(prismaMock.order.update).toHaveBeenCalledWith({
+        data: {
+          orderState: OrderState.PENDING_TRANSACTION,
+        },
+        where: { orderUID: order.orderUID },
+      });
     });
 
     it('should throw BadRequestError when attempting to move order not in OPEN state', async () => {

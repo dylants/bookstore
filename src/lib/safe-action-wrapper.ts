@@ -1,16 +1,13 @@
 'use server';
 
 import BadRequestError from '@/lib/errors/BadRequestError';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import logger from '@/lib/logger';
 import { HttpResponse } from '@/types/HttpResponse';
 
 export async function safeActionWrapper<Return>(
   wrappedFunction: (...args: never[]) => Promise<Return>,
   ...args: unknown[]
-): Promise<
-  HttpResponse<Return | null, BadRequestError | NegativeBookQuantityError>
-> {
+): Promise<HttpResponse<Return | null, BadRequestError>> {
   try {
     const data = await wrappedFunction(...(args as never[]));
 
@@ -19,10 +16,7 @@ export async function safeActionWrapper<Return>(
       status: 200,
     };
   } catch (err: unknown) {
-    if (
-      err instanceof BadRequestError ||
-      err instanceof NegativeBookQuantityError
-    ) {
+    if (err instanceof BadRequestError) {
       return {
         data: null,
         error: {
