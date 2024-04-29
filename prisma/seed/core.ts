@@ -44,8 +44,22 @@ async function generateGenres() {
   await Promise.all(genres.map(generateGenre));
 }
 
+async function generateInventoryAdjustmentReason(displayName: string) {
+  await prisma.inventoryAdjustmentReason.create({
+    data: { displayName },
+  });
+}
+
+async function generateInventoryAdjustmentReasons() {
+  const reasons = ['Incorrect Inventory', 'Damage', 'Theft'];
+
+  await Promise.all(reasons.map(generateInventoryAdjustmentReason));
+}
+
 export default async function generateCoreSeeds() {
   await generateFormats();
 
   await generateGenres();
+
+  await generateInventoryAdjustmentReasons();
 }
