@@ -4,16 +4,13 @@ import {
   syncTransactionStatus,
 } from '@/lib/actions/transaction';
 import BadRequestError from '@/lib/errors/BadRequestError';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
 import { safeActionWrapper } from '@/lib/safe-action-wrapper';
 import { HttpResponse } from '@/types/HttpResponse';
 import { Order, Transaction } from '@prisma/client';
 
 export async function createTransactionSafe(
   orderUID: Order['orderUID'],
-): Promise<
-  HttpResponse<Transaction | null, BadRequestError | NegativeBookQuantityError>
-> {
+): Promise<HttpResponse<Transaction | null, BadRequestError>> {
   return safeActionWrapper(createTransaction, orderUID);
 }
 

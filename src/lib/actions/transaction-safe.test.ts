@@ -4,8 +4,6 @@ import {
   syncTransactionStatusSafe,
 } from '@/lib/actions/transaction-safe';
 import BadRequestError from '@/lib/errors/BadRequestError';
-import NegativeBookQuantityError from '@/lib/errors/NegativeBookQuantityError';
-import { fakeBook } from '@/lib/fakes/book';
 import { fakeTransaction } from '@/lib/fakes/transaction';
 
 const mockCancelTransaction = jest.fn();
@@ -45,23 +43,6 @@ describe('transaction safe actions', () => {
         error: {
           message: 'bad input',
           name: BadRequestError.name,
-        },
-        status: 400,
-      });
-    });
-
-    it('should return error when createTransaction throws NegativeBookQuantityError', async () => {
-      const book = fakeBook();
-      mockCreateTransaction.mockRejectedValue(
-        new NegativeBookQuantityError(book),
-      );
-
-      expect(await createTransactionSafe('1')).toEqual({
-        data: null,
-        error: {
-          book,
-          message: 'Attempting to set a negative quantity for Book',
-          name: NegativeBookQuantityError.name,
         },
         status: 400,
       });
