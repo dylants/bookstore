@@ -12,7 +12,7 @@ describe('format actions', () => {
   const format3 = fakeFormat();
 
   describe('getFormats', () => {
-    it('should get books when provided with default input', async () => {
+    it('should get formats when provided with default input', async () => {
       prismaMock.format.findMany.mockResolvedValue([format1, format2, format3]);
 
       const result = await getFormats();
