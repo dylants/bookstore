@@ -298,7 +298,7 @@ export async function getOrderWithItems(
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
       },
     },
     where: { orderUID },
