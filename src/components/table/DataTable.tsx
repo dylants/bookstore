@@ -34,6 +34,7 @@ export type DataTableProps<TData, TValue> = {
   idFieldName?: string;
   isLoading?: boolean;
   linkPathname?: string;
+  tableBodyAdditionalChildren?: React.ReactNode;
   noDataText?: string;
   onNext?: () => Promise<void>;
   onPrevious?: () => Promise<void>;
@@ -46,7 +47,8 @@ export default function DataTable<TData, TValue>({
   idFieldName = 'id',
   isLoading,
   linkPathname,
-  noDataText = 'No items',
+  tableBodyAdditionalChildren,
+  noDataText,
   onNext,
   onPrevious,
   showPagination = !!onNext || !!onPrevious,
@@ -103,11 +105,15 @@ export default function DataTable<TData, TValue>({
           </TableRow>
         ))
       ) : (
-        <TableRow className="hover:!bg-transparent">
-          <TableCell colSpan={columns.length} className="h-24 text-center">
-            {noDataText}
-          </TableCell>
-        </TableRow>
+        <>
+          {noDataText && (
+            <TableRow className="hover:!bg-transparent">
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                {noDataText}
+              </TableCell>
+            </TableRow>
+          )}
+        </>
       )}
     </>
   );
@@ -134,7 +140,10 @@ export default function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>{tableBody}</TableBody>
+          <TableBody>
+            <>{tableBody}</>
+            {tableBodyAdditionalChildren && <>{tableBodyAdditionalChildren}</>}
+          </TableBody>
         </Table>
       </div>
       {!isLoading && showPagination && (

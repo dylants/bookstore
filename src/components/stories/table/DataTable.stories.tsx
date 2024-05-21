@@ -1,5 +1,6 @@
 import DataTable from '@/components/table/DataTable';
 import SortableHeader from '@/components/table/SortableHeader';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { faker } from '@faker-js/faker';
 import { Meta, StoryObj } from '@storybook/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -158,6 +159,35 @@ export const NoResults: Story = {
     return (
       <div>
         <DataTable columns={columns} data={[]} />
+      </div>
+    );
+  },
+};
+
+export const AdditionalChildren: Story = {
+  render: () => {
+    const tableBodyAdditionalChildren = (
+      <>
+        <TableRow>
+          <TableCell colSpan={columns.length}>
+            <div>I&apos;m an additional table row!!</div>
+          </TableCell>
+        </TableRow>
+        <TableRow className="hover:!bg-transparent">
+          <TableCell colSpan={columns.length}>
+            <div>I&apos;m a row that has no hover shading</div>
+          </TableCell>
+        </TableRow>
+      </>
+    );
+
+    return (
+      <div>
+        <DataTable
+          columns={columns}
+          data={data}
+          tableBodyAdditionalChildren={tableBodyAdditionalChildren}
+        />
       </div>
     );
   },
