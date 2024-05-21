@@ -1,5 +1,6 @@
 'use client';
 
+import SkuSearch from '@/app/checkout/SkuInput';
 import OrderTotal from '@/app/orders/[uid]/OrderTotal';
 import {
   Breadcrumbs,
@@ -8,23 +9,23 @@ import {
   BreadcrumbsText,
 } from '@/components/Breadcrumbs';
 import OrderItemsTable from '@/components/order-item/OrderItemsTable';
-import Search from '@/components/search/Search';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { getBook } from '@/lib/actions/book';
 import { createOrder, getOrderWithItems } from '@/lib/actions/order';
 import { createOrderItem } from '@/lib/actions/order-item';
 import { createTransactionSafe } from '@/lib/actions/transaction-safe';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
-import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function CheckoutPage() {
   const [order, setOrder] = useState<OrderWithItemsHydrated | null>();
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [sku, setSku] = useState<string>('');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -53,7 +54,13 @@ export default function CheckoutPage() {
     if (searchRef.current) {
       searchRef.current.focus();
     }
-  }, [order, orderUID, searchRef]);
+  }, [
+    order,
+    orderUID,
+    searchRef,
+    // include isSearching to reset focus after (invalid) search
+    isSearching,
+  ]);
 
   const onSearch = useCallback(
     async ({ input }: { input: string }) => {
@@ -65,6 +72,13 @@ export default function CheckoutPage() {
         if (!order) {
           const newOrder = await createOrder();
           orderUID = newOrder.orderUID;
+
+          // update the URL to include the orderUID (if not there)
+          const params = new URLSearchParams(searchParams.toString());
+          if (!params.get('orderUID')) {
+            params.set('orderUID', orderUID);
+            router.push(`${pathname}?${params.toString()}`);
+          }
         } else {
           orderUID = order.orderUID;
         }
@@ -78,15 +92,8 @@ export default function CheckoutPage() {
           });
           setOrder(await getOrderWithItems(orderUID));
         }
+        setSku('');
         setIsSearching(false);
-
-        // update the URL to include the orderUID (if not there)
-        // do this last to retain the animations
-        const params = new URLSearchParams(searchParams.toString());
-        if (!params.get('orderUID')) {
-          params.set('orderUID', orderUID);
-          router.push(`${pathname}?${params.toString()}`);
-        }
       }
     },
     [order, pathname, router, searchParams],
@@ -122,6 +129,24 @@ export default function CheckoutPage() {
     );
   }
 
+  const tableBodyAdditionalChildren = (
+    <TableRow className="hover:!bg-transparent">
+      <TableCell className="p-0">
+        <SkuSearch
+          isSearching={isSearching}
+          onChange={setSku}
+          onSubmit={onSearch}
+          ref={searchRef}
+          value={sku}
+        />
+      </TableCell>
+      {/* just a big colSpan number here to fill the remaining columns */}
+      <TableCell className="p-1" colSpan={100}>
+        {isSearching ? <Skeleton className="h-6 w-full" /> : <></>}
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <>
       <Breadcrumbs>
@@ -132,71 +157,33 @@ export default function CheckoutPage() {
 
       <h1 className="mt-8">Checkout</h1>
 
-      <AnimatePresence initial={false}>
-        <div
-          className={clsx(
-            'flex flex-col justify-center gap-4',
-            order && 'mt-4',
-            !order && 'mx-[100px] h-[400px]',
-          )}
-        >
-          <div className="flex w-full justify-between items-end">
-            <motion.div
-              layout
-              className={clsx(
-                'flex',
-                order && 'w-[300px]',
-                !order && 'flex-grow',
-              )}
-            >
-              <Search
-                onSubmit={onSearch}
-                clearOnSubmit
-                isSearching={isSearching}
-                labelText="SKU"
-                ref={searchRef}
-              />
-            </motion.div>
-            {order && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                exit={{ opacity: 0 }}
-              >
-                <Button
-                  isLoading={isCreatingTransaction}
-                  onClick={onCreateTransaction}
-                  className="w-[100px]"
-                >
-                  Pay Now
-                </Button>
-              </motion.div>
-            )}
-          </div>
-
-          <div>
-            {order ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.15 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="mt-4">
-                  <OrderItemsTable orderItems={order.orderItems} />
-                </div>
-
-                <div className="flex justify-end mt-4">
-                  <OrderTotal order={order} />
-                </div>
-              </motion.div>
-            ) : (
-              <p className="text-center">Scan item or enter SKU to begin</p>
-            )}
-          </div>
+      <div className="flex flex-col justify-center gap-4 mt-4">
+        <div className="flex w-full justify-end items-end">
+          <Button
+            isLoading={isCreatingTransaction}
+            onClick={onCreateTransaction}
+            className="w-[100px]"
+            disabled={!order}
+          >
+            Pay Now
+          </Button>
         </div>
-      </AnimatePresence>
+
+        <div>
+          <div className="mt-4">
+            <OrderItemsTable
+              orderItems={order ? order.orderItems : []}
+              tableBodyAdditionalChildren={tableBodyAdditionalChildren}
+            />
+          </div>
+
+          {order && (
+            <div className="flex justify-end mt-4">
+              <OrderTotal order={order} />
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 }
