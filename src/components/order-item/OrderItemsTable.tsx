@@ -77,16 +77,18 @@ const columns: ColumnDef<OrderItemHydrated>[] = [
 export default function OrderItemsTable({
   orderItems,
   isLoading,
+  tableBodyAdditionalChildren,
 }: {
   orderItems: OrderItemHydrated[];
   isLoading?: boolean;
+  tableBodyAdditionalChildren?: React.ReactNode;
 }) {
   return (
     <DataTable
       columns={columns}
       data={orderItems}
       isLoading={isLoading}
-      noDataText="No Order Items found"
+      tableBodyAdditionalChildren={tableBodyAdditionalChildren}
     />
   );
 }

@@ -25,3 +25,9 @@ export const Default: Story = {
     );
   },
 };
+
+export const NoResults: Story = {
+  args: {
+    orderItems: [],
+  },
+};
