@@ -529,7 +529,7 @@ describe('order action', () => {
                 },
               },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: 'asc' },
           },
         },
         where: { orderUID: 'uid123' },
