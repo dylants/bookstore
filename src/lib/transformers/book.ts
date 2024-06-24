@@ -15,6 +15,7 @@ export function transformBookHydratedToBookFormInput({
 }): BookFormInput {
   return {
     authors: bookHydrated.authors.map((a) => a.name).join(', '),
+    discountPercentageDisplay: undefined,
     formatId: bookHydrated.format.id,
     genreId: bookHydrated.genre.id,
     imageUrl: bookHydrated.imageUrl,

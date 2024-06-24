@@ -46,7 +46,7 @@ export function discountPercentageToDisplayNumber(
 }
 
 export function discountPercentageDisplayNumberToNumber(
-  discountPercentageDisplay: number,
+  discountPercentageDisplay: number | undefined,
 ): number {
   return _.round((discountPercentageDisplay ?? 0) / 100, 4);
 }

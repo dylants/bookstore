@@ -162,6 +162,10 @@ describe('money', () => {
     it('should work with 0', () => {
       expect(discountPercentageDisplayNumberToNumber(0)).toEqual(0);
     });
+
+    it('should work with undefined', () => {
+      expect(discountPercentageDisplayNumberToNumber(undefined)).toEqual(0);
+    });
   });
 
   describe('computeTax', () => {
