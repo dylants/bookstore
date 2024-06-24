@@ -54,6 +54,7 @@ describe('book transformers', () => {
   };
   const bookFormInput: BookFormInput = {
     authors: 'Author 1, Author 2',
+    discountPercentageDisplay: undefined,
     formatId: 2,
     genreId: 3,
     imageUrl: 'http://image.com',

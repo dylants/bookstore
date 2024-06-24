@@ -22,12 +22,9 @@ async function addBookToOrder({
   page: Page;
 }) {
   // enter in an ISBN and press enter
-  const skuInput = page.getByLabel('SKU');
+  const skuInput = page.getByPlaceholder('Scan or Enter SKU');
   await skuInput.fill(book.isbn13);
   await skuInput.press('Enter');
-
-  // TODO remove this after the animation is removed from the start of checkout
-  await page.waitForTimeout(1000);
 
   await expect(page.getByText('Pay Now')).toBeVisible();
 

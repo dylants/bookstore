@@ -19,7 +19,11 @@ type InvoiceCreateFormInputStrings = Omit<
 
 type BookFormInputStrings = Omit<
   BookFormInput,
-  'formatId' | 'genreId' | 'imageUrl' | 'priceInCents'
+  | 'discountPercentageDisplay'
+  | 'formatId'
+  | 'genreId'
+  | 'imageUrl'
+  | 'priceInCents'
 > & {
   format: string;
   genre: string;
