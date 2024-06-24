@@ -9,6 +9,7 @@ type BookFormInput = Omit<
   | 'publishedDate'
   | 'quantity'
 > & {
+  discountPercentageDisplay: number;
   formatId: number | undefined;
   genreId: number | undefined;
   isbn13: string;

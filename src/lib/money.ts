@@ -36,7 +36,19 @@ export function determineDiscountPercentage({
 export function discountPercentageToDisplayString(
   discountPercentage: number | null,
 ): string {
-  return `${_.round((discountPercentage ?? 0) * 100, 2)}%`;
+  return `${discountPercentageToDisplayNumber(discountPercentage)}%`;
+}
+
+export function discountPercentageToDisplayNumber(
+  discountPercentage: number | null,
+): number {
+  return _.round((discountPercentage ?? 0) * 100, 2);
+}
+
+export function discountPercentageDisplayNumberToNumber(
+  discountPercentageDisplay: number,
+): number {
+  return _.round((discountPercentageDisplay ?? 0) / 100, 4);
 }
 
 export function computeTax(priceInCents: number): number {

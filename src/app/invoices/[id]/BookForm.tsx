@@ -7,7 +7,11 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { createInvoiceItem } from '@/lib/actions/invoice-item';
 import { convertDateToFormInputString } from '@/lib/date';
-import { determineDiscountedAmountInCents } from '@/lib/money';
+import {
+  determineDiscountedAmountInCents,
+  discountPercentageDisplayNumberToNumber,
+  discountPercentageToDisplayNumber,
+} from '@/lib/money';
 import { findBookByIsbn13 } from '@/lib/search/book';
 import { transformBookFormInputToBookCreateInput } from '@/lib/transformers/book';
 import BookCreateInput from '@/types/BookCreateInput';
@@ -43,6 +47,9 @@ function BookFormInputField({
   if (fieldName === 'publishedDate') {
     fieldNameToDisplay = 'Published Date';
     type = 'date';
+  } else if (fieldName === 'discountPercentageDisplay') {
+    fieldNameToDisplay = 'Discount %';
+    type = 'number';
   } else if (fieldName === 'isbn13') {
     fieldNameToDisplay = 'ISBN';
   } else if (fieldName === 'priceInCents') {
@@ -57,6 +64,7 @@ function BookFormInputField({
       <label className="text-sm capitalize">
         {fieldNameToDisplay}
         <Input
+          min={0}
           step={type === 'number' ? 'any' : ''}
           type={type}
           variant={errors[fieldName] ? 'error' : 'default'}
@@ -128,6 +136,9 @@ export default function BookForm({
   } = useForm<BookFormInput>({
     values: {
       authors: lookupBook?.authors || '',
+      discountPercentageDisplay: discountPercentageToDisplayNumber(
+        invoice.vendor.discountPercentage,
+      ),
       formatId: lookupBook?.formatId,
       genreId: lookupBook?.genreId,
       imageUrl: lookupBook?.imageUrl || '',
@@ -160,9 +171,10 @@ export default function BookForm({
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
 
-        // TODO allow dynamic discountPercentage per invoice item
-        const { discountPercentage } = invoice.vendor;
-
+        const { discountPercentageDisplay } = bookFormInput;
+        const discountPercentage = discountPercentageDisplayNumberToNumber(
+          discountPercentageDisplay,
+        );
         const itemCostInCents = determineDiscountedAmountInCents({
           discountPercentage: discountPercentage ?? 0,
           priceInCents: book.priceInCents,
@@ -267,29 +279,33 @@ export default function BookForm({
 
             <div className="flex flex-col flex-1 gap-4 mt-3">
               <div className="flex flex-1 gap-4">
-                <BookFormSelectGenre
-                  genres={genres}
-                  hasError={!!errors.genreId}
-                  onSelect={(value) => {
-                    setValue('genreId', value);
-                    clearErrors('genreId');
-                  }}
-                  selectedGenreId={getValues('genreId')}
-                />
-                <BookFormSelectFormat
-                  formats={formats}
-                  hasError={!!errors.formatId}
-                  onSelect={(value) => {
-                    setValue('formatId', value);
-                    clearErrors('formatId');
-                  }}
-                  selectedFormatId={getValues('formatId')}
-                />
-                <BookFormInputField
-                  errors={errors}
-                  fieldName="priceInCents"
-                  register={register}
-                />
+                <div className="flex flex-[3] gap-4">
+                  <BookFormSelectGenre
+                    genres={genres}
+                    hasError={!!errors.genreId}
+                    onSelect={(value) => {
+                      setValue('genreId', value);
+                      clearErrors('genreId');
+                    }}
+                    selectedGenreId={getValues('genreId')}
+                  />
+                  <BookFormSelectFormat
+                    formats={formats}
+                    hasError={!!errors.formatId}
+                    onSelect={(value) => {
+                      setValue('formatId', value);
+                      clearErrors('formatId');
+                    }}
+                    selectedFormatId={getValues('formatId')}
+                  />
+                </div>
+                <div className="flex flex-1">
+                  <BookFormInputField
+                    errors={errors}
+                    fieldName="priceInCents"
+                    register={register}
+                  />
+                </div>
               </div>
               <div className="flex flex-1 gap-4">
                 <div className="flex flex-1">
@@ -299,7 +315,7 @@ export default function BookForm({
                     register={register}
                   />
                 </div>
-                <div className="flex flex-1 gap-4">
+                <div className="flex flex-[2] gap-4">
                   <BookFormInputField
                     errors={errors}
                     fieldName="publishedDate"
@@ -308,6 +324,11 @@ export default function BookForm({
                   <BookFormInputField
                     errors={errors}
                     fieldName="quantity"
+                    register={register}
+                  />
+                  <BookFormInputField
+                    errors={errors}
+                    fieldName="discountPercentageDisplay"
                     register={register}
                   />
                 </div>

@@ -5,6 +5,8 @@ import {
   determineDiscountedAmountInCents,
   computeTax,
   determineDiscountPercentage,
+  discountPercentageToDisplayNumber,
+  discountPercentageDisplayNumberToNumber,
 } from '@/lib/money';
 
 describe('money', () => {
@@ -127,6 +129,38 @@ describe('money', () => {
 
     it('should work with null', () => {
       expect(discountPercentageToDisplayString(null)).toEqual('0%');
+    });
+  });
+
+  describe('discountPercentageToDisplayNumber', () => {
+    it('should work with a simple number', () => {
+      expect(discountPercentageToDisplayNumber(0.56)).toEqual(56);
+    });
+
+    it('should work with a complex number', () => {
+      expect(discountPercentageToDisplayNumber(0.56348)).toEqual(56.35);
+    });
+
+    it('should work with 0', () => {
+      expect(discountPercentageToDisplayNumber(0)).toEqual(0);
+    });
+
+    it('should work with null', () => {
+      expect(discountPercentageToDisplayNumber(null)).toEqual(0);
+    });
+  });
+
+  describe('discountPercentageDisplayNumberToNumber', () => {
+    it('should work with a simple number', () => {
+      expect(discountPercentageDisplayNumberToNumber(56)).toEqual(0.56);
+    });
+
+    it('should work with a complex number', () => {
+      expect(discountPercentageDisplayNumberToNumber(56.35)).toEqual(0.5635);
+    });
+
+    it('should work with 0', () => {
+      expect(discountPercentageDisplayNumberToNumber(0)).toEqual(0);
     });
   });
 
