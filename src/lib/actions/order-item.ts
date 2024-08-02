@@ -4,6 +4,7 @@ import { recomputeOrderTotals } from '@/lib/actions/order';
 import logger from '@/lib/logger';
 import prisma from '@/lib/prisma';
 import OrderItemCreateInput from '@/types/OrderItemCreateInput';
+import OrderItemUpdateInput from '@/types/OrderItemUpdateInput';
 import { OrderItem, Prisma, ProductType } from '@prisma/client';
 
 export async function createOrderItem(
@@ -41,9 +42,40 @@ export async function createOrderItem(
 
       logger.trace('created order item in DB: %j', createdOrderItem);
 
-      await recomputeOrderTotals({ orderItem: createdOrderItem, tx });
+      await recomputeOrderTotals({ orderId: createdOrderItem.orderId, tx });
 
       return createdOrderItem;
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    },
+  );
+}
+
+export async function editOrderItem({
+  orderItemId,
+  orderItemUpdate,
+}: {
+  orderItemId: OrderItem['id'];
+  orderItemUpdate: OrderItemUpdateInput;
+}): Promise<OrderItem> {
+  return prisma.$transaction(
+    async (tx) => {
+      const { productPriceInCents, quantity, totalPriceInCents } =
+        orderItemUpdate;
+
+      const orderItem = await tx.orderItem.update({
+        data: {
+          productPriceInCents,
+          quantity,
+          totalPriceInCents,
+        },
+        where: { id: orderItemId },
+      });
+
+      await recomputeOrderTotals({ orderId: orderItem.orderId, tx });
+
+      return orderItem;
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
