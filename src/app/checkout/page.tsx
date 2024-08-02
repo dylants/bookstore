@@ -8,15 +8,21 @@ import {
   BreadcrumbsHome,
   BreadcrumbsText,
 } from '@/components/Breadcrumbs';
-import OrderItemsTable from '@/components/order-item/OrderItemsTable';
+import OrderItemsTable, {
+  EditableDiscountCallbackProps,
+} from '@/components/order-item/OrderItemsTable';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { getBook } from '@/lib/actions/book';
 import { createOrder, getOrderWithItems } from '@/lib/actions/order';
-import { createOrderItem } from '@/lib/actions/order-item';
+import { createOrderItem, editOrderItem } from '@/lib/actions/order-item';
 import { createTransactionSafe } from '@/lib/actions/transaction-safe';
+import {
+  determineDiscountedAmountInCents,
+  discountPercentageDisplayNumberToNumber,
+} from '@/lib/money';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import { ProductType } from '@prisma/client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -121,6 +127,44 @@ export default function CheckoutPage() {
     }
   }, [orderUID, router]);
 
+  const editableDiscountCallback = useCallback(
+    async ({
+      discountDisplayNumber,
+      orderItem,
+    }: EditableDiscountCallbackProps) => {
+      if (!orderUID) {
+        return;
+      }
+
+      const { book, quantity } = orderItem;
+      if (!book) {
+        // we only handle book types at this time
+        return;
+      }
+
+      const discountPercentage = discountPercentageDisplayNumberToNumber(
+        discountDisplayNumber,
+      );
+      const productPriceInCents = determineDiscountedAmountInCents({
+        discountPercentage: discountPercentage ?? 0,
+        priceInCents: book.priceInCents,
+      });
+      const totalPriceInCents = productPriceInCents * quantity;
+
+      await editOrderItem({
+        orderItemId: orderItem.id,
+        orderItemUpdate: {
+          productPriceInCents,
+          quantity,
+          totalPriceInCents,
+        },
+      });
+
+      setOrder(await getOrderWithItems(orderUID));
+    },
+    [orderUID],
+  );
+
   if (orderUID && !order) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -173,6 +217,7 @@ export default function CheckoutPage() {
           <div className="mt-4">
             <OrderItemsTable
               orderItems={order ? order.orderItems : []}
+              editableDiscountCallback={editableDiscountCallback}
               tableBodyAdditionalChildren={tableBodyAdditionalChildren}
             />
           </div>

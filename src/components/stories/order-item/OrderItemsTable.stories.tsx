@@ -31,3 +31,18 @@ export const NoResults: Story = {
     orderItems: [],
   },
 };
+
+export const EditableDiscount: Story = {
+  render: () => {
+    const items = getOrderItems();
+
+    return (
+      <div>
+        <OrderItemsTable
+          orderItems={items}
+          editableDiscountCallback={async () => {}}
+        />
+      </div>
+    );
+  },
+};
