@@ -11,7 +11,7 @@ _This app uses [bun](https://bun.sh/) for dependency management and script execu
 1. Install dependencies
 
 ```
-$ bun install
+bun install
 ```
 
 2. Setup the [database](#database)
@@ -19,7 +19,7 @@ $ bun install
 3. Start the application
 
 ```
-$ bun dev
+bun dev
 ```
 
 ## Database
@@ -46,13 +46,13 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/bookstore"
 To run migrations (note: this will automatically run the [seed script](#seeds) after migrations):
 
 ```
-$ npx prisma migrate dev
+npx prisma migrate dev
 ```
 
 or if you have an `.env.local` file:
 
 ```
-$ npx dotenv -e .env.local -- prisma migrate dev
+npx dotenv -e .env.local -- prisma migrate dev
 ```
 
 ### Create New Migration
@@ -60,7 +60,7 @@ $ npx dotenv -e .env.local -- prisma migrate dev
 To create a new migration (and run it):
 
 ```
-$ npx prisma migrate dev --name <update name>
+npx prisma migrate dev --name <update name>
 ```
 
 ### Seeds
@@ -72,13 +72,13 @@ The following commands require an `.env.local` file with the `DATABASE_URL`.
 To run the seed script to generate fake data:
 
 ```
-$ bun db:seed
+bun db:seed
 ```
 
 Reset the database, re-run migrations, and re-seed with fake data:
 
 ```
-$ bun db:reset
+bun db:reset
 ```
 
 #### Overrides
@@ -116,20 +116,32 @@ https://developer.squareup.com/docs/devtools/sandbox/testing#terminal-api-checko
 
 ## Tests
 
+Lint and unit tests are run during CI.
+
+### Lint
+
+This project is configured to use ESLint as the linter.
+
+To run both lint and compile TypeScript files:
+
+```
+bun run lint
+```
+
 ### Unit Tests
 
-Lint and Jest tests are run during CI. These unit tests are stored along side the source code.
+The unit tests are stored along side the source code.
 
 To run the tests:
 
 ```
-$ bun run test
+bun run test
 ```
 
 To run tests in watch mode:
 
 ```
-$ bun run test:watch
+bun run test:watch
 ```
 
 ### Playwright e2e Tests
@@ -141,19 +153,19 @@ Note that these e2e tests are not run via the GitHub CI actions, since they requ
 To run the tests:
 
 ```
-$ bun playwright test
+bun playwright test
 ```
 
 To run the tests with the Playwright UI:
 
 ```
-$ bun playwright test --ui
+bun playwright test --ui
 ```
 
 To run the full e2e tests, which _!!resets the database!!_, applies seeds for CI, then runs the playwright e2e tests:
 
 ```
-$ bun run test:e2e
+bun run test:e2e
 ```
 
 ## Storybook
@@ -163,5 +175,5 @@ This app uses [Storybook](https://storybook.js.org/) to demo UI components.
 To run storybook:
 
 ```
-$ bun storybook
+bun storybook
 ```
