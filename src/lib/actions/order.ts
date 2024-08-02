@@ -14,13 +14,7 @@ import OrderHydrated from '@/types/OrderHydrated';
 import OrderWithItemsHydrated from '@/types/OrderWithItemsHydrated';
 import PageInfo from '@/types/PageInfo';
 import PaginationQuery from '@/types/PaginationQuery';
-import {
-  Order,
-  OrderItem,
-  OrderState,
-  Prisma,
-  ProductType,
-} from '@prisma/client';
+import { Order, OrderState, Prisma, ProductType } from '@prisma/client';
 import { format } from 'date-fns';
 
 export async function createOrder(): Promise<OrderWithItemsHydrated> {
@@ -50,19 +44,23 @@ export async function createOrder(): Promise<OrderWithItemsHydrated> {
 }
 
 export async function recomputeOrderTotals({
-  orderItem,
+  orderId,
   tx,
 }: {
-  orderItem: OrderItem;
+  orderId: Order['id'];
   tx: Prisma.TransactionClient;
 }): Promise<void> {
-  const { orderId } = orderItem;
-
   const order = await tx.order.findUniqueOrThrow({
+    include: {
+      orderItems: true,
+    },
     where: { id: orderId },
   });
 
-  const subTotalInCents = order.subTotalInCents + orderItem.totalPriceInCents;
+  const subTotalInCents = order.orderItems.reduce(
+    (total, item) => total + item.totalPriceInCents,
+    0,
+  );
   const taxInCents = computeTax(subTotalInCents);
   const totalInCents = subTotalInCents + taxInCents;
 
